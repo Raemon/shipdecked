@@ -4,9 +4,11 @@ import { createUseStyles } from 'react-jss';
 import SunDial from './SunDial';
 import ScalingField from './ScalingField';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
-import { units } from '../collections/units';
+import { CardSlug, units } from '../collections/units';
 import { CardPosition } from '../collections/types';
 import { createCardPosition } from '../collections/utils';
+
+export const debugging = false
 
 export function handleStart(event: DraggableEvent) {
   event.stopPropagation();
@@ -39,21 +41,26 @@ const useStyles = createUseStyles({
     left: '2.5%',
     borderRadius: 6,
     overflow: "hidden",
-    background: "rgba(255,255,255,.5)"
+    background: "rgba(220,210,200,.7)",
   }
 });
 
 function Game() {
   const classes = useStyles();
-  const [cardPositions, setCardPositions] = useState<CardPosition[]>([
-    'villager2',
-    'path1',
-  ].map((slug, i) => createCardPosition(slug, i*160+250+Math.random()*200, 200+Math.random()*100)));
+  const startingSlugs: CardSlug[] = ['ruth', 'path1']
+
+  const [cardPositions, setCardPositions] = useState<CardPosition[]>(startingSlugs.map((slug, i) => createCardPosition(slug, i*160+250+Math.random()*200, 200+Math.random()*100)));
 
   const isAttached = (i: number) => {
     const attachedCards = []
     for (let j = 0; j < cardPositions.length; j++) {
-      if (i !== j && Math.abs(cardPositions[i].x - cardPositions[j].x) < CARD_WIDTH && Math.abs(cardPositions[i].y - cardPositions[j].y) < CARD_HEIGHT) {
+      const cardsAreDifferent = i !== j;
+      
+      const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < CARD_WIDTH;
+      const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < CARD_HEIGHT;
+      const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
+
+      if (cardsAreDifferent && cardsOverlap) {
         attachedCards.push(j);
       }
     }
@@ -75,11 +82,11 @@ function Game() {
     const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
       return Math.max(acc, cardPositions[i].zIndex);
     }, 0);
-    const defaultZIndex = units[cardPosition.slug].defaultZindex;
+    const zIndex = units[cardPosition.slug].zIndex;
     if (greatestAttachedZIndex === 0) {
-      return defaultZIndex;
+      return zIndex;
     } else {
-      return defaultZIndex + greatestAttachedZIndex + 1;
+      return zIndex + greatestAttachedZIndex + 1;
     }
   }
 
@@ -99,14 +106,18 @@ function Game() {
   function getNewCardPosition (index: number): CardPosition {
     const cardPosition = cardPositions[index];  
     const attachedCardIndices = isAttached(index);
+    clearTimeout(cardPosition.timerId);
     const newCardData = { ...cardPosition,
       zIndex: getZIndex(cardPosition, attachedCardIndices),
       maybeAttached: [],
+      timerEnd: undefined,
+      timerStart: undefined,
+      timerId: undefined,
       attached: attachedCardIndices,
     }
     const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndices);
     if (attachedCardIndex !== undefined) {
-      newCardData.x = cardPositions[attachedCardIndex].x + 15
+      newCardData.x = cardPositions[attachedCardIndex].x + 10
       newCardData.y = cardPositions[attachedCardIndex].y + 30
     }
     return newCardData;
@@ -126,7 +137,11 @@ function Game() {
           <Draggable onStart={handleStart}>
             <div className={classes.map}>
               {cardPositions.map((cardPosition, i) => {
-                return <Card cardPositions={cardPositions} key={i} onDrag={onDrag} onStop={onStop} i={i} setCardPositions={setCardPositions}/>
+                return <Card key={i} 
+                  cardPositionInfo={{cardPositions, i, setCardPositions}} 
+                  onDrag={onDrag} 
+                  onStop={onStop}
+                />
               })}
             </div>
           </Draggable>

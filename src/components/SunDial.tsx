@@ -19,14 +19,15 @@ function SunDial() {
     const endTime = Date.now() + 100000; // 100 seconds from now
 
     const intervalId = setInterval(() => {
-      const timeLeft = Math.round((endTime - Date.now()) / 1000);
+      const timeLeft = Math.round((endTime - Date.now()) / 100);
       
       if (timeLeft >= 0) {
         setCountdown(timeLeft);
       } else {
+        // hungerCheck()
         clearInterval(intervalId);
       }
-    }, 1000);
+    }, 100);
 
     return () => clearInterval(intervalId); // clear interval on component unmount
   }, []);

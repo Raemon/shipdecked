@@ -1,38 +1,59 @@
-import { CardPosition, CardType } from "./types"
-import { spawnFromParent } from "./utils"
+import { CardType } from "./types"
+import { spawnTimer } from "./utils"
 
-export const units: Record<string, CardType> = {
+export type CardSlug = 
+  'villager1'|'ruth'|
+  'tree'|'log'|
+  'path1'
+  // 'crate'
+
+export const units: Record<CardSlug, CardType> = {
   "villager1": {
     name: 'Villager',
     imageUrl: 'maleVillager.jpg',
-    defaultZindex: 2,
+    zIndex: 2,
+    spawnItems: {}
   },
-  "villager2": {
-    name: 'Villager',
+  "ruth": {
+    name: 'Ruth',
     imageUrl: 'femaleVillager.jpg',
-    defaultZindex: 2,
-    whileAttached: (cardPositions: CardPosition[], i: number, setCardPositions: React.Dispatch<React.SetStateAction<CardPosition[]>>) => {
-      spawnFromParent('tree', 'log', cardPositions, i, setCardPositions)
-      spawnFromParent('path1', 'tree', cardPositions, i, setCardPositions)
+    zIndex: 2,
+    spawnItems: {},
+    hunger: true,
+    whileAttached: (cardPositionInfo) => {
+      spawnTimer('path1', 2000, cardPositionInfo)
+      spawnTimer('tree', 2000, cardPositionInfo)
     }
   },
   'tree': {
     name: "Tree",
     imageUrl: 'tree.jpg',
-    defaultZindex: 1,
+    zIndex: 1,
+    spawnItems: {
+      'ruth': ['log', 'log', 'log']
+    },
   },
   'log': {
     name: "Log",
     imageUrl: 'log.jpg',
-    defaultZindex: 1
+    zIndex: 1,
+    spawnItems: {}
   },
   'path1': {
     name: "Shoreside path",
     backgroundImage: 'shoresidepath.jpg',
-    defaultZindex: 1
-  }
+    large: true,
+    spawnItems: {
+      'ruth': ['tree', 'villager1', 'tree']
+    },
+    zIndex: 1
+  },
+  // 'crate': {
+  //   name: "Supply Crate",
+  //   imageUrl: 'crate.jpg',
+  //   spawnItems: {
+  //     'ruth':['cannedBeans']
+  //   },
+  //   zIndex:1
+  // }
 }
-
-export const abilities = [
-  { id: 1, name: 'Strength' },
-]
