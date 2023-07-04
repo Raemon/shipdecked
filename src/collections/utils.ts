@@ -10,17 +10,28 @@ export function createCardPosition(slug: CardSlug, x=0, y=0): CardPosition {
     maybeAttached: [],
     attached: [],
     slug,
+    currentHunger: card.maxHunger ? card.maxHunger/2 : undefined,
     ...card
   }
 }
 
-function updateCardPosition(cardPositionInfo: CardPositionInfo, newCardPosition: CardPosition) {
+export function updateCardPosition(cardPositionInfo: CardPositionInfo, newCardPosition: CardPosition) {
   const { cardPositions, i, setCardPositions } = cardPositionInfo
   const newCardPositions = [...cardPositions]
   newCardPositions[i] = newCardPosition
   setCardPositions(newCardPositions)
   return {cardPositions: newCardPositions, i, setCardPositions}
 }
+
+export const updateCardPosition2 = (cardPositionInfo: CardPositionInfo, updateFunction: (cardPosition: CardPosition) => CardPosition) => {
+  const { setCardPositions, i } = cardPositionInfo
+  setCardPositions((prevCardPositions: CardPosition[]) => {
+    const newCardPositions = [...prevCardPositions];
+    const cardPosition = newCardPositions[i];
+    newCardPositions[i] = updateFunction(cardPosition);
+    return newCardPositions;
+  });
+};
 
 function spawnNearby(slug: CardSlug, parent: CardPosition) {
   return createCardPosition(slug, 
@@ -53,11 +64,13 @@ export function spawnTimer(attachedSlug: CardSlug, duration: number, cardPositio
   const attachedSlugs = cardPosition.attached.map(i => cardPositions[i].slug)
   if (attachedSlugs.includes(attachedSlug) && !cardPosition.timerEnd) {
     const timerId = setTimeout(() => spawnFromParent(attachedSlug, cardPositionInfo), duration);
+    const attachedSpawnDescriptor = units[attachedSlug].spawnDescriptor
     updateCardPosition(cardPositionInfo, {
       ...cardPositions[i], 
       timerId: timerId,
       timerStart: new Date(), 
-      timerEnd: new Date(Date.now() + duration) 
+      timerEnd: new Date(Date.now() + duration),
+      currentSpawnDescriptor: attachedSpawnDescriptor
    })
   }
 }
@@ -91,6 +104,10 @@ export function spawnFromParent(attachedSlug: CardSlug, cardPositionInfo: CardPo
         ...cardPositions[attachedId].spawnItems,
         [cardPosition.slug]: newSpawnItems
       }
+    }
+
+    if (newSpawnItems.length === 0) {
+      newCardPositions.splice(attachedId, 1)
     }
   }
   setCardPositions(newCardPositions)  

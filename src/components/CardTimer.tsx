@@ -5,18 +5,26 @@ import { createUseStyles } from 'react-jss';
 const useStyles = createUseStyles({
   root: {
     fontSize: 10,
+    color: "rgba(0,0,0,.8)",
     width: "100%",
-    height: 10,
+    height: 14,
     border: "solid 1px rgba(0,0,0,.2)",
     borderRadius: 3,
+    position: "relative"
   },
   timer: {
     background: "rgba(0,0,0,.2)",
-    height: 10
+    height: 14
+  },
+  descriptor: {
+    position: "absolute",
+    top: 7,
+    left: "50%",
+    transform: "translate(-50%, -50%)"
   }
 });
 
-const CardTimer = ({timerStart, timerEnd}:{timerStart: Date, timerEnd:Date}) => {
+const CardTimer = ({timerStart, timerEnd, descriptor}:{timerStart: Date, timerEnd:Date, descriptor?: string}) => {
   const classes = useStyles();
   const [currentTime, setCurrentTime] = useState(Math.floor(Date.now()));
   
@@ -42,6 +50,7 @@ const CardTimer = ({timerStart, timerEnd}:{timerStart: Date, timerEnd:Date}) => 
 
   return (
     <div className={classes.root}>
+      <div className={classes.descriptor}>{descriptor}</div>
       <div className={classes.timer} style={{ width: `${progressWidth}%`}} />
     </div>
   );

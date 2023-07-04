@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect } from 'react';
 import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
-import { CardPositionInfo } from '../collections/types';
+import { CardPosition, CardPositionInfo } from '../collections/types';
 import { units } from '../collections/units';
+import { updateCardPosition2 } from '../collections/utils';
 import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
+import HungerBar from './HungerBar';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 220
@@ -44,8 +46,8 @@ const useStyles = createUseStyles({
     }
   },
   image: {
-    height: 130,
-    width: 90,
+    height: 150,
+    width: 120,
     backgroundSize: "contain !important",
     backgroundPositionX: "center !important",
     backgroundPositionY: "center !important",
@@ -74,10 +76,9 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
   const classes = useStyles();
   const {cardPositions, i } = cardPositionInfo
   const cardPosition = cardPositions[i];
-  const { slug, timerEnd, timerStart } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, whileAttached, currentSpawnDescriptor, maxHunger, currentHunger } = cardPosition;
   const card = units[slug]
   if (!card) throw Error
-  const {name, imageUrl, whileAttached} = card
 
   function handleDrag (event: DraggableEvent, data: DraggableData){
     onDrag(event, data, i)
@@ -92,7 +93,26 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
     }
   }, [whileAttached, cardPositionInfo]);
 
-  const spawnItems = cardPosition.spawnItems && Object.values(cardPosition.spawnItems).flatMap((item) => item)
+  const updateHunger = useCallback(() => {
+    // Inside updateHunger function
+    setTimeout(() => {
+      updateCardPosition2(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
+        const hunger = cardPosition.currentHunger
+        if (hunger && hunger > 0) {
+          return { ...cardPosition, currentHunger: hunger - 1 };
+        }
+        return cardPosition;
+      });
+    }, 1000);
+  }, [cardPositionInfo, cardPosition])
+
+  useEffect(() => {
+    updateHunger()
+  }, [cardPosition.currentHunger])
+
+  // const spawnItems = cardPosition.spawnItems && Object.values(cardPosition.spawnItems).flatMap((item) => item)
+
+  const backgroundColor = cardPosition.maybeAttached.length || cardPosition.attached.length ? 'rgba(255,255,255,.5)' : 'white'
 
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
@@ -105,7 +125,7 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
           width: card.large ? LARGE_CARD_WIDTH : CARD_WIDTH,
           height: card.large ? LARGE_CARD_HEIGHT : CARD_HEIGHT,
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
-          background: card.backgroundImage ? `url(${card.backgroundImage})` : 'white',
+          background: card.backgroundImage ? `url(${card.backgroundImage})` : backgroundColor
         }}>
           <h2>{name}</h2>
           {debugging && <div>
@@ -120,8 +140,17 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
             </div>
           </div>}
           {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
-          {timerStart && timerEnd && <CardTimer timerStart={timerStart} timerEnd={timerEnd}/>}
-          {spawnItems && <span style={{fontSize:10}}>{spawnItems.join(", ")}</span>}
+          {timerStart && timerEnd && <CardTimer 
+            descriptor={currentSpawnDescriptor}
+            timerStart={timerStart} 
+            timerEnd={timerEnd}
+          />}
+          {maxHunger && currentHunger && cardPosition.currentHunger && <HungerBar
+             maxHunger={maxHunger} 
+             currentHunger={currentHunger}
+            />}
+        
+          {/* {spawnItems && <span style={{fontSize:10}}>{spawnItems.join(", ")}</span>} */}
         </div>
       </div>
     </DraggableCore>

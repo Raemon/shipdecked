@@ -5,23 +5,27 @@ export interface CardType {
   large?: boolean,
   name: string,
   zIndex: number;
-  hunger?: boolean;
+  maxHunger?: number;
+  calories?: number;
   spawnItems: Partial<Record<CardSlug, CardSlug[]>>;
+  spawnDescriptor?: string,
   whileAttached?: (
     cardPositionInfo: CardPositionInfo
   ) => void
 }
 
 export interface CardPosition extends CardType {
-  slug: CardSlug;
-  x: number;
-  y: number;
-  maybeAttached: number[];
-  attached: number[];
-  timerStart?: Date;
-  timerEnd?: Date;
-  timerId?: NodeJS.Timeout;
-};
+  slug: CardSlug,
+  x: number,
+  y: number,
+  maybeAttached: number[],
+  attached: number[],
+  timerStart?: Date,
+  timerEnd?: Date,
+  timerId?: NodeJS.Timeout,
+  currentSpawnDescriptor?: string,
+  currentHunger?: number,
+}
 
 export type CardPositionInfo = {
   cardPositions: CardPosition[],

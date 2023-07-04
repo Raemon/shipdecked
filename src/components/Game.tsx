@@ -47,7 +47,7 @@ const useStyles = createUseStyles({
 
 function Game() {
   const classes = useStyles();
-  const startingSlugs: CardSlug[] = ['ruth', 'path1']
+  const startingSlugs: CardSlug[] = ['ruth', 'path1', 'crate']
 
   const [cardPositions, setCardPositions] = useState<CardPosition[]>(startingSlugs.map((slug, i) => createCardPosition(slug, i*160+250+Math.random()*200, 200+Math.random()*100)));
 
@@ -129,7 +129,7 @@ function Game() {
     newPositions[index] = newCardPosition;
     setCardPositions(newPositions);
   }
-  
+
   return (
     <div className={classes.root}>
       <div className={classes.style}>
