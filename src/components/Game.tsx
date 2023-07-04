@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
-import Card from './Card';
+import Card, { CARD_HEIGHT, CARD_WIDTH } from './Card';
 import { createUseStyles } from 'react-jss';
 import SunDial from './SunDial';
 import ScalingField from './ScalingField';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
-
-export type CardPosition = {
-  slug: string;
-  x: number;
-  y: number;
-  attached: boolean;
-};
+import { units } from '../collections/units';
+import { CardPosition } from '../collections/types';
+import { createCardPosition } from '../collections/utils';
 
 export function handleStart(event: DraggableEvent) {
   event.stopPropagation();
@@ -26,7 +22,7 @@ const useStyles = createUseStyles({
   map: {
     textAlign: 'center',
     // backgroundColor: 'white',
-    display: 'flex',
+    // display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: 'calc(10px + 2vmin)',
@@ -47,32 +43,81 @@ const useStyles = createUseStyles({
   }
 });
 
-
-
 function Game() {
   const classes = useStyles();
   const [cardPositions, setCardPositions] = useState<CardPosition[]>([
-    { slug: 'villager1', x: 0, y: 0, attached: false }, 
-    { slug: 'villager2', x: 200, y: 200, attached: false },
-    { slug: 'tree', x: 300, y: 200, attached: false }
-  ]);
-  const [attached, setAttached] = useState<number[]>([]);
+    'villager2',
+    'path1',
+  ].map((slug, i) => createCardPosition(slug, i*160+250+Math.random()*200, 200+Math.random()*100)));
+
+  const isAttached = (i: number) => {
+    const attachedCards = []
+    for (let j = 0; j < cardPositions.length; j++) {
+      if (i !== j && Math.abs(cardPositions[i].x - cardPositions[j].x) < CARD_WIDTH && Math.abs(cardPositions[i].y - cardPositions[j].y) < CARD_HEIGHT) {
+        attachedCards.push(j);
+      }
+    }
+    return attachedCards;
+  };
+
   const onDrag = (event: DraggableEvent, data: DraggableData, i: number) => {
-    // console.log(data.x, data.y);
     const newPositions = [...cardPositions];
-    newPositions[i] = { ...cardPositions[i], x: data.x, y: data.y };
+    const cardPosition = cardPositions[i];
+    newPositions[i] = { ...cardPosition, 
+      x: cardPosition.x + data.deltaX,
+      y: cardPosition.y + data.deltaY,
+      maybeAttached: isAttached(i)
+    };
     setCardPositions(newPositions);
   };
 
-  const onStop = (index: number) => {
-    // Check if the elements are close enough to be considered "attached"
-    console.log(index)
-    for (let i = 0; i < cardPositions.length; i++) {
-      if (i !== index && Math.abs(cardPositions[i].x - cardPositions[index].x) < 50 && Math.abs(cardPositions[i].y - cardPositions[index].y) < 50) {
-        setAttached([...attached, i]);
-      }
+  function getZIndex(cardPosition: CardPosition, attachedCardIndices: number[]): number {
+    const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
+      return Math.max(acc, cardPositions[i].zIndex);
+    }, 0);
+    const defaultZIndex = units[cardPosition.slug].defaultZindex;
+    if (greatestAttachedZIndex === 0) {
+      return defaultZIndex;
+    } else {
+      return defaultZIndex + greatestAttachedZIndex + 1;
     }
-  };
+  }
+
+  function getIndexOfHighestAttachedZIndex (attachedCardIndices: number[]): number|undefined {
+    let highestAttachedZIndex = 0;
+    let highestAttachedIndex = undefined;
+    attachedCardIndices.forEach((i) => {
+      const zIndex = cardPositions[i].zIndex;
+      if (zIndex > highestAttachedZIndex) {
+        highestAttachedZIndex = zIndex;
+        highestAttachedIndex = i;
+      }
+    });
+    return highestAttachedIndex;
+  }
+
+  function getNewCardPosition (index: number): CardPosition {
+    const cardPosition = cardPositions[index];  
+    const attachedCardIndices = isAttached(index);
+    const newCardData = { ...cardPosition,
+      zIndex: getZIndex(cardPosition, attachedCardIndices),
+      maybeAttached: [],
+      attached: attachedCardIndices,
+    }
+    const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndices);
+    if (attachedCardIndex !== undefined) {
+      newCardData.x = cardPositions[attachedCardIndex].x + 15
+      newCardData.y = cardPositions[attachedCardIndex].y + 30
+    }
+    return newCardData;
+  }
+
+  function onStop (index: number) {
+    const newPositions = [...cardPositions];
+    const newCardPosition = getNewCardPosition(index);
+    newPositions[index] = newCardPosition;
+    setCardPositions(newPositions);
+  }
   
   return (
     <div className={classes.root}>
@@ -81,7 +126,7 @@ function Game() {
           <Draggable onStart={handleStart}>
             <div className={classes.map}>
               {cardPositions.map((cardPosition, i) => {
-                return <Card cardPosition={cardPosition} key={i} onDrag={onDrag} onStop={onStop} i={i}/>
+                return <Card cardPositions={cardPositions} key={i} onDrag={onDrag} onStop={onStop} i={i} setCardPositions={setCardPositions}/>
               })}
             </div>
           </Draggable>
