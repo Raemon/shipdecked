@@ -6,10 +6,6 @@ const useStyles = createUseStyles({
   root: {
     fontSize: 10,
     color: "rgba(0,0,0,.5)",
-    position: "absolute",
-    bottom: 6,
-    left: "50%",
-    transform: "translate(-50%, 0)",
     fontStyle: "italic",
     fontFamily: "Palatino"
   }
@@ -17,11 +13,13 @@ const useStyles = createUseStyles({
 
 const HungerBar = ({maxHunger, currentHunger}:{maxHunger: number, currentHunger:number}) => {
   const classes = useStyles();
-  let hungerDescriptor = ""
-  if (currentHunger > maxHunger - maxHunger/8) hungerDescriptor = "Full"
+  let hungerDescriptor = "Full"
+  if (currentHunger > maxHunger - maxHunger/8) hungerDescriptor = "Gorged"
+  if (currentHunger < maxHunger/1.5) hungerDescriptor = "Slightly Hungry"
   if (currentHunger < maxHunger/2) hungerDescriptor = "Hungry"
   if (currentHunger < maxHunger/4) hungerDescriptor = "Very Hungry"
   if (currentHunger < maxHunger/8) hungerDescriptor = "Starving"
+  if (currentHunger < 1) hungerDescriptor = "Dead"
 
   if (hungerDescriptor) return (
     <Tooltip tooltip={`${currentHunger}/${maxHunger} hunger`}>

@@ -3,17 +3,13 @@ import React, { useEffect, useRef, useState } from 'react';
 const ScalingField = ({children}:{children: React.ReactNode}) => {
   const scalingRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
-  const [origin, setOrigin] = useState({x: 0, y: 0});
-
-  const handleMouseMove = (event: MouseEvent) => {
-    setOrigin({x: event.clientX, y: event.clientY});
-  };
-
+  const [origin] = useState({x: 0, y: 0});
+  
   const handleScroll = (event: WheelEvent) => {
     event.preventDefault();
 
     // Determine whether the scroll is up or down
-    const scaleChange = event.deltaY > 0 ? -0.005 : 0.005;
+    const scaleChange = event.deltaY > 0 ? -0.01 : 0.01;
 
     // Update the scale state
     setScale(prevScale => Math.min(Math.max(0.4, prevScale + scaleChange), 2));

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Card, { CARD_HEIGHT, CARD_WIDTH } from './Card';
 import { createUseStyles } from 'react-jss';
 import SunDial from './SunDial';
 import ScalingField from './ScalingField';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
-import { CardSlug, units } from '../collections/units';
+import { CardSlug } from '../collections/units';
 import { CardPosition } from '../collections/types';
 import { createCardPosition } from '../collections/utils';
 
@@ -47,7 +47,12 @@ const useStyles = createUseStyles({
 
 function Game() {
   const classes = useStyles();
-  const startingSlugs: CardSlug[] = ['ruth', 'path1', 'crate']
+  const [dayCount, setDayCount] = useState(0);
+  const startingSlugs: CardSlug[] = [
+    'ruth', 
+    'shoresidePath', 'crate', 
+    // 'log', 'flint', 'sticks'
+  ]
 
   const [cardPositions, setCardPositions] = useState<CardPosition[]>(startingSlugs.map((slug, i) => createCardPosition(slug, i*160+250+Math.random()*200, 200+Math.random()*100)));
 
@@ -73,7 +78,8 @@ function Game() {
     newPositions[i] = { ...cardPosition, 
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
-      maybeAttached: isAttached(i)
+      maybeAttached: isAttached(i),
+      zIndex: 1000000
     };
     setCardPositions(newPositions);
   };
@@ -82,7 +88,7 @@ function Game() {
     const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
       return Math.max(acc, cardPositions[i].zIndex);
     }, 0);
-    const zIndex = units[cardPosition.slug].zIndex;
+    const zIndex = 1
     if (greatestAttachedZIndex === 0) {
       return zIndex;
     } else {
@@ -147,7 +153,7 @@ function Game() {
           </Draggable>
         </ScalingField>
       </div>
-      <SunDial />
+      <SunDial dayCount={dayCount} setDayCount={setDayCount} />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { createUseStyles } from 'react-jss';
 
@@ -8,12 +7,15 @@ const useStyles = createUseStyles({
     color: "rgba(0,0,0,.8)",
     width: "100%",
     height: 14,
-    border: "solid 1px rgba(0,0,0,.2)",
+    border: "solid 1px #979090",
+    background: "#efefe0",
     borderRadius: 3,
-    position: "relative"
+    position: "absolute",
+    bottom: -20,
+    marginTop: 6,
   },
   timer: {
-    background: "rgba(0,0,0,.2)",
+    background: "#d1c7c2",
     height: 14
   },
   descriptor: {

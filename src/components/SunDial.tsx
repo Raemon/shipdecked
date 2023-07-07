@@ -1,3 +1,4 @@
+import moment from "moment";
 import React, { useState, useEffect } from "react";
 import { createUseStyles } from "react-jss";
 
@@ -11,30 +12,37 @@ const useStyles = createUseStyles({
   },
 });
 
-function SunDial() {
-  const [countdown, setCountdown] = useState(100);
+function SunDial({dayCount, setDayCount}:{dayCount: number, setDayCount: React.Dispatch<React.SetStateAction<number>>}) {
+  const [countdown, setCountdown] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState(moment())
   const classes = useStyles();
 
+  const dayLength = 60 * 5 * 1000 // 5 minutes
+
   useEffect(() => {
-    const endTime = Date.now() + 100000; // 100 seconds from now
-
-    const intervalId = setInterval(() => {
-      const timeLeft = Math.round((endTime - Date.now()) / 100);
-      
-      if (timeLeft >= 0) {
-        setCountdown(timeLeft);
+    const interval = setInterval(() => {
+      if (countdown < dayLength) {
+        const now = moment();
+        const timeDiff = now.diff(lastUpdated, 'milliseconds');
+        setCountdown(prevTime => prevTime + timeDiff);
+        setLastUpdated(now);
       } else {
-        // hungerCheck()
-        clearInterval(intervalId);
+        setCountdown(0);
+        setDayCount(prevDayCount => prevDayCount + 1);
       }
-    }, 100);
+    }, 1000);
 
-    return () => clearInterval(intervalId); // clear interval on component unmount
-  }, []);
+    return () => {
+      clearInterval(interval); // Cleanup the interval when the component unmounts
+    };
+  }, [countdown, lastUpdated]);
 
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
-  const offset = ((50 - countdown) / 50) * circumference;
+  const offset = ((dayLength - countdown) / dayLength) * circumference;
+
+  const dayCountRemainder = dayCount % 2;
+  const dayCountWhole = Math.floor(dayCount / 2);
 
   return (
     <svg className={classes.root}>
@@ -57,6 +65,14 @@ function SunDial() {
         cx="50"
         cy="50"
       />
+      <text
+        x="50%"
+        y="50%"
+        dominantBaseline="middle"
+        textAnchor="middle"
+      >
+        {dayCountRemainder === 0 ? "Day" : "Night"} {dayCountWhole}
+      </text>
     </svg>
   );
 }

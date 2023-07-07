@@ -3,7 +3,7 @@ import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
 import { CardPosition, CardPositionInfo } from '../collections/types';
 import { units } from '../collections/units';
-import { updateCardPosition2 } from '../collections/utils';
+import { updateCardPosition, whileAttached } from '../collections/utils';
 import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
 import HungerBar from './HungerBar';
@@ -24,13 +24,13 @@ const useStyles = createUseStyles({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-between',
-    cursor: "pointer",
     border: "solid 1px rgba(0,0,0,.15)",
     outline: "solid 1px rgba(0,0,0,1)",
     borderRadius: 4,
     boxShadow: '0 4px 0 0 rgba(0,0,0,0)',
     backgroundSize: "cover !important",
     transition: 'all .1s ease-in-out',
+    cursor: "grab", 
     '&:hover': {
       transform: 'scale(1.01)',
       filter: 'saturate(1)',
@@ -40,7 +40,7 @@ const useStyles = createUseStyles({
     '& h2': {
       margin: 0,
       fontSize: 14,
-      fontWeight: 400,
+      fontWeight: 500,
       color: 'rgba(0,0,0,.6)',
       fontFamily: "Papyrus"
     }
@@ -63,6 +63,12 @@ const useStyles = createUseStyles({
     color: 'rgba(0,0,0,.4)',
     fontFamily: "Helvetica"
   },
+  cardText: {
+    fontSize: 12,
+    color: 'rgba(0,0,0,.6)',
+    fontStyle: "italic",
+    fontFamily: "Palatino"
+  }
 });
 
 type DraggableItemProps = {
@@ -76,7 +82,7 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
   const classes = useStyles();
   const {cardPositions, i } = cardPositionInfo
   const cardPosition = cardPositions[i];
-  const { slug, timerEnd, timerStart, name, imageUrl, whileAttached, currentSpawnDescriptor, maxHunger, currentHunger } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, currentHunger, cardText } = cardPosition;
   const card = units[slug]
   if (!card) throw Error
 
@@ -87,16 +93,18 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
     onStop(i)
   }
 
+  const whileAttachedCallback = useCallback((cardPositionInfo: CardPositionInfo) => {
+    whileAttached(cardPositionInfo)
+  }, [cardPositionInfo]);
+
   useEffect(() => {
-    if (whileAttached) {
-      whileAttached(cardPositionInfo)
-    }
-  }, [whileAttached, cardPositionInfo]);
+    whileAttachedCallback(cardPositionInfo)
+  }, [cardPositionInfo]);
 
   const updateHunger = useCallback(() => {
     // Inside updateHunger function
     setTimeout(() => {
-      updateCardPosition2(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
+      updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
         const hunger = cardPosition.currentHunger
         if (hunger && hunger > 0) {
           return { ...cardPosition, currentHunger: hunger - 1 };
@@ -110,9 +118,9 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
     updateHunger()
   }, [cardPosition.currentHunger])
 
-  // const spawnItems = cardPosition.spawnItems && Object.values(cardPosition.spawnItems).flatMap((item) => item)
+  // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)
 
-  const backgroundColor = cardPosition.maybeAttached.length || cardPosition.attached.length ? 'rgba(255,255,255,.5)' : 'white'
+  const backgroundColor = (cardPosition.maybeAttached.length || cardPosition.attached.length || cardPosition.type === "idea") ? 'rgba(255,255,255,.7)' : 'white'
 
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
@@ -122,35 +130,41 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
         zIndex: cardPosition.zIndex,
       }}>
         <div className={classes.styling} style={{
-          width: card.large ? LARGE_CARD_WIDTH : CARD_WIDTH,
-          height: card.large ? LARGE_CARD_HEIGHT : CARD_HEIGHT,
+          width: card.type === "landscape" ? LARGE_CARD_WIDTH : CARD_WIDTH,
+          height: card.type === "landscape" ? LARGE_CARD_HEIGHT : CARD_HEIGHT,
+          border: card.type === "idea" ? "dashed 2px rgba(0,0,0,.2)" : "",
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
           background: card.backgroundImage ? `url(${card.backgroundImage})` : backgroundColor
         }}>
           <h2>{name}</h2>
-          {debugging && <div>
-            <div className={classes.meta} style={{left: 5, top: 5}}>
-              {i}
-            </div>
-            <div className={classes.meta} style={{left: 5, bottom: 5}}>
-              {cardPosition.attached.length > 0 && <span>{cardPosition.attached.map((index) => `${index}`).join(",")} attached</span>}
-            </div>
-            <div className={classes.meta} style={{right: 5, top: 5}}>
-              {cardPosition.zIndex}
-            </div>
-          </div>}
+          {
+            debugging && 
+              <div>
+                <div className={classes.meta} style={{left: 5, top: 5}}>
+                  {i}
+                </div>
+                <div className={classes.meta} style={{left: 5, bottom: 5}}>
+                  {cardPosition.attached.length > 0 && <span>{cardPosition.attached.map((index) => `${index}`).join(",")} attached</span>}
+                </div>
+                <div className={classes.meta} style={{right: 5, top: 5}}>
+                  {cardPosition.zIndex}
+                </div>
+              </div>
+            }
           {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
+          {!!(maxHunger && currentHunger && cardPosition.currentHunger) && <HungerBar
+             maxHunger={maxHunger} 
+             currentHunger={currentHunger}
+            />}
           {timerStart && timerEnd && <CardTimer 
             descriptor={currentSpawnDescriptor}
             timerStart={timerStart} 
             timerEnd={timerEnd}
           />}
-          {maxHunger && currentHunger && cardPosition.currentHunger && <HungerBar
-             maxHunger={maxHunger} 
-             currentHunger={currentHunger}
-            />}
-        
-          {/* {spawnItems && <span style={{fontSize:10}}>{spawnItems.join(", ")}</span>} */}
+          {cardText && <div className={classes.cardText}>
+            {cardText}
+          </div>}
+          {/* {loot && <span style={{fontSize:10}}>{loot.join(", ")}</span>} */}
         </div>
       </div>
     </DraggableCore>
