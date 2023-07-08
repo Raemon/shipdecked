@@ -8,7 +8,7 @@ const useStyles = createUseStyles({
     width: "100%",
     height: 14,
     border: "solid 1px #979090",
-    background: "#efefe0",
+    background: "#efefef",
     borderRadius: 3,
     position: "absolute",
     bottom: -20,

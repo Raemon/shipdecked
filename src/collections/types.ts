@@ -1,14 +1,19 @@
 import React from "react";
-import { CardSlug } from "./units";
+import { CardSlug } from "./cards";
+
 export interface CardType {
   imageUrl?: string,
   nightImageUrl?: string,
   backgroundImage?: string,
   nightBackgroundImage?: string,
-  type?: string,
   name: string,
+  large?: boolean,
+  idea?: true,
   maxHunger?: number;
+  maxHealth?: number;
+  maxFuel?: number;
   calories?: number;
+  fuel?: number;
   loot?: CardSlug[];
   spawnInfo?: SpawnInfo;
   spawnDescriptor?: string,
@@ -30,6 +35,8 @@ export interface CardPosition extends CardType {
   timerId?: NodeJS.Timeout,
   currentSpawnDescriptor?: string,
   currentHunger?: number,
+  currentHealth?: number,
+  currentFuel?: number,
   zIndex: number
 }
 
@@ -39,4 +46,10 @@ export type CardPositionInfo = {
   setCardPositions: React.Dispatch<React.SetStateAction<CardPosition[]>>
 }
 
-export type SpawnInfo = Partial<Record<CardSlug, {time: number, stack?: CardSlug[], product?: CardSlug, preserve?:boolean, descriptor?: string}>>
+export type SpawnInfo = Partial<Record<CardSlug, {
+  duration: number, 
+  inputStack?: CardSlug[], 
+  output?: CardSlug|CardSlug[], 
+  preserve?:boolean, 
+  descriptor: string,
+}>>

@@ -2,11 +2,12 @@ import React, { useCallback, useEffect } from 'react';
 import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
 import { CardPosition, CardPositionInfo } from '../collections/types';
-import { units } from '../collections/units';
+import { units } from '../collections/cards';
 import { updateCardPosition, whileAttached } from '../collections/utils';
 import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
 import HungerBar from './HungerBar';
+import FuelBar from './FuelBar';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 220
@@ -41,7 +42,7 @@ const useStyles = createUseStyles({
       margin: 0,
       fontSize: 14,
       fontWeight: 500,
-      color: 'rgba(0,0,0,.6)',
+      color: 'rgba(0,0,0,.75)',
       fontFamily: "Papyrus"
     }
   },
@@ -64,9 +65,8 @@ const useStyles = createUseStyles({
     fontFamily: "Helvetica"
   },
   cardText: {
-    fontSize: 12,
-    color: 'rgba(0,0,0,.6)',
-    fontStyle: "italic",
+    fontSize: 11,
+    color: 'rgba(0,0,0,.8)',
     fontFamily: "Palatino"
   }
 });
@@ -82,7 +82,8 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
   const classes = useStyles();
   const {cardPositions, i } = cardPositionInfo
   const cardPosition = cardPositions[i];
-  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, currentHunger, cardText } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, 
+    currentHunger, cardText, currentFuel, maxFuel } = cardPosition;
   const card = units[slug]
   if (!card) throw Error
 
@@ -114,13 +115,30 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
     }, 1000);
   }, [cardPositionInfo, cardPosition])
 
+  const updateFuel = useCallback(() => {
+    // Inside updateHunger function
+    setTimeout(() => {
+      updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
+        const fuel = cardPosition.currentFuel
+        if (fuel && fuel > 0) {
+          return { ...cardPosition, currentFuel: fuel - 1 };
+        }
+        return cardPosition;
+      });
+    }, 1000);
+  }, [cardPositionInfo, cardPosition])
+
   useEffect(() => {
     updateHunger()
   }, [cardPosition.currentHunger])
 
+  useEffect(() => {
+    updateFuel()
+  }, [cardPosition.currentFuel])
+
   // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)
 
-  const backgroundColor = (cardPosition.maybeAttached.length || cardPosition.attached.length || cardPosition.type === "idea") ? 'rgba(255,255,255,.7)' : 'white'
+  const backgroundColor = (cardPosition.maybeAttached.length || cardPosition.attached.length || cardPosition.idea) ? 'rgba(255,255,255,.8)' : 'white'
 
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
@@ -130,31 +148,40 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
         zIndex: cardPosition.zIndex,
       }}>
         <div className={classes.styling} style={{
-          width: card.type === "landscape" ? LARGE_CARD_WIDTH : CARD_WIDTH,
-          height: card.type === "landscape" ? LARGE_CARD_HEIGHT : CARD_HEIGHT,
-          border: card.type === "idea" ? "dashed 2px rgba(0,0,0,.2)" : "",
+          width: card.large ? LARGE_CARD_WIDTH : CARD_WIDTH,
+          height: card.large ? LARGE_CARD_HEIGHT : CARD_HEIGHT,
+          border: card.idea ? "dashed 2px rgba(0,0,0,.2)" : "",
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
           background: card.backgroundImage ? `url(${card.backgroundImage})` : backgroundColor
         }}>
           <h2>{name}</h2>
           {
-            debugging && 
+            // debugging && 
               <div>
                 <div className={classes.meta} style={{left: 5, top: 5}}>
                   {i}
                 </div>
                 <div className={classes.meta} style={{left: 5, bottom: 5}}>
-                  {cardPosition.attached.length > 0 && <span>{cardPosition.attached.map((index) => `${index}`).join(",")} attached</span>}
+                  {cardPosition.attached.length > 0 && <span>
+                    {cardPosition.attached.map((index) => `${index}`).join(",")} attached
+                  </span>}
                 </div>
                 <div className={classes.meta} style={{right: 5, top: 5}}>
                   {cardPosition.zIndex}
                 </div>
+                <div className={classes.meta} style={{right: 5, bottom: 5}}>
+                  {cardPosition.loot?.join(", ")}
+                </div>
               </div>
             }
           {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
-          {!!(maxHunger && currentHunger && cardPosition.currentHunger) && <HungerBar
+          {!!(maxHunger && currentHunger) && <HungerBar
              maxHunger={maxHunger} 
              currentHunger={currentHunger}
+            />}
+          {!!(maxFuel && currentFuel) && <FuelBar
+             maxFuel={maxFuel} 
+             currentFuel={currentFuel}
             />}
           {timerStart && timerEnd && <CardTimer 
             descriptor={currentSpawnDescriptor}

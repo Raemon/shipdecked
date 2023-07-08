@@ -1,6 +1,6 @@
 import sample from "lodash/sample"
 import { CardPosition, CardPositionInfo } from "./types"
-import { CardSlug, units } from "./units"
+import { CardSlug, units } from "./cards"
 
 export function createCardPosition(slug: CardSlug, x: number, y: number): CardPosition {
   const card = units[slug]
@@ -12,6 +12,7 @@ export function createCardPosition(slug: CardSlug, x: number, y: number): CardPo
     slug,
     zIndex: 1,
     currentHunger: card.maxHunger ? card.maxHunger/2 - 1: undefined,
+    currentFuel: card.maxFuel ? card.maxFuel/2 - 1: undefined,
     ...card
   }
 }
@@ -39,17 +40,18 @@ export const updateCardPosition = (
 
 function spawnNearby(slug: CardSlug, parent: CardPosition) {
   return createCardPosition(slug,
-    parent.x+50 + Math.random() * 50, 
+    parent.x+100 + Math.random() * 50, 
     parent.y+15 + Math.random() * 50
   )
 }
 
-function getSpawn (cardPositionInfo: CardPositionInfo, slug: CardSlug) {
+function getLoot (cardPositionInfo: CardPositionInfo, slug: CardSlug) {
   const { cardPositions, i } = cardPositionInfo
   const cardPosition = cardPositions[i]
   const attachedId = cardPosition.attached.find(i => cardPositions[i].slug === slug)
-  const loot = attachedId && cardPositions[attachedId].loot
+  const loot = typeof attachedId === "number" && cardPositions[attachedId].loot
   const spawnSlug = loot && sample(loot)
+
   return { spawnSlug, attachedId }
 }
 
@@ -86,48 +88,47 @@ function containsAll(arr1: string[], arr2: string[]): boolean {
   return arr2.every(arr2Item => arr1.includes(arr2Item));
 }
 
-export function spawnTimerFromParent({attachedSlug, time, cardPositionInfo, preserve, descriptor}:{attachedSlug: CardSlug, time: number, cardPositionInfo: CardPositionInfo, preserve?: boolean, descriptor?: string}) {
+export function spawnTimerFromLoot({attachedSlug, duration, cardPositionInfo, preserve, descriptor}:{attachedSlug: CardSlug, duration: number, cardPositionInfo: CardPositionInfo, preserve?: boolean, descriptor?: string}) {
   const { cardPositions, i } = cardPositionInfo
   const cardPosition = cardPositions[i]
   const attachedSlugs = cardPosition.attached.map(i => cardPositions[i].slug)
 
-  const {spawnSlug} = getSpawn(cardPositionInfo, attachedSlug)
+  const spawnSlug = getLoot(cardPositionInfo, attachedSlug).spawnSlug
 
   if (attachedSlugs.includes(attachedSlug) && !cardPosition.timerEnd && spawnSlug) {
-    const timerId = setTimeout(() => spawnFromParent(attachedSlug, cardPositionInfo, preserve), time);
+    const timerId = setTimeout(() => spawnFromLoot({attachedSlug, cardPositionInfo, preserve}), duration);
     const attachedSpawnDescriptor = descriptor ?? units[attachedSlug].spawnDescriptor
+    
     return updateCardPosition(cardPositionInfo, (cardPosition) => ({
       ...cardPosition, 
       timerId: timerId,
       timerStart: new Date(), 
-      timerEnd: new Date(Date.now() + time),
+      timerEnd: new Date(Date.now() + duration),
       currentSpawnDescriptor: attachedSpawnDescriptor
    }))
   }
   return cardPositionInfo
 }
 
-
-export function spawnFromParent(attachedSlug: CardSlug, cardPositionInfo: CardPositionInfo, preserveWhenEmpty?: boolean) {
+export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attachedSlug: CardSlug, cardPositionInfo: CardPositionInfo, preserve?: boolean, output?: CardSlug|CardSlug[]}) {
   const { cardPositions, i, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[i]
-
-  const { spawnSlug, attachedId } = getSpawn(cardPositionInfo, attachedSlug)
+  const { spawnSlug, attachedId } = getLoot(cardPositionInfo, attachedSlug)
   if (spawnSlug && attachedId) {
-
-    const oldAttached = cardPositions[attachedId]
-    const oldSpawnItems = oldAttached.loot
-    const newSpawnItems = oldSpawnItems ? removeOneInstance(oldSpawnItems, spawnSlug) : []
-
     setCardPositions(prevCardPositions => {
       const newCardPositions = [...prevCardPositions];
+
+      const oldAttached = cardPositions[attachedId]
+      const oldSpawnItems = [...(oldAttached.loot ?? [])]
+      const newSpawnItems = removeOneInstance(oldSpawnItems, spawnSlug)
+
       newCardPositions[i] = popOffCard(cardPositionInfo)
       newCardPositions.push(spawnNearby(spawnSlug, cardPosition))
       newCardPositions[attachedId] = {
         ...cardPositions[attachedId],
         loot: newSpawnItems
       }
-      if (newSpawnItems.length === 0 && !preserveWhenEmpty) {
+      if (newSpawnItems.length === 0 && !preserve) {
         newCardPositions.splice(attachedId, 1)
       }
       return newCardPositions;
@@ -142,13 +143,14 @@ export function spawnFromParent(attachedSlug: CardSlug, cardPositionInfo: CardPo
 }
 
 
-export function spawnTimerFromSet(stack: CardSlug[], outputSlug: CardSlug, duration: number, cardPositionInfo: CardPositionInfo) {
+
+
+export function spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor}:{inputStack: CardSlug[], output: CardSlug|CardSlug[], duration: number, cardPositionInfo: CardPositionInfo, descriptor: string}) {
   const { cardPositions, i, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[i] 
   const attachedSlugs = cardPosition.attached.map(i => cardPositions[i].slug)
-  if (containsAll(attachedSlugs, stack) && !cardPosition.timerEnd) {
-    const timerId = setTimeout(() => spawnFromSet(stack, outputSlug, cardPositionInfo), duration);
-    const outputSpawnDescriptor = units[outputSlug].creatingDescriptor
+  if (containsAll(attachedSlugs, inputStack) && !cardPosition.timerEnd) {
+    const timerId = setTimeout(() => spawnFromSet({inputStack, output, cardPositionInfo}), duration);
     setCardPositions(prevCardPositions => {
       const newCardPositions = [...prevCardPositions];
       newCardPositions[i] = ({
@@ -156,28 +158,34 @@ export function spawnTimerFromSet(stack: CardSlug[], outputSlug: CardSlug, durat
         timerId: timerId,
         timerStart: new Date(), 
         timerEnd: new Date(Date.now() + duration),
-        currentSpawnDescriptor: outputSpawnDescriptor
+        currentSpawnDescriptor: descriptor
       })
       return newCardPositions;
     })
   }
 }
 
-export function spawnFromSet(stack: CardSlug[], outputSlug: CardSlug, cardPositionInfo: CardPositionInfo) {
+export function spawnFromSet({inputStack, output, cardPositionInfo}:{inputStack: CardSlug[], output: CardSlug|CardSlug[], cardPositionInfo: CardPositionInfo}) {
   const { i, setCardPositions } = cardPositionInfo
   setCardPositions(prevCardPositions => {
     const newCardPositions = [...prevCardPositions]
     const cardPosition = newCardPositions[cardPositionInfo.i]
     const newCardPositionInfo = { ...cardPositionInfo, cardPositions: newCardPositions }
     const attachedSlugs = cardPosition.attached.map(i => newCardPositions[i].slug)
-    if (containsAll(attachedSlugs, stack)) {
+    if (containsAll(attachedSlugs, inputStack)) {
       newCardPositions[i] = popOffCard(newCardPositionInfo)
 
       // create the output card
-      newCardPositions.push(createCardPosition(outputSlug, cardPosition.x, cardPosition.y))
+      if (typeof output === "string") {
+        newCardPositions.push(spawnNearby(output, cardPosition))
+      } else {
+        output.forEach((outputSlug) => {
+          newCardPositions.push(spawnNearby(outputSlug, cardPosition))
+        })
+      }
 
       const attachedCardPositions = cardPosition.attached.map(i => newCardPositions[i])
-      const attachedCardsInStack = attachedCardPositions.filter(attachedCardPosition => stack.includes(attachedCardPosition.slug))
+      const attachedCardsInStack = attachedCardPositions.filter(attachedCardPosition => inputStack.includes(attachedCardPosition.slug))
       // destroy the attached cards
       attachedCardsInStack.forEach(attachedCardPosition => {
         newCardPositions.splice(newCardPositions.indexOf(attachedCardPosition), 1)
@@ -200,6 +208,24 @@ export function eatTimer(duration: number, cardPositionInfo: CardPositionInfo) {
       timerStart: new Date(),
       timerEnd: new Date(Date.now() + duration),
       currentSpawnDescriptor: "Eating..." 
+    }))
+  }
+  return cardPositionInfo
+}
+
+export function fuelTimer(duration: number, cardPositionInfo: CardPositionInfo) {
+  const { cardPositions, i } = cardPositionInfo
+  const cardPosition = cardPositions[i]
+  const attachedId = cardPosition.attached.find(i => cardPositions[i].fuel)
+  const fuel = attachedId && cardPositions[attachedId].fuel
+  if (cardPosition.currentFuel && !cardPosition.timerEnd && fuel && attachedId) {
+    const timerId = setTimeout(() => eat(cardPositionInfo, fuel, attachedId), duration);
+    return updateCardPosition(cardPositionInfo, (cardPosition) => ({
+      ...cardPosition,
+      timerId: timerId,
+      timerStart: new Date(),
+      timerEnd: new Date(Date.now() + duration),
+      currentSpawnDescriptor: "Fueling..." 
     }))
   }
   return cardPositionInfo
@@ -243,14 +269,16 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
   attachedSortedByZIndex.forEach((attachedCard) => {
     const spawnCardInfo = spawnInfo[attachedCard.slug]
     if (spawnCardInfo) {
-      const { time, stack, preserve, product, descriptor } = spawnCardInfo
-      if (stack && product) {
-        spawnTimerFromSet(stack, product, time, cardPositionInfo)
-      } else if (time && attachedSortedByZIndex.length === 1) {  
-        spawnTimerFromParent({attachedSlug: attachedCard.slug, time, cardPositionInfo, preserve, descriptor})
+      const { duration, inputStack, preserve, output, descriptor } = spawnCardInfo
+      if (inputStack && output) {
+        spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor})
+      } else if (duration && attachedSortedByZIndex.length === 1) {  
+        spawnTimerFromLoot({attachedSlug: attachedCard.slug, duration, cardPositionInfo, preserve, descriptor})
       }
     } else if (attachedCard.calories) {
       eatTimer(1000, cardPositionInfo)
+    } else if (attachedCard.fuel) {
+      fuelTimer(1000, cardPositionInfo)
     }
   })
 }

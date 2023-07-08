@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import Card, { CARD_HEIGHT, CARD_WIDTH } from './Card';
 import { createUseStyles } from 'react-jss';
 import SunDial from './SunDial';
 import ScalingField from './ScalingField';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
-import { CardSlug } from '../collections/units';
+import { CardSlug } from '../collections/cards';
 import { CardPosition } from '../collections/types';
 import { createCardPosition } from '../collections/utils';
 
@@ -50,11 +50,12 @@ function Game() {
   const [dayCount, setDayCount] = useState(0);
   const startingSlugs: CardSlug[] = [
     'ruth', 
-    'shoresidePath', 'crate', 
+    // 'shoresidePath', 'crate', 
+    'palmTree', 'palmTree'
     // 'log', 'flint', 'sticks'
   ]
 
-  const [cardPositions, setCardPositions] = useState<CardPosition[]>(startingSlugs.map((slug, i) => createCardPosition(slug, i*160+250+Math.random()*200, 200+Math.random()*100)));
+  const [cardPositions, setCardPositions] = useState<CardPosition[]>(startingSlugs.map((slug, i) => createCardPosition(slug, i*160+260+Math.random()*100, 200+Math.random()*100)));
 
   const isAttached = (i: number) => {
     const attachedCards = []
