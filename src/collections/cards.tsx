@@ -10,22 +10,59 @@ export type CardSlug =
   'crate'|
   'smallFire'|
   'raft'|'birdDroppings'|
-  'ideaFire'|'ideaRaft'|'ideaEscape'
+  'ideaFire'|'ideaRaft'|'ideaEscape'|'ideaHatchet'|
+  'hatchet'
+
+export const startingCards: CardSlug[] = [
+  'ruth',
+  'shoresidePath', 'crate',
+  // 'palmTree', 'hatchet'
+]
 
 const characterSpawnInfo: SpawnInfo = {
   'shoresidePath': { duration: 3000, descriptor: "Exploring...", preserve: true },
   'shelteredCove': { duration: 3000, descriptor: "Exploring...", preserve: true },
   'craggyCliffs': { duration: 3000, descriptor: "Exploring...", preserve: true },
   'junglePath': { duration: 30000, descriptor: "Exploring...", preserve: true},
-  'smallFire': { duration: 6000, descriptor: "Stare into flames..." },
-  'palmTree': { duration: 2000, descriptor: "Climbing...", preserve: true },
   'crate': { duration: 1000, descriptor: "Opening..." },
   'rocks': { duration: 2000, descriptor: "Smashing..." },
   'flint': { 
-    duration: 1000, descriptor: "Building...", inputStack: ['flint', 'log', 'sticks'], output: 'smallFire', 
+    duration: 1000, 
+    descriptor: "Building...", 
+    inputStack: ['flint', 'log', 'sticks'], 
+    output: 'smallFire', 
   },
   'driftWoodLog': { 
-    duration: 1000, descriptor: "Building...", inputStack: ['flint', 'driftWoodLog', 'sticks'], output: 'smallFire',  
+    duration: 1000, 
+    descriptor: "Building...", 
+    inputStack: ['flint', 'driftWoodLog', 'sticks'], 
+    output: 'smallFire',  
+  },
+  'sticks': {
+    duration: 1000, 
+    descriptor: "Building...", 
+    inputStack: ['flint', 'sticks'], 
+    output: 'hatchet',
+  },
+  'smallFire': { 
+    duration: 6000, 
+    descriptor: "Stare into flames...", 
+    inputStack: ['smallFire'], 
+    output: "ideaEscape"
+  },
+  'hatchet': { 
+    duration: 3000, 
+    descriptor: "Chopping...", 
+    inputStack: ['hatchet', 'palmTree'], 
+    output: ["coconut", "coconut", "log"]
+  },
+  'palmTree': {
+    duration: 3000, 
+    descriptor: "Staring Frustratedly...", 
+    skipIfExists: ['hatchet', 'ideaHatchet'], 
+    preserve: true,
+    inputStack: ['palmTree'],
+    output: 'ideaHatchet', 
   },
 }
 
@@ -83,12 +120,12 @@ export const units: Record<CardSlug, CardType> = {
     name: "Shoreside path",
     backgroundImage: 'shoresidepath.jpg',
     large: true,
-    loot: ['palmTree', 'flint', 'sticks', 'coconut', 'carlosFootprints'],
+    loot: ['palmTree', 'flint', 'sticks', 'carlosFootprints'],
     spawnDescriptor: "Exploring...",
   },
   'junglePath': {
     name: "Jungle Path",
-    backgroundImage: "junglePath.png",
+    backgroundImage: "junglePath.jpg",
     large: true,
     spawnDescriptor: "Exploring...",
     loot: ['palmTree', 'shelteredCove', 'palmTree'],
@@ -161,6 +198,13 @@ export const units: Record<CardSlug, CardType> = {
     imageUrl: "Bird Droppings",
   },
 
+  // Tools
+
+  'hatchet': {
+    name: "Hatchet",
+    imageUrl: 'hatchet.png',
+  },
+
   // Ideas/Dreams
 
   'ideaFire': {
@@ -187,5 +231,12 @@ export const units: Record<CardSlug, CardType> = {
       <div>Covered Boat, Sheltered Cove</div>
     </div>
   },
-  
+  'ideaHatchet': {
+    name: 'Idea: Hatchet',
+    imageUrl: "ideaHatchet.png",
+    idea: true,
+    cardText: <div>
+      <div>Sticks and Flint</div>
+    </div>
+  } 
 }

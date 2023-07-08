@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import Card, { CARD_HEIGHT, CARD_WIDTH } from './Card';
+import Card from './Card';
 import { createUseStyles } from 'react-jss';
 import SunDial from './SunDial';
 import ScalingField from './ScalingField';
-import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
-import { CardSlug } from '../collections/cards';
-import { CardPosition } from '../collections/types';
-import { createCardPosition } from '../collections/utils';
+import Draggable, { DraggableEvent } from 'react-draggable';
+import { startingCards } from '../collections/cards';
+import { createCardPosition } from '../collections/spawning';
+import { useCardPositions } from '../collections/useCardPositions';
 
 export const debugging = false
 
@@ -48,94 +48,10 @@ const useStyles = createUseStyles({
 function Game() {
   const classes = useStyles();
   const [dayCount, setDayCount] = useState(0);
-  const startingSlugs: CardSlug[] = [
-    'ruth', 
-    // 'shoresidePath', 'crate', 
-    'palmTree', 'palmTree'
-    // 'log', 'flint', 'sticks'
-  ]
 
-  const [cardPositions, setCardPositions] = useState<CardPosition[]>(startingSlugs.map((slug, i) => createCardPosition(slug, i*160+260+Math.random()*100, 200+Math.random()*100)));
+  const initialCardPositions = startingCards.map((slug, i) => createCardPosition(slug, i*160+260+Math.random()*100, 200+Math.random()*100));
 
-  const isAttached = (i: number) => {
-    const attachedCards = []
-    for (let j = 0; j < cardPositions.length; j++) {
-      const cardsAreDifferent = i !== j;
-      
-      const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < CARD_WIDTH;
-      const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < CARD_HEIGHT;
-      const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
-
-      if (cardsAreDifferent && cardsOverlap) {
-        attachedCards.push(j);
-      }
-    }
-    return attachedCards;
-  };
-
-  const onDrag = (event: DraggableEvent, data: DraggableData, i: number) => {
-    const newPositions = [...cardPositions];
-    const cardPosition = cardPositions[i];
-    newPositions[i] = { ...cardPosition, 
-      x: cardPosition.x + data.deltaX,
-      y: cardPosition.y + data.deltaY,
-      maybeAttached: isAttached(i),
-      zIndex: 1000000
-    };
-    setCardPositions(newPositions);
-  };
-
-  function getZIndex(cardPosition: CardPosition, attachedCardIndices: number[]): number {
-    const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
-      return Math.max(acc, cardPositions[i].zIndex);
-    }, 0);
-    const zIndex = 1
-    if (greatestAttachedZIndex === 0) {
-      return zIndex;
-    } else {
-      return zIndex + greatestAttachedZIndex + 1;
-    }
-  }
-
-  function getIndexOfHighestAttachedZIndex (attachedCardIndices: number[]): number|undefined {
-    let highestAttachedZIndex = 0;
-    let highestAttachedIndex = undefined;
-    attachedCardIndices.forEach((i) => {
-      const zIndex = cardPositions[i].zIndex;
-      if (zIndex > highestAttachedZIndex) {
-        highestAttachedZIndex = zIndex;
-        highestAttachedIndex = i;
-      }
-    });
-    return highestAttachedIndex;
-  }
-
-  function getNewCardPosition (index: number): CardPosition {
-    const cardPosition = cardPositions[index];  
-    const attachedCardIndices = isAttached(index);
-    clearTimeout(cardPosition.timerId);
-    const newCardData = { ...cardPosition,
-      zIndex: getZIndex(cardPosition, attachedCardIndices),
-      maybeAttached: [],
-      timerEnd: undefined,
-      timerStart: undefined,
-      timerId: undefined,
-      attached: attachedCardIndices,
-    }
-    const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndices);
-    if (attachedCardIndex !== undefined) {
-      newCardData.x = cardPositions[attachedCardIndex].x + 10
-      newCardData.y = cardPositions[attachedCardIndex].y + 30
-    }
-    return newCardData;
-  }
-
-  function onStop (index: number) {
-    const newPositions = [...cardPositions];
-    const newCardPosition = getNewCardPosition(index);
-    newPositions[index] = newCardPosition;
-    setCardPositions(newPositions);
-  }
+  const { cardPositions, setCardPositions, onDrag, onStop } = useCardPositions(initialCardPositions);
 
   return (
     <div className={classes.root}>

@@ -3,6 +3,9 @@ import { createUseStyles } from 'react-jss';
 
 const useStyles = createUseStyles({
   root: {
+    position: "absolute",
+    bottom: -20,
+    marginTop: 6,
     fontSize: 10,
     color: "rgba(0,0,0,.8)",
     width: "100%",
@@ -10,9 +13,6 @@ const useStyles = createUseStyles({
     border: "solid 1px #979090",
     background: "#efefef",
     borderRadius: 3,
-    position: "absolute",
-    bottom: -20,
-    marginTop: 6,
   },
   timer: {
     background: "#d1c7c2",
@@ -22,11 +22,18 @@ const useStyles = createUseStyles({
     position: "absolute",
     top: 7,
     left: "50%",
-    transform: "translate(-50%, -50%)"
+    transform: "translate(-50%, -50%)",
+    width: "100%"
   }
 });
 
-const CardTimer = ({timerStart, timerEnd, descriptor}:{timerStart: Date, timerEnd:Date, descriptor?: string}) => {
+const CardTimer = ({timerStart, timerEnd, descriptor, offsetX, offsetY}:{
+  timerStart: Date, 
+  timerEnd:Date, 
+  descriptor?: string,
+  offsetX: number,
+  offsetY: number
+}) => {
   const classes = useStyles();
   const [currentTime, setCurrentTime] = useState(Math.floor(Date.now()));
   
@@ -51,7 +58,7 @@ const CardTimer = ({timerStart, timerEnd, descriptor}:{timerStart: Date, timerEn
   }, []);
 
   return (
-    <div className={classes.root}>
+    <div className={classes.root} style={{bottom: -20 - offsetY, left: offsetX}}>
       <div className={classes.descriptor}>{descriptor}</div>
       <div className={classes.timer} style={{ width: `${progressWidth}%`}} />
     </div>

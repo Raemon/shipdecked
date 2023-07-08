@@ -3,11 +3,12 @@ import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
 import { CardPosition, CardPositionInfo } from '../collections/types';
 import { units } from '../collections/cards';
-import { updateCardPosition, whileAttached } from '../collections/utils';
+import { getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawning';
 import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
 import HungerBar from './HungerBar';
 import FuelBar from './FuelBar';
+import { STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 220
@@ -140,6 +141,10 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
 
   const backgroundColor = (cardPosition.maybeAttached.length || cardPosition.attached.length || cardPosition.idea) ? 'rgba(255,255,255,.8)' : 'white'
 
+  const offsetStackSize = getAttachedCardsWithHigherZIndex(cardPositions, i).length
+  const progressBarOffsetX = offsetStackSize * STACK_OFFSET_X
+  const progressBarOffsetY = offsetStackSize * STACK_OFFSET_Y
+
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
       <div className={classes.root} style={{
@@ -156,7 +161,7 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
         }}>
           <h2>{name}</h2>
           {
-            // debugging && 
+            debugging && 
               <div>
                 <div className={classes.meta} style={{left: 5, top: 5}}>
                   {i}
@@ -183,15 +188,16 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
              maxFuel={maxFuel} 
              currentFuel={currentFuel}
             />}
+          {cardText && <div className={classes.cardText}>
+            {cardText}
+          </div>}
           {timerStart && timerEnd && <CardTimer 
+            offsetX={progressBarOffsetX}
+            offsetY={progressBarOffsetY}
             descriptor={currentSpawnDescriptor}
             timerStart={timerStart} 
             timerEnd={timerEnd}
           />}
-          {cardText && <div className={classes.cardText}>
-            {cardText}
-          </div>}
-          {/* {loot && <span style={{fontSize:10}}>{loot.join(", ")}</span>} */}
         </div>
       </div>
     </DraggableCore>

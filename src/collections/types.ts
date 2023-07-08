@@ -52,4 +52,5 @@ export type SpawnInfo = Partial<Record<CardSlug, {
   output?: CardSlug|CardSlug[], 
   preserve?:boolean, 
   descriptor: string,
+  skipIfExists?: CardSlug[],
 }>>
