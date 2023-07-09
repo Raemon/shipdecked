@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { DraggableData, DraggableEvent } from 'react-draggable';
-import { CARD_HEIGHT, CARD_WIDTH } from '../components/Card';
+import { CARD_HEIGHT, CARD_WIDTH, LARGE_CARD_HEIGHT, LARGE_CARD_WIDTH } from '../components/Card';
 import { CardPosition } from './types';
 
 export const STACK_OFFSET_X = 10;
@@ -64,26 +64,38 @@ export function useCardPositions(initialPositions: CardPosition[]) {
     }
     const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndices);
     if (attachedCardIndex !== undefined) {
+      console.log(cardPositions[attachedCardIndex])
       newCardData.x = cardPositions[attachedCardIndex].x + STACK_OFFSET_X;
       newCardData.y = cardPositions[attachedCardIndex].y + STACK_OFFSET_Y;
     }
     return newCardData;
   }
 
+  // find an overlapping card wiht
   const isAttached = useCallback((i: number) => {
-    const attachedCards = []
+    let attachedCardIndex: number|undefined = undefined
     for (let j = 0; j < cardPositions.length; j++) {
       const cardsAreDifferent = i !== j;
+      const width = cardPositions[j].large ? LARGE_CARD_WIDTH : CARD_WIDTH;
+      const height = cardPositions[j].large ? LARGE_CARD_HEIGHT : CARD_HEIGHT;
       
-      const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < CARD_WIDTH;
-      const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < CARD_HEIGHT;
+      const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < width;
+      const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < height;
       const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
 
       if (cardsAreDifferent && cardsOverlap) {
-        attachedCards.push(j);
+        if (!attachedCardIndex) {
+          attachedCardIndex = j;
+        } else if (cardPositions[j].zIndex > cardPositions[attachedCardIndex].zIndex) {
+          attachedCardIndex = j;
+        }
       }
     }
-    return attachedCards;
+    if (attachedCardIndex !== undefined) {
+      return [attachedCardIndex, ...cardPositions[attachedCardIndex].attached];
+    } else {
+      return []
+    }
   }, [cardPositions]);
 
   const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: number) => {

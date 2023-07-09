@@ -2,8 +2,8 @@ import React from 'react';
 import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
-  'ruth', 'milo',
-  'shoresidePath', 'crate', 'distantFigure'
+  'ruth', 
+  'shoresidePath', 'crate', 
   // 'seaweed', 'smallFire',
   // 'carlos', 'shelter', 'log'
 ]
@@ -201,7 +201,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: 'shoresidepath.jpg',
     large: true,
     loot: ['coconutTree', 'flint', 'sticks', 'carlosFootprints'],
-    secondaryLoot: ['crate'],
+    secondaryLoot: ['crate', 'coconutTree', 'bananaTree', 'rocks', 'sticks'],
     spawnDescriptor: "Exploring...",
   },
   'denseJungle': {

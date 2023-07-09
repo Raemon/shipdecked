@@ -145,7 +145,8 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
 
       newCardPositions[attachedId] = {
       ...cardPositions[attachedId],
-        loot: newSpawnItems
+        loot: newSpawnItems,
+        secondaryLoot
       }
 
       // If there are no more items to spawn even , remove the attached card
