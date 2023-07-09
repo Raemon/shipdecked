@@ -1,7 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { usePopper } from 'react-popper';
 
-export const Tooltip = ({ children, tooltip }:{children:React.ReactNode, tooltip:React.ReactNode|string}) => {
+export const Tooltip = ({ children, tooltip, display="block" }:{
+  children:React.ReactNode, 
+  tooltip:React.ReactNode|string,
+  display?:'block'|'inline-block'|'inline'
+}) => {
   const [visible, setVisible] = useState(false);
   const buttonRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -42,6 +46,7 @@ export const Tooltip = ({ children, tooltip }:{children:React.ReactNode, tooltip
         ref={buttonRef}
         onMouseEnter={showTooltip}
         onMouseLeave={hideTooltip}
+        style={{ display: display }}
       >
         {children}
       </div>

@@ -1,39 +1,41 @@
 import React from 'react';
 import { CardType, SpawnInfo } from "./types"
 
+export const startingCards: CardSlug[] = [
+  'ruth',
+  'shoresidePath', 'crate', 
+  // 'seaweed', 'smallFire',
+  // 'carlos', 'shelter', 'log'
+]
+
 export type CardSlug = 
   'carlos'|'ruth'|
   'palmTree'|'log'|'driftWoodLog'|'flint'|'sticks'|'rocks'|
-  'coconut'|'seaweed'|'cannedBeans'|
-  'shoresidePath'|'junglePath'|'birdIsland'|'shelteredCove'|'craggyCliffs'|
+  'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|
+  'shoresidePath'|'denseJungle'|'birdIsland'|'shelteredCove'|'craggyCliffs'|
   'carlosFootprints'|
   'crate'|
   'smallFire'|
   'raft'|'birdDroppings'|
   'ideaFire'|'ideaRaft'|'ideaEscape'|'ideaHatchet'|
+  'shelter'|
   'hatchet'
-
-export const startingCards: CardSlug[] = [
-  'ruth',
-  'shoresidePath', 'crate',
-  // 'palmTree', 'hatchet'
-]
 
 const characterSpawnInfo: SpawnInfo = {
   'shoresidePath': { duration: 3000, descriptor: "Exploring...", preserve: true },
   'shelteredCove': { duration: 3000, descriptor: "Exploring...", preserve: true },
   'craggyCliffs': { duration: 3000, descriptor: "Exploring...", preserve: true },
-  'junglePath': { duration: 30000, descriptor: "Exploring...", preserve: true},
+  'denseJungle': { duration: 25000, descriptor: "Exploring...", preserve: true},
   'crate': { duration: 1000, descriptor: "Opening..." },
-  'rocks': { duration: 2000, descriptor: "Smashing..." },
+  'rocks': { duration: 3000, descriptor: "Chipping..." },
   'flint': { 
-    duration: 1000, 
+    duration: 6000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'log', 'sticks'], 
     output: 'smallFire', 
   },
   'driftWoodLog': { 
-    duration: 1000, 
+    duration: 6000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'driftWoodLog', 'sticks'], 
     output: 'smallFire',  
@@ -44,6 +46,12 @@ const characterSpawnInfo: SpawnInfo = {
     inputStack: ['flint', 'sticks'], 
     output: 'hatchet',
   },
+  'log': {
+    duration: 1000,
+    descriptor: "Building...",
+    inputStack: ['log', 'log'],
+    output: 'shelter',
+  },
   'smallFire': { 
     duration: 6000, 
     descriptor: "Stare into flames...", 
@@ -51,7 +59,7 @@ const characterSpawnInfo: SpawnInfo = {
     output: "ideaEscape"
   },
   'hatchet': { 
-    duration: 3000, 
+    duration: 6000, 
     descriptor: "Chopping...", 
     inputStack: ['hatchet', 'palmTree'], 
     output: ["coconut", "coconut", "log"]
@@ -70,22 +78,34 @@ export const units: Record<CardSlug, CardType> = {
   "carlos": {
     name: 'Carlos',
     imageUrl: 'carlos.png',
-    spawnInfo: characterSpawnInfo,
     maxHunger: 2800,
+    maxStamina: 2000,
     maxHealth: 10,
-    loot: ['ideaFire']
+    spawnInfo: {
+      ...characterSpawnInfo,
+      'ruth': { 
+        skipIfExists: ['ideaFire'], 
+        inputStack: ['ruth'],
+        duration: 3000, preserve: true, descriptor: "Talking...", output: 'ideaFire' 
+      },
+    }
   },
   "ruth": {
     name: 'Ruth',
     imageUrl: 'ruth.png',
     nightImageUrl: 'nightRuth.png',
     maxHunger: 2000,
+    maxStamina: 2000,
     maxHealth: 6,
     spawnInfo: {
       ...characterSpawnInfo,
-      'carlosFootprints': { duration: 5000, descriptor: "Following...", output: ['carlos', 'shelteredCove'] },
-      'carlos': { duration: 3000, preserve: true, descriptor: "Talking..." },
-    }
+      'carlosFootprints': { duration: 5000, descriptor: "Following..." },
+      'carlos': { 
+        skipIfExists: ['ideaFire'], 
+        inputStack: ['carlos'],
+        duration: 3000, preserve: true, descriptor: "Talking...", output: 'ideaFire' 
+      },
+    } 
   },
   'sticks': {
     name: "Sticks",
@@ -120,21 +140,21 @@ export const units: Record<CardSlug, CardType> = {
     name: "Shoreside path",
     backgroundImage: 'shoresidepath.jpg',
     large: true,
-    loot: ['palmTree', 'flint', 'sticks', 'carlosFootprints'],
+    loot: ['palmTree', 'flint', 'sticks', 'sticks', 'flint', 'carlosFootprints'],
     spawnDescriptor: "Exploring...",
   },
-  'junglePath': {
-    name: "Jungle Path",
-    backgroundImage: "junglePath.jpg",
+  'denseJungle': {
+    name: "Dense Jungle",
+    backgroundImage: "junglePath.png",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['palmTree', 'shelteredCove', 'palmTree'],
+    loot: ['palmTree', 'craggyCliffs', 'palmTree', 'sticks', 'sticks'],
   },
   'shelteredCove': {
     name: "Sheltered Cove",
     backgroundImage: "shelteredCove.png",
     large: true,
-    loot: ['seaweed', 'carlos', 'driftWoodLog', 'craggyCliffs', 'driftWoodLog', 'seaweed', 'junglePath' ],
+    loot: ['carlos', 'driftWoodLog', 'rocks', 'driftWoodLog', 'seaweed', 'denseJungle' ],
     spawnDescriptor: "Exploring...",
   },
   'craggyCliffs': {
@@ -160,6 +180,21 @@ export const units: Record<CardSlug, CardType> = {
     name: "Seaweed",
     imageUrl: "seaweed.png",
     calories: 100,
+    spawnInfo: {
+      'smallFire': {
+        duration: 3000,
+        descriptor: "Cooking...",
+        inputStack: ['smallFire'],
+        output: 'bakedSeaweed',
+        preserve: true,
+        consumeInitiator: true
+      }
+    }
+  },
+  'bakedSeaweed': {
+    name: "Baked Seaweed",
+    imageUrl: "bakedSeaweed.png",
+    calories: 300,
   },
   'crate': {
     name: "Supply Crate",
@@ -181,6 +216,7 @@ export const units: Record<CardSlug, CardType> = {
     imageUrl: "smallFire.png",
     creatingDescriptor: "Building...",
     spawnDescriptor: "Cooking...",
+    maxFuel: 1000,
     loot: ['ideaRaft'],
   },
   'raft': {
@@ -203,6 +239,12 @@ export const units: Record<CardSlug, CardType> = {
   'hatchet': {
     name: "Hatchet",
     imageUrl: 'hatchet.png',
+  },
+
+  'shelter': {
+    name: "Shelter",
+    imageUrl: 'shelter.png',
+    rest: 600
   },
 
   // Ideas/Dreams

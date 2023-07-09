@@ -6,17 +6,24 @@ import { CardPosition } from './types';
 export const STACK_OFFSET_X = 10;
 export const STACK_OFFSET_Y = 30;
 
-function addIfNotInArray (array: number[], value: number): number[] {
-  if (array.indexOf(value) === -1) {
-    return [...array, value];
-  } else {
-    return array;
-  }
-}
+// function addIfNotInArray (array: number[], value: number): number[] {
+//   if (array.indexOf(value) === -1) {
+//     return [...array, value];
+//   } else {
+//     return array;
+//   }
+// }
 
 // Create the custom hook for card positions
 export function useCardPositions(initialPositions: CardPosition[]) {
-  const [cardPositions, setCardPositions] = useState(initialPositions);
+  const [cardPositions, setCardPositions] = useState(() => {
+    // Try to load from local storage
+    const savedState = localStorage.getItem('cardPositions');
+    const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
+    const validState = jsonParsedState.map((cardPosition: CardPosition) => cardPosition) as CardPosition[]
+
+    return initialPositions;
+  });
 
   function getZIndex(cardPosition: CardPosition, attachedCardIndices: number[]): number {
     const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {

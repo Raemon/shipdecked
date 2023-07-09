@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect } from 'react';
 import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
-import { CardPosition, CardPositionInfo } from '../collections/types';
+import { AttributeInfo, CardPosition, CardPositionInfo } from '../collections/types';
 import { units } from '../collections/cards';
-import { getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawning';
+import { getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
 import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
-import HungerBar from './HungerBar';
-import FuelBar from './FuelBar';
+import HungerStatus from './Statuses/HungerStatus';
+import FuelStatus from './Statuses/FuelStatus';
 import { STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
+import { StaminaStatus } from './Statuses/StaminaStatus';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 220
@@ -69,22 +70,32 @@ const useStyles = createUseStyles({
     fontSize: 11,
     color: 'rgba(0,0,0,.8)',
     fontFamily: "Palatino"
+  },
+  statuses: {
+    fontSize: 10,
+    color: "rgba(0,0,0,.65)",
+    fontStyle: "italic",
+    fontFamily: "Palatino",
+    '& span:not(:last-child):after': {
+      content: '", "',
+    }
   }
 });
 
-type DraggableItemProps = {
+type CardProps = {
   cardPositionInfo: CardPositionInfo,
   onDrag: (event: DraggableEvent, data: DraggableData, i: number) => void;
   onStop: (i: number) => void;
+  paused: boolean;
 };
 
 
-const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
+const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
   const classes = useStyles();
   const {cardPositions, i } = cardPositionInfo
   const cardPosition = cardPositions[i];
   const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, 
-    currentHunger, cardText, currentFuel, maxFuel } = cardPosition;
+    currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina } = cardPosition;
   const card = units[slug]
   if (!card) throw Error
 
@@ -103,30 +114,33 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
     whileAttachedCallback(cardPositionInfo)
   }, [cardPositionInfo]);
 
-  const updateHunger = useCallback(() => {
-    // Inside updateHunger function
+  function updateAttribute (attribute: keyof AttributeInfo) {
     setTimeout(() => {
       updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
-        const hunger = cardPosition.currentHunger
-        if (hunger && hunger > 0) {
-          return { ...cardPosition, currentHunger: hunger - 1 };
+        try {
+          const current = cardPosition[attribute]
+          if (!paused && current && current > 0) {
+            return { ...cardPosition, [attribute]: current - 1 };
+          }
+        } catch (err) {
+          console.log(err)
+          console.log({cardPosition, attribute})
         }
         return cardPosition;
       });
     }, 1000);
+  }
+
+  const updateHunger = useCallback(() => {
+    updateAttribute('currentHunger')
   }, [cardPositionInfo, cardPosition])
 
   const updateFuel = useCallback(() => {
-    // Inside updateHunger function
-    setTimeout(() => {
-      updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
-        const fuel = cardPosition.currentFuel
-        if (fuel && fuel > 0) {
-          return { ...cardPosition, currentFuel: fuel - 1 };
-        }
-        return cardPosition;
-      });
-    }, 1000);
+    updateAttribute('currentFuel')
+  }, [cardPositionInfo, cardPosition])
+
+  const updateStamina = useCallback(() => {
+    updateAttribute('currentStamina')
   }, [cardPositionInfo, cardPosition])
 
   useEffect(() => {
@@ -136,6 +150,10 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
   useEffect(() => {
     updateFuel()
   }, [cardPosition.currentFuel])
+
+  useEffect(() => {
+    updateStamina()
+  }, [cardPosition.currentStamina])
 
   // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)
 
@@ -180,14 +198,21 @@ const Card = ({onDrag, onStop, cardPositionInfo}:DraggableItemProps) => {
               </div>
             }
           {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
-          {!!(maxHunger && currentHunger) && <HungerBar
-             maxHunger={maxHunger} 
-             currentHunger={currentHunger}
-            />}
-          {!!(maxFuel && currentFuel) && <FuelBar
-             maxFuel={maxFuel} 
-             currentFuel={currentFuel}
-            />}
+          <div className={classes.statuses}>
+            {!!(maxHunger && currentHunger) && <HungerStatus
+              max={maxHunger} 
+              current={currentHunger}
+              />}
+            {!!(maxFuel && currentFuel) && <FuelStatus
+              max={maxFuel} 
+              current={currentFuel}
+              />}
+            {!!(maxStamina && currentStamina) && <StaminaStatus
+              max={maxStamina} 
+              current={currentStamina}
+              />}
+          </div>
+
           {cardText && <div className={classes.cardText}>
             {cardText}
           </div>}

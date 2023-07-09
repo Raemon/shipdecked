@@ -1,7 +1,22 @@
 import React from "react";
 import { CardSlug } from "./cards";
 
-export interface CardType {
+export interface MaxCardAttributes {
+  maxHunger?: number;
+  maxHealth?: number;
+  maxFuel?: number;
+  maxStamina?: number;
+}
+
+export interface CurrentCardAttriutes {
+  currentHunger?: number;
+  currentHealth?: number;
+  currentFuel?: number;
+  currentStamina?: number;
+}
+
+export interface AttributeInfo extends MaxCardAttributes, CurrentCardAttriutes {}
+export interface CardTypeBase {
   imageUrl?: string,
   nightImageUrl?: string,
   backgroundImage?: string,
@@ -9,11 +24,9 @@ export interface CardType {
   name: string,
   large?: boolean,
   idea?: true,
-  maxHunger?: number;
-  maxHealth?: number;
-  maxFuel?: number;
   calories?: number;
   fuel?: number;
+  rest?: number;
   loot?: CardSlug[];
   spawnInfo?: SpawnInfo;
   spawnDescriptor?: string,
@@ -24,7 +37,9 @@ export interface CardType {
   ) => void
 }
 
-export interface CardPosition extends CardType {
+export interface CardType extends CardTypeBase, MaxCardAttributes {}
+
+export interface CardPositionBase extends CardType {
   slug: CardSlug,
   x: number,
   y: number,
@@ -37,8 +52,11 @@ export interface CardPosition extends CardType {
   currentHunger?: number,
   currentHealth?: number,
   currentFuel?: number,
+  currentStamina?: number,
   zIndex: number
 }
+
+export interface CardPosition extends CardPositionBase, CurrentCardAttriutes, MaxCardAttributes {}
 
 export type CardPositionInfo = {
   cardPositions: CardPosition[],
@@ -51,6 +69,7 @@ export type SpawnInfo = Partial<Record<CardSlug, {
   inputStack?: CardSlug[], 
   output?: CardSlug|CardSlug[], 
   preserve?:boolean, 
+  consumeInitiator?: boolean,
   descriptor: string,
   skipIfExists?: CardSlug[],
 }>>

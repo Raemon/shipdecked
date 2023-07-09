@@ -14,6 +14,7 @@ export function createCardPosition(slug: CardSlug, x: number, y: number): CardPo
     zIndex: 1,
     currentHunger: card.maxHunger ? card.maxHunger/2 - 1: undefined,
     currentFuel: card.maxFuel ? card.maxFuel/2 - 1: undefined,
+    currentStamina: card.maxStamina ? card.maxStamina/1.5 - 1: undefined,
     ...card
   }
 }
@@ -81,7 +82,14 @@ export function getAttachedCardsWithHigherZIndex (cardPositions: CardPosition[],
   const cardPosition = cardPositions[i]
   const attachedCardIds = cardPosition.attached
   const attachedCards = attachedCardIds.map((id) => cardPositions[id])
-  const attachedCardsWithHigherZIndex = attachedCards.filter(attachedCard => attachedCard.zIndex > cardPosition.zIndex)
+  const attachedCardsWithHigherZIndex = attachedCards.filter(attachedCard => {
+    try {
+      return attachedCard.zIndex > cardPosition.zIndex
+    } catch(err) {
+      console.log(err)
+      console.log({attachedCard, cardPosition})
+    }
+  })
   return attachedCardsWithHigherZIndex.sort((a, b) => b.zIndex - a.zIndex)
 }
 
@@ -143,14 +151,15 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
   }
 }
 
-export function spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor, preserve, skipIfExists}:{
+export function spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists}:{
   inputStack: CardSlug[], 
   output: CardSlug|CardSlug[], 
   duration: number, 
   cardPositionInfo: CardPositionInfo, 
   descriptor: string,
   skipIfExists?: CardSlug[]
-  preserve?: boolean
+  preserve?: boolean,
+  consumeInitiator?: boolean
 }) {
   const { cardPositions, i, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[i] 
@@ -164,7 +173,7 @@ export function spawnTimerFromSet({inputStack, output, duration, cardPositionInf
   });
 
   if (completeStack && !cardPosition.timerEnd && !alreadySpawned) {
-    const timerId = setTimeout(() => spawnFromSet({inputStack, output, cardPositionInfo, preserve}), duration);
+    const timerId = setTimeout(() => spawnFromSet({inputStack, output, cardPositionInfo, preserve, consumeInitiator}), duration);
     setCardPositions(prevCardPositions => {
       const newCardPositions = [...prevCardPositions];
       newCardPositions[i] = ({
@@ -179,11 +188,12 @@ export function spawnTimerFromSet({inputStack, output, duration, cardPositionInf
   }
 }
 
-export function spawnFromSet({inputStack, output, cardPositionInfo, preserve}:{
+export function spawnFromSet({inputStack, output, cardPositionInfo, preserve, consumeInitiator}:{
   inputStack: CardSlug[], 
   output: CardSlug|CardSlug[], 
   cardPositionInfo: CardPositionInfo
-  preserve?: boolean
+  preserve?: boolean,
+  consumeInitiator?: boolean
 }) {
   const { i, setCardPositions } = cardPositionInfo
   setCardPositions(prevCardPositions => {
@@ -211,56 +221,66 @@ export function spawnFromSet({inputStack, output, cardPositionInfo, preserve}:{
           newCardPositions.splice(newCardPositions.indexOf(attachedCardPosition), 1)
         })
       }
+      if (consumeInitiator) {
+        newCardPositions.splice(i, 1)
+      }
     }
     return newCardPositions
   })
 }
 
-export function eatTimer(duration: number, cardPositionInfo: CardPositionInfo) {
+export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxAttribute, resource, preserve, descriptor}:{
+  duration: number, 
+  cardPositionInfo: 
+  CardPositionInfo, 
+  currentAttribute: "currentHunger"|"currentFuel"|"currentStamina",
+  maxAttribute: "maxHunger"|"maxFuel"|"maxStamina",
+  resource: "calories"|"fuel"|"rest",
+  preserve?: boolean,
+  descriptor?: string
+}) {
   const { cardPositions, i } = cardPositionInfo
   const cardPosition = cardPositions[i]
-  const attachedId = cardPosition.attached.find(i => cardPositions[i].calories)
-  const calories = attachedId && cardPositions[attachedId].calories
-  if (cardPosition.currentHunger && !cardPosition.timerEnd && calories && attachedId) {
-    const timerId = setTimeout(() => eat(cardPositionInfo, calories, attachedId), duration);
+  const attachedId = cardPosition.attached.find(i => cardPositions[i][resource])
+  const resourceAmount = attachedId && cardPositions[attachedId][resource]
+  if (cardPosition.currentHunger && !cardPosition.timerEnd && resourceAmount && attachedId) {
+    const timerId = setTimeout(() => {
+      restore({
+        cardPositionInfo,
+        currentAttribute, 
+        maxAttribute,
+        resourceAmount, 
+        attachedId,
+        preserve,
+      })
+    }, duration)
     return updateCardPosition(cardPositionInfo, (cardPosition) => ({
       ...cardPosition,
       timerId: timerId,
       timerStart: new Date(),
       timerEnd: new Date(Date.now() + duration),
-      currentSpawnDescriptor: "Eating..." 
+      currentSpawnDescriptor: descriptor
     }))
   }
   return cardPositionInfo
 }
 
-export function fuelTimer(duration: number, cardPositionInfo: CardPositionInfo) {
-  const { cardPositions, i } = cardPositionInfo
-  const cardPosition = cardPositions[i]
-  const attachedId = cardPosition.attached.find(i => cardPositions[i].fuel)
-  const fuel = attachedId && cardPositions[attachedId].fuel
-  if (cardPosition.currentFuel && !cardPosition.timerEnd && fuel && attachedId) {
-    const timerId = setTimeout(() => eat(cardPositionInfo, fuel, attachedId), duration);
-    return updateCardPosition(cardPositionInfo, (cardPosition) => ({
-      ...cardPosition,
-      timerId: timerId,
-      timerStart: new Date(),
-      timerEnd: new Date(Date.now() + duration),
-      currentSpawnDescriptor: "Fueling..." 
-    }))
-  }
-  return cardPositionInfo
-}
-
-function eat(cardPositionInfo: CardPositionInfo, attachedCalories: number, attachedId: number) {
+function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribute, attachedId, preserve}:{
+  cardPositionInfo: CardPositionInfo, 
+  resourceAmount: number, 
+  currentAttribute: "currentHunger"|"currentFuel"|"currentStamina",
+  maxAttribute: "maxHunger"|"maxFuel"|"maxStamina",
+  attachedId: number,
+  preserve?: boolean,
+}) {
   const { i, setCardPositions } = cardPositionInfo;
 
   setCardPositions((prevCardPositions: CardPosition[]) => {
     const newCardPositions = [...prevCardPositions];
     const cardPosition = newCardPositions[i];
-    const currentHunger = cardPosition.currentHunger;
+    const currentAttributeAmount = cardPosition[currentAttribute];
 
-    if (currentHunger && attachedCalories) {
+    if (currentAttributeAmount && resourceAmount) {
       // Update the current card position.
       newCardPositions[i] = {
         ...cardPosition,
@@ -269,11 +289,12 @@ function eat(cardPositionInfo: CardPositionInfo, attachedCalories: number, attac
         timerEnd: undefined,
         currentSpawnDescriptor: undefined,
         attached: [],
-        currentHunger: currentHunger + attachedCalories,
+        [currentAttribute]: Math.min(currentAttributeAmount + resourceAmount, cardPosition[maxAttribute] ?? 0),
       };
 
-      // Remove the eaten card position.
-      newCardPositions.splice(attachedId, 1);
+      if (!preserve) {
+        newCardPositions.splice(attachedId, 1);
+      }
     }
 
     return newCardPositions;
@@ -290,16 +311,40 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
   attachedSortedByZIndex.forEach((attachedCard) => {
     const spawnCardInfo = spawnInfo[attachedCard.slug]
     if (spawnCardInfo) {
-      const { duration, inputStack, preserve, output, descriptor, skipIfExists } = spawnCardInfo
+      const { duration, inputStack, preserve, output, descriptor, skipIfExists, consumeInitiator } = spawnCardInfo
       if (inputStack && output) {
-        spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor, skipIfExists, preserve})
+        spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator})
       } else if (duration && attachedSortedByZIndex.length === 1) {  
         spawnTimerFromLoot({attachedSlug: attachedCard.slug, duration, cardPositionInfo, preserve, descriptor})
       }
     } else if (attachedCard.calories) {
-      eatTimer(1000, cardPositionInfo)
+      restoreTimer({
+        duration: 1000, 
+        cardPositionInfo, 
+        resource: "calories", 
+        currentAttribute: "currentHunger",
+        maxAttribute: "maxHunger",
+        descriptor: "Eating..."
+      })
     } else if (attachedCard.fuel) {
-      fuelTimer(1000, cardPositionInfo)
+      restoreTimer({
+        duration:1000, 
+        cardPositionInfo, 
+        resource: "fuel", 
+        currentAttribute: "currentFuel",
+        maxAttribute: "maxFuel",
+        descriptor: "Fueling..."
+      })
+    } else if (attachedCard.rest) {
+      restoreTimer({
+        duration:6000, 
+        cardPositionInfo, 
+        resource: "rest", 
+        currentAttribute: "currentStamina",
+        maxAttribute: "maxStamina",
+        preserve: true,
+        descriptor: "Resting..."
+      })
     }
   })
 }
