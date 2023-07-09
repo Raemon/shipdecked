@@ -64,7 +64,6 @@ export function useCardPositions(initialPositions: CardPosition[]) {
     }
     const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndices);
     if (attachedCardIndex !== undefined) {
-      console.log(cardPositions[attachedCardIndex])
       newCardData.x = cardPositions[attachedCardIndex].x + STACK_OFFSET_X;
       newCardData.y = cardPositions[attachedCardIndex].y + STACK_OFFSET_Y;
     }
