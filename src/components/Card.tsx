@@ -92,12 +92,8 @@ type CardProps = {
 
 const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
   const classes = useStyles();
-  const {cardPositions, i } = cardPositionInfo
+  const {cardPositions, i, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[i];
-  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, 
-    currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina } = cardPosition;
-  const card = units[slug]
-  if (!card) throw Error
 
   function handleDrag (event: DraggableEvent, data: DraggableData){
     onDrag(event, data, i)
@@ -114,13 +110,28 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
     whileAttachedCallback(cardPositionInfo)
   }, [cardPositionInfo]);
 
-  function updateAttribute (attribute: keyof AttributeInfo) {
+  function updateAttribute (attribute: keyof AttributeInfo, interval=1000) {
     setTimeout(() => {
+      if (cardPosition[attribute] === 0) {
+        setCardPositions((cardPositions: CardPosition[]) => {
+          const newCardPositions = [...cardPositions]
+          newCardPositions[i] = {
+            ...newCardPositions[i],
+            hide: true
+          }
+          return newCardPositions
+        })
+      }
       updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
         try {
           const current = cardPosition[attribute]
           if (!paused && current && current > 0) {
             return { ...cardPosition, [attribute]: current - 1 };
+          } else {
+            return {
+              ...cardPosition,
+              name: cardPosition.name
+            }
           }
         } catch (err) {
           console.log(err)
@@ -128,7 +139,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
         }
         return cardPosition;
       });
-    }, 1000);
+    }, interval);
   }
 
   const updateHunger = useCallback(() => {
@@ -143,6 +154,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
     updateAttribute('currentStamina')
   }, [cardPositionInfo, cardPosition])
 
+  const updateFading = useCallback(() => {
+    updateAttribute('currentFading', 10)
+  }, [cardPositionInfo, cardPosition])
+
   useEffect(() => {
     updateHunger()
   }, [cardPosition.currentHunger])
@@ -155,6 +170,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
     updateStamina()
   }, [cardPosition.currentStamina])
 
+  useEffect(() => {
+    updateFading()
+  }, [cardPosition.currentFading])
+
   // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)
 
   const backgroundColor = (cardPosition.maybeAttached.length || cardPosition.attached.length || cardPosition.idea) ? 'rgba(255,255,255,.8)' : 'white'
@@ -163,6 +182,14 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
   const progressBarOffsetX = offsetStackSize * STACK_OFFSET_X
   const progressBarOffsetY = offsetStackSize * STACK_OFFSET_Y
 
+  if (!cardPosition) return null
+
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, 
+    currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina } = cardPosition;
+  const card = units[slug]
+  if (!card) throw Error
+
+  if (cardPosition.hide) return null
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
       <div className={classes.root} style={{

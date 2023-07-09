@@ -6,6 +6,7 @@ export interface MaxCardAttributes {
   maxHealth?: number;
   maxFuel?: number;
   maxStamina?: number;
+  maxFading?: number;
 }
 
 export interface CurrentCardAttriutes {
@@ -13,6 +14,7 @@ export interface CurrentCardAttriutes {
   currentHealth?: number;
   currentFuel?: number;
   currentStamina?: number;
+  currentFading?: number;
 }
 
 export interface AttributeInfo extends MaxCardAttributes, CurrentCardAttriutes {}
@@ -28,6 +30,7 @@ export interface CardTypeBase {
   fuel?: number;
   rest?: number;
   loot?: CardSlug[];
+  secondaryLoot?: CardSlug[];
   spawnInfo?: SpawnInfo;
   spawnDescriptor?: string,
   creatingDescriptor?: string,
@@ -49,10 +52,7 @@ export interface CardPositionBase extends CardType {
   timerEnd?: Date,
   timerId?: NodeJS.Timeout,
   currentSpawnDescriptor?: string,
-  currentHunger?: number,
-  currentHealth?: number,
-  currentFuel?: number,
-  currentStamina?: number,
+  hide?: boolean,
   zIndex: number
 }
 

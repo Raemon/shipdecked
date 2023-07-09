@@ -8,7 +8,7 @@ const FuelStatus = ({max, current}:{max: number, current:number}) => {
     color = "orange"
   }
   if (current < max/1.5) {
-    descriptor = "Roading"
+    descriptor = "Roaring"
   }
   if (current < max/2) {
     descriptor = "Burning"

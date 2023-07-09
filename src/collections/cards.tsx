@@ -2,24 +2,27 @@ import React from 'react';
 import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
-  'ruth',
-  'shoresidePath', 'crate', 
+  'ruth', 'milo',
+  'shoresidePath', 'crate', 'distantFigure'
   // 'seaweed', 'smallFire',
   // 'carlos', 'shelter', 'log'
 ]
 
 export type CardSlug = 
-  'carlos'|'ruth'|
-  'palmTree'|'log'|'driftWoodLog'|'flint'|'sticks'|'rocks'|
-  'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|
+  'carlos'|'ruth'|'milo'|
+  'coconutTree'|'tree'|'ancientTree'|'jungleTree'|'bananaTree'|
+  'log'|'driftWoodLog'|'flint'|'sticks'|'rocks'|
+  'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
+  'palmLeaves'|
   'shoresidePath'|'denseJungle'|'birdIsland'|'shelteredCove'|'craggyCliffs'|
-  'carlosFootprints'|
+  'carlosFootprints'|'jungleFootprints'|
   'crate'|
   'smallFire'|
   'raft'|'birdDroppings'|
   'ideaFire'|'ideaRaft'|'ideaEscape'|'ideaHatchet'|
   'shelter'|
-  'hatchet'
+  'hatchet'|'spear'|
+  'distantFigure'|'feyHorror'
 
 const characterSpawnInfo: SpawnInfo = {
   'shoresidePath': { duration: 3000, descriptor: "Exploring...", preserve: true },
@@ -61,17 +64,41 @@ const characterSpawnInfo: SpawnInfo = {
   'hatchet': { 
     duration: 6000, 
     descriptor: "Chopping...", 
-    inputStack: ['hatchet', 'palmTree'], 
+    inputStack: ['hatchet', 'coconutTree'], 
     output: ["coconut", "coconut", "log"]
   },
-  'palmTree': {
+  'coconutTree': {
     duration: 3000, 
     descriptor: "Staring Frustratedly...", 
     skipIfExists: ['hatchet', 'ideaHatchet'], 
     preserve: true,
-    inputStack: ['palmTree'],
+    inputStack: ['coconutTree'],
     output: 'ideaHatchet', 
   },
+  'bananaTree': {
+    duration: 3000, 
+    descriptor: "Chopping Tree...",  
+    inputStack: ['hatchet', 'bananaTree'],
+    output: ['bananas', 'bananas', 'bananas', 'log'], 
+  },
+  'jungleTree': {
+    duration: 3000,
+    descriptor: "Chopping",
+    inputStack: ['jungleTree', 'hatchet'],
+    output: ['sticks', 'log', 'log', 'log', 'sticks']
+  },
+  'ancientTree': {
+    duration: 30000,
+    descriptor: "Chopping...",
+    inputStack: ['hatchet', 'ancientTree'],
+  },
+  'distantFigure': {
+    duration: 3000,
+    descriptor: "Following...",
+    inputStack: ['distantFigure'], 
+    consumeInitiator: true,
+    output: 'feyHorror',
+  }
 }
 
 export const units: Record<CardSlug, CardType> = {
@@ -107,21 +134,54 @@ export const units: Record<CardSlug, CardType> = {
       },
     } 
   },
+  'milo': {
+    name: 'Milo',
+    imageUrl: 'milo.png',
+    maxHunger: 2000,
+    maxStamina: 2000,
+    maxHealth: 6,
+    spawnInfo: {
+      ...characterSpawnInfo,
+    }
+  },
   'sticks': {
     name: "Sticks",
     imageUrl: 'sticks.png',
     fuel: 100,
   },
-  'palmTree': {
-    name: "Palm Tree",
+  'coconutTree': {
+    name: "Coconut Tree",
     imageUrl: 'palmTree.png',
-    spawnDescriptor: "Chopping...",
-    loot: ['coconut', 'coconut']
+  },
+  'bananaTree': {
+    name: "Banana Tree",
+    imageUrl: 'bananaTree.png',
+  },
+  'tree': {
+    name: "Tree",
+    imageUrl: 'tree.jpg',
+  },
+  'jungleTree': {
+    name: "Jungle Tree",
+    imageUrl: 'jungleTree.png',
+  },
+  'palmLeaves': {
+    name: "Palm Leaves",
+    imageUrl: 'palmLeaves.png',
   },
   'coconut': {
     name: "Coconut",
     imageUrl: 'coconut.png',
-    calories: 200,
+  },
+  'openCoconut': {
+    name: "Open Coconut",
+    imageUrl: 'openCoconut.png',
+    calories: 1400,
+  },
+  'bananas': {
+    name: "Bananas",
+    imageUrl: 'bananas.png',
+    calories: 600,
   },
   'log': {
     name: "Log",
@@ -140,7 +200,8 @@ export const units: Record<CardSlug, CardType> = {
     name: "Shoreside path",
     backgroundImage: 'shoresidepath.jpg',
     large: true,
-    loot: ['palmTree', 'flint', 'sticks', 'sticks', 'flint', 'carlosFootprints'],
+    loot: ['coconutTree', 'flint', 'sticks', 'carlosFootprints'],
+    secondaryLoot: ['crate'],
     spawnDescriptor: "Exploring...",
   },
   'denseJungle': {
@@ -148,7 +209,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "junglePath.png",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['palmTree', 'craggyCliffs', 'palmTree', 'sticks', 'sticks'],
+    loot: ['coconutTree', 'craggyCliffs', 'coconutTree', 'sticks', 'sticks', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree'],
   },
   'shelteredCove': {
     name: "Sheltered Cove",
@@ -170,6 +231,10 @@ export const units: Record<CardSlug, CardType> = {
     name: "Footprints",
     imageUrl: "footprints.png",
     loot: ['shelteredCove'],
+  },
+  'jungleFootprints': {
+    name: "Footprints",
+    imageUrl: "jungleFootprints.png",
   },
   'rocks': {
     name: "Rocks",
@@ -233,12 +298,21 @@ export const units: Record<CardSlug, CardType> = {
     name: "Bird Droppings",
     imageUrl: "Bird Droppings",
   },
+  'ancientTree': {
+    name: "Ancient Tree",
+    imageUrl: "ancientTree.png",
+  },
 
   // Tools
 
   'hatchet': {
     name: "Hatchet",
     imageUrl: 'hatchet.png',
+  },
+
+  'spear': {
+    name: "Spear",
+    imageUrl: 'spear.png',
   },
 
   'shelter': {
@@ -280,5 +354,17 @@ export const units: Record<CardSlug, CardType> = {
     cardText: <div>
       <div>Sticks and Flint</div>
     </div>
-  } 
+  },
+
+  // Encounters
+
+  'distantFigure': {
+    name: "Distant Figure",
+    imageUrl: "distantFigure.png",
+  },
+  'feyHorror': {
+    name: "Fey Horror",
+    backgroundImage: "feyHorror.jpg",
+    maxFading: 20
+  }
 }

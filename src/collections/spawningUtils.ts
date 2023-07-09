@@ -1,7 +1,7 @@
 import sample from "lodash/sample"
 import { CardPosition, CardPositionInfo } from "./types"
 import { CardSlug, units } from "./cards"
-import { includes, some } from "lodash"
+import { filter, includes, some } from "lodash"
 
 export function createCardPosition(slug: CardSlug, x: number, y: number): CardPosition {
   const card = units[slug]
@@ -15,6 +15,7 @@ export function createCardPosition(slug: CardSlug, x: number, y: number): CardPo
     currentHunger: card.maxHunger ? card.maxHunger/2 - 1: undefined,
     currentFuel: card.maxFuel ? card.maxFuel/2 - 1: undefined,
     currentStamina: card.maxStamina ? card.maxStamina/1.5 - 1: undefined,
+    currentFading: card.maxFading,
     ...card
   }
 }
@@ -52,7 +53,8 @@ function getLoot (cardPositionInfo: CardPositionInfo, slug: CardSlug) {
   const cardPosition = cardPositions[i]
   const attachedId = cardPosition.attached.find(i => cardPositions[i].slug === slug)
   const loot = typeof attachedId === "number" && cardPositions[attachedId].loot
-  const spawnSlug = loot && sample(loot)
+  const lootStack = loot && filter(loot, (lootStack) => lootStack.length > 0 )
+  const spawnSlug = lootStack && sample(lootStack)
 
   return { spawnSlug, attachedId }
 }
@@ -129,14 +131,24 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
 
       const oldAttached = cardPositions[attachedId]
       const oldSpawnItems = [...(oldAttached.loot ?? [])]
-      const newSpawnItems = removeOneInstance(oldSpawnItems, spawnSlug)
+      let newSpawnItems = removeOneInstance(oldSpawnItems, spawnSlug)
+      let secondaryLoot = oldAttached.secondaryLoot ?? []
 
       newCardPositions[i] = popOffCard(cardPositionInfo)
       newCardPositions.push(spawnNearby(spawnSlug, cardPosition))
+
+      // If there are no more items to spawn, add the secondary loot
+      if (newSpawnItems.length === 0 && secondaryLoot.length > 0) {
+        newSpawnItems = secondaryLoot
+        secondaryLoot = []
+      }
+
       newCardPositions[attachedId] = {
-        ...cardPositions[attachedId],
+      ...cardPositions[attachedId],
         loot: newSpawnItems
       }
+
+      // If there are no more items to spawn even , remove the attached card
       if (newSpawnItems.length === 0 && !preserve) {
         newCardPositions.splice(attachedId, 1)
       }

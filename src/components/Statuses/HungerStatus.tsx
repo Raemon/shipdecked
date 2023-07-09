@@ -26,7 +26,9 @@ const HungerStatus = ({max, current}:{max: number, current:number}) => {
   }
   if (descriptor) return (
     // <Tooltip tooltip={`${current}/${max} hunger`} display="inline">
-      <span style={{color}}>{descriptor}:{current}</span>
+      <span style={{color}}>
+        {descriptor}
+      </span>
     // </Tooltip>
   );
   return null
