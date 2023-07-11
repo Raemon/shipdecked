@@ -59,8 +59,9 @@ function spawnNearby(slug: CardSlug, parent: CardPosition) {
 function getLoot (cardPositions: Record<string, CardPosition>, index: string, slug: CardSlug) {
   const cardPosition = cardPositions[index]
   const attachedId = cardPosition.attached.find(i => cardPositions[i].slug === slug)
-  const loot = typeof attachedId === "number" && cardPositions[attachedId].loot
+  const loot = typeof attachedId === "string" && cardPositions[attachedId].loot
   const lootStack = loot && filter(loot, (lootStack) => lootStack.length > 0 )
+
   const spawnSlug = lootStack && sample(lootStack)
 
   return { spawnSlug, attachedId }
@@ -128,10 +129,10 @@ export function spawnTimerFromLoot({attachedSlug, duration, cardPositionInfo, pr
   const { cardPositions, id } = cardPositionInfo
   const cardPosition = cardPositions[id]
   const attachedSlugs = cardPosition.attached.map(i => cardPositions[i].slug)
-
   const spawnSlug = getLoot(cardPositions, id, attachedSlug).spawnSlug
+  console.log("spawnTimerFromLoot", {attachedSlug, attachedSlugs, cardPositionInfo, spawnSlug})
   if (attachedSlugs.includes(attachedSlug) && !cardPosition.timerEnd && spawnSlug) {
-    console.log({attachedSlug, attachedSlugs, spawnSlug})
+    console.log("spawnTimerFromLoot 2")
     const timerId = setTimeout(() => spawnFromLoot({attachedSlug, cardPositionInfo, preserve}), duration);
     const attachedSpawnDescriptor = descriptor ?? units[attachedSlug].spawnDescriptor
     
@@ -150,11 +151,13 @@ export function spawnTimerFromLoot({attachedSlug, duration, cardPositionInfo, pr
 export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attachedSlug: CardSlug, cardPositionInfo: CardPositionInfo, preserve?: boolean, output?: CardSlug|CardSlug[]}) {
   const { cardPositions, id: i, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[i]
+  console.log("spawning from loot", {attachedSlug, cardPositionInfo})
+
   setCardPositions(prevCardPositions => {
     const { spawnSlug, attachedId } = getLoot(prevCardPositions, i, attachedSlug)
 
     if (spawnSlug && attachedId) {
-      console.log("spawning from loot", {spawnSlug, attachedId, attachedSlug, cardPositionInfo})
+      console.log("spawning from loot", {attachedId, attachedSlug, cardPositionInfo})
       const newCardPositions = {...prevCardPositions}
 
       const oldAttached = cardPositions[attachedId]
@@ -182,7 +185,7 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
       // If there are no more items to spawn even , remove the attached card
       
       if (newSpawnItems.length === 0 && !preserve) {
-        newCardPositions[attachedId].deleted = true
+        delete newCardPositions[attachedId]
       }
       return newCardPositions;
     } else {
@@ -261,11 +264,11 @@ export function spawnFromSet({inputStack, output, cardPositionInfo, preserve, co
       // destroy the attached cards
       if (!preserve) {
         attachedCardsInStack.forEach(attachedCardPosition => {
-          newCardPositions[attachedCardPosition.id].deleted = true
+          delete newCardPositions[attachedCardPosition.id]
         })
       }
       if (consumeInitiator) {
-        newCardPositions[i].deleted = true
+        delete newCardPositions[i]
       }
     }
     return newCardPositions

@@ -115,10 +115,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
       if (cardPosition[attribute] === 0) {
         setCardPositions((cardPositions: Record<string, CardPosition>) => {
           const newCardPositions = {...cardPositions}
-          newCardPositions[id] = {
-            ...newCardPositions[id],
-            hide: true
-          }
+          delete newCardPositions[id]
           return newCardPositions
         })
       }
@@ -191,9 +188,6 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
 
   if (cardPosition.hide) return null
 
-  if (spawningStack) {
-    console.log({slug: cardPosition.slug, spawningStack, attached:cardPosition.attached})
-  }
   const renderTimer = 
     timerStart && 
     timerEnd && 
