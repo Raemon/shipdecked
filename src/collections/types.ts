@@ -43,25 +43,28 @@ export interface CardTypeBase {
 export interface CardType extends CardTypeBase, MaxCardAttributes {}
 
 export interface CardPositionBase extends CardType {
+  id: string,
   slug: CardSlug,
   x: number,
   y: number,
-  maybeAttached: number[],
-  attached: number[],
+  maybeAttached: string[],
+  attached: string[],
   timerStart?: Date,
   timerEnd?: Date,
   timerId?: NodeJS.Timeout,
+  spawningStack?: CardSlug[],
   currentSpawnDescriptor?: string,
   hide?: boolean,
-  zIndex: number
+  zIndex: number,
+  deleted?: boolean
 }
 
 export interface CardPosition extends CardPositionBase, CurrentCardAttriutes, MaxCardAttributes {}
 
 export type CardPositionInfo = {
-  cardPositions: CardPosition[],
-  i: number,
-  setCardPositions: React.Dispatch<React.SetStateAction<CardPosition[]>>
+  cardPositions: Record<string, CardPosition>,
+  id: string,
+  setCardPositions: React.Dispatch<React.SetStateAction<Record<string, CardPosition>>>
 }
 
 export type SpawnInfo = Partial<Record<CardSlug, {

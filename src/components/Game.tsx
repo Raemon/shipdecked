@@ -7,6 +7,7 @@ import Draggable, { DraggableEvent } from 'react-draggable';
 import { startingCards } from '../collections/cards';
 import { createCardPosition } from '../collections/spawningUtils';
 import { useCardPositions } from '../collections/useCardPositions';
+import { CardPosition } from '../collections/types';
 
 export const debugging = false
 
@@ -62,10 +63,13 @@ const useStyles = createUseStyles({
 function Game() {
   const classes = useStyles();
 
-  const initialCardPositions = startingCards.map((slug, i) => {
-    return createCardPosition(slug, 
+
+  const initialCardPositions: Record<string, CardPosition> = {}
+  startingCards.forEach((slug, i) => {
+    const cardPosition = createCardPosition(slug, 
       i*160+260+Math.random()*100, 
       200+Math.random()*100)
+    initialCardPositions[cardPosition.id] = cardPosition
   }); 
 
   const { cardPositions, setCardPositions, onDrag, onStop } = useCardPositions(initialCardPositions);
@@ -102,7 +106,7 @@ function Game() {
   // //   }
   // //   pauseCheckTimer()
   // // }, [lastMouseMoved]);
-
+  const a = Object.values(cardPositions)
   return (
     <div className={classes.root}>
       {
@@ -118,9 +122,9 @@ function Game() {
         <ScalingField>
           <Draggable onStart={handleStart}>
             <div className={classes.map}>
-              {cardPositions.map((cardPosition, i) => {
-                return <Card key={i} 
-                  cardPositionInfo={{cardPositions, i, setCardPositions}} 
+              {Object.values(cardPositions).map(cardPosition => {
+                return <Card key={cardPosition.id} 
+                  cardPositionInfo={{cardPositions, id:cardPosition.id, setCardPositions}} 
                   onDrag={onDrag} 
                   onStop={onStop}
                   paused={paused}

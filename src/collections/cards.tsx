@@ -3,7 +3,8 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate', 
+  'shoresidePath', 'crate',
+  //  'carlos', 'milo', 'shelter', 'hatchet', 'ancientTree'
   // 'seaweed', 'smallFire',
   // 'carlos', 'shelter', 'log'
 ]
@@ -19,10 +20,11 @@ export type CardSlug =
   'crate'|
   'smallFire'|
   'raft'|'birdDroppings'|
-  'ideaFire'|'ideaRaft'|'ideaEscape'|'ideaHatchet'|
+  'ideaFire'|'ideaRaft'|'ideaEscape'|'ideaHatchet'|'ideaShelter'|'ideaGatherSurvivors'|
   'shelter'|
   'hatchet'|'spear'|
-  'distantFigure'|'feyHorror'
+  'distantFigure'|'feyHorror'|
+  'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'
 
 const characterSpawnInfo: SpawnInfo = {
   'shoresidePath': { duration: 3000, descriptor: "Exploring...", preserve: true },
@@ -52,22 +54,16 @@ const characterSpawnInfo: SpawnInfo = {
   'log': {
     duration: 1000,
     descriptor: "Building...",
-    inputStack: ['log', 'log'],
+    inputStack: ['log', 'log', 'log', 'palmLeaves', 'palmLeaves'],
     output: 'shelter',
-  },
-  'smallFire': { 
-    duration: 6000, 
-    descriptor: "Stare into flames...", 
-    inputStack: ['smallFire'], 
-    output: "ideaEscape"
   },
   'hatchet': { 
     duration: 6000, 
     descriptor: "Chopping...", 
     inputStack: ['hatchet', 'coconutTree'], 
-    output: ["coconut", "coconut", "log"]
+    output: ["coconut", "coconut", "log", "hatchet", "palmLeaves"],
   },
-  'coconutTree': {
+  'coconutTree': {  
     duration: 3000, 
     descriptor: "Staring Frustratedly...", 
     skipIfExists: ['hatchet', 'ideaHatchet'], 
@@ -75,22 +71,23 @@ const characterSpawnInfo: SpawnInfo = {
     inputStack: ['coconutTree'],
     output: 'ideaHatchet', 
   },
+  'coconut': {
+    duration: 3000,
+    descriptor: "Cracking...",
+    inputStack: ['coconut', 'hatchet'],
+    output: ['openCoconut', 'hatchet']
+  },
   'bananaTree': {
     duration: 3000, 
     descriptor: "Chopping Tree...",  
     inputStack: ['hatchet', 'bananaTree'],
-    output: ['bananas', 'bananas', 'bananas', 'log'], 
+    output: ['bananas', 'bananas', 'bananas', 'log', 'palmLeaves', 'hatchet'], 
   },
   'jungleTree': {
     duration: 3000,
     descriptor: "Chopping",
     inputStack: ['jungleTree', 'hatchet'],
-    output: ['sticks', 'log', 'log', 'log', 'sticks']
-  },
-  'ancientTree': {
-    duration: 30000,
-    descriptor: "Chopping...",
-    inputStack: ['hatchet', 'ancientTree'],
+    output: ['sticks', 'log', 'log', 'log', 'sticks', 'hatchet']
   },
   'distantFigure': {
     duration: 3000,
@@ -102,21 +99,6 @@ const characterSpawnInfo: SpawnInfo = {
 }
 
 export const units: Record<CardSlug, CardType> = {
-  "carlos": {
-    name: 'Carlos',
-    imageUrl: 'carlos.png',
-    maxHunger: 2800,
-    maxStamina: 2000,
-    maxHealth: 10,
-    spawnInfo: {
-      ...characterSpawnInfo,
-      'ruth': { 
-        skipIfExists: ['ideaFire'], 
-        inputStack: ['ruth'],
-        duration: 3000, preserve: true, descriptor: "Talking...", output: 'ideaFire' 
-      },
-    }
-  },
   "ruth": {
     name: 'Ruth',
     imageUrl: 'ruth.png',
@@ -132,7 +114,41 @@ export const units: Record<CardSlug, CardType> = {
         inputStack: ['carlos'],
         duration: 3000, preserve: true, descriptor: "Talking...", output: 'ideaFire' 
       },
+      'ancientTree': {
+        duration: 30000,
+        descriptor: "Chopping...",
+        inputStack: ['hatchet', 'ancientTree'],
+        output: ['sticks', 'log', 'log', 'log', 'hatchet', 'ruthUnsettlingFeeling']
+      },
+      'smallFire': { 
+        duration: 6000, 
+        descriptor: "Stare into flames...", 
+        inputStack: ['smallFire'], 
+        output: "ideaGatherSurvivors",
+        preserve: true,
+      },
     } 
+  },
+  "carlos": {
+    name: 'Carlos',
+    imageUrl: 'carlos.png',
+    maxHunger: 2800,
+    maxStamina: 2000,
+    maxHealth: 10,
+    spawnInfo: {
+      ...characterSpawnInfo,
+      'ruth': { 
+        skipIfExists: ['ideaFire'], 
+        inputStack: ['ruth'],
+        duration: 3000, preserve: true, descriptor: "Talking...", output: 'ideaFire' 
+      },
+      'ancientTree': {
+        duration: 30000,
+        descriptor: "Chopping...",
+        inputStack: ['hatchet', 'ancientTree'],
+        output: ['sticks', 'log', 'log', 'log', 'hatchet', 'carlosUnsettlingFeeling', 'palmLeaves']
+      },
+    }
   },
   'milo': {
     name: 'Milo',
@@ -142,6 +158,12 @@ export const units: Record<CardSlug, CardType> = {
     maxHealth: 6,
     spawnInfo: {
       ...characterSpawnInfo,
+      'ancientTree': {
+        duration: 30000,
+        descriptor: "Chopping...",
+        inputStack: ['hatchet', 'ancientTree'],
+        output: ['sticks', 'log', 'log', 'log', 'hatchet', 'miloUnsettlingFeeling']
+      },
     }
   },
   'sticks': {
@@ -300,7 +322,8 @@ export const units: Record<CardSlug, CardType> = {
   },
   'ancientTree': {
     name: "Ancient Tree",
-    imageUrl: "ancientTree.png",
+    large: true,
+    backgroundImage: "ancientTree.jpg",
   },
 
   // Tools
@@ -316,7 +339,7 @@ export const units: Record<CardSlug, CardType> = {
   },
 
   'shelter': {
-    name: "Shelter",
+    name: "Small Shelter",
     imageUrl: 'shelter.png',
     rest: 600
   },
@@ -347,12 +370,28 @@ export const units: Record<CardSlug, CardType> = {
       <div>Covered Boat, Sheltered Cove</div>
     </div>
   },
+  'ideaGatherSurvivors': {
+    name: 'Idea: Gather Survivors',
+    imageUrl: "ideaGatherSurvivors.png",
+    idea: true,
+    cardText: <div>
+      Small Fire,<br/> 4 Survivors
+    </div>
+  },
   'ideaHatchet': {
     name: 'Idea: Hatchet',
     imageUrl: "ideaHatchet.png",
     idea: true,
     cardText: <div>
       <div>Sticks and Flint</div>
+    </div>
+  },
+  'ideaShelter': {
+    name: 'Idea: Shelter',
+    imageUrl: "ideaShelter.png",
+    idea: true,
+    cardText: <div>
+      <div>3 Logs, 2 Palm Leaves</div>
     </div>
   },
 
@@ -366,5 +405,29 @@ export const units: Record<CardSlug, CardType> = {
     name: "Fey Horror",
     backgroundImage: "feyHorror.jpg",
     maxFading: 20
+  },
+  'miloUnsettlingFeeling': {
+    name: "Unsettled Feeling",
+    backgroundImage: "miloUnsettlingFeeling.png",
+    idea: true,
+    cardText: <div>
+      <em>I felt the tree screaming as my axe bit into it</em>
+    </div>
+  },
+  'ruthUnsettlingFeeling': {
+    name: "Unsettled Feeling",
+    backgroundImage: "ruthUnsettlingFeeling.jpg",
+    idea: true,
+    cardText: <div>
+      <em>I felt the tree screaming as my axe bit into it</em>
+    </div>
+  },
+  'carlosUnsettlingFeeling': {
+    name: "Unsettled Feeling",
+    backgroundImage: "carlosUnsettlingFeeling.png",
+    idea: true,
+    cardText: <div>
+      <em>I felt the tree screaming as my axe bit into it</em>
+    </div>
   }
 }

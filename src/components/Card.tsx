@@ -84,22 +84,22 @@ const useStyles = createUseStyles({
 
 type CardProps = {
   cardPositionInfo: CardPositionInfo,
-  onDrag: (event: DraggableEvent, data: DraggableData, i: number) => void;
-  onStop: (i: number) => void;
+  onDrag: (event: DraggableEvent, data: DraggableData, id: string) => void;
+  onStop: (id: string) => void;
   paused: boolean;
 };
 
 
 const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
   const classes = useStyles();
-  const {cardPositions, i, setCardPositions } = cardPositionInfo
-  const cardPosition = cardPositions[i];
+  const {cardPositions, id, setCardPositions } = cardPositionInfo
+  const cardPosition = cardPositions[id];
 
   function handleDrag (event: DraggableEvent, data: DraggableData){
-    onDrag(event, data, i)
+    onDrag(event, data, id)
   }
   function handleStop () {
-    onStop(i)
+    onStop(id)
   }
 
   const whileAttachedCallback = useCallback((cardPositionInfo: CardPositionInfo) => {
@@ -110,13 +110,13 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
     whileAttachedCallback(cardPositionInfo)
   }, [cardPositionInfo]);
 
-  function updateAttribute (attribute: keyof AttributeInfo, interval=1000) {
+  function updateAttribute (attribute: keyof AttributeInfo, interval=3000) {
     setTimeout(() => {
       if (cardPosition[attribute] === 0) {
-        setCardPositions((cardPositions: CardPosition[]) => {
-          const newCardPositions = [...cardPositions]
-          newCardPositions[i] = {
-            ...newCardPositions[i],
+        setCardPositions((cardPositions: Record<string, CardPosition>) => {
+          const newCardPositions = {...cardPositions}
+          newCardPositions[id] = {
+            ...newCardPositions[id],
             hide: true
           }
           return newCardPositions
@@ -178,18 +178,29 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
 
   const backgroundColor = (cardPosition.maybeAttached.length || cardPosition.attached.length || cardPosition.idea) ? 'rgba(255,255,255,.8)' : 'white'
 
-  const offsetStackSize = getAttachedCardsWithHigherZIndex(cardPositions, i).length
+  const offsetStackSize = getAttachedCardsWithHigherZIndex(cardPositions, id).length
   const progressBarOffsetX = offsetStackSize * STACK_OFFSET_X
   const progressBarOffsetY = offsetStackSize * STACK_OFFSET_Y
 
   if (!cardPosition) return null
 
   const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, 
-    currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina } = cardPosition;
+    currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack } = cardPosition;
   const card = units[slug]
   if (!card) throw Error
 
   if (cardPosition.hide) return null
+
+  if (spawningStack) {
+    console.log({slug: cardPosition.slug, spawningStack, attached:cardPosition.attached})
+  }
+  const renderTimer = 
+    timerStart && 
+    timerEnd && 
+    timerEnd.getTime() > Date.now() && 
+    // TODO rewrite this to check slugs
+    spawningStack?.length === cardPosition.attached.length
+
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
       <div className={classes.root} style={{
@@ -206,22 +217,22 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
         }}>
           <h2>{name}</h2>
           {
-            // debugging && 
+            debugging && 
               <div>
                 <div className={classes.meta} style={{left: 5, top: 5}}>
-                  {i}
+                  {id}
                 </div>
                 <div className={classes.meta} style={{left: 5, bottom: 5}}>
                   {cardPosition.attached.length > 0 && <span>
-                    {cardPosition.attached.map((index) => `${index}`).join(",")} attached
+                    {cardPosition.attached.map((index) => `${index}`).join(",")}
                   </span>}
                 </div>
                 <div className={classes.meta} style={{right: 5, top: 5}}>
                   {cardPosition.zIndex}
                 </div>
-                <div className={classes.meta} style={{right: 5, bottom: 5}}>
+                {/* <div className={classes.meta} style={{right: 5, bottom: 5}}>
                   {cardPosition.loot?.join(", ")}
-                </div>
+                </div> */}
               </div>
             }
           {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
@@ -243,7 +254,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
           {cardText && <div className={classes.cardText}>
             {cardText}
           </div>}
-          {timerStart && timerEnd && <CardTimer 
+          {renderTimer && <CardTimer 
             offsetX={progressBarOffsetX}
             offsetY={progressBarOffsetY}
             descriptor={currentSpawnDescriptor}

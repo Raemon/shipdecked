@@ -6,26 +6,26 @@ import { CardPosition } from './types';
 export const STACK_OFFSET_X = 10;
 export const STACK_OFFSET_Y = 30;
 
-// function addIfNotInArray (array: number[], value: number): number[] {
-//   if (array.indexOf(value) === -1) {
-//     return [...array, value];
-//   } else {
-//     return array;
-//   }
-// }
+function addIfNotInArray (array: string[], value: string): string[] {
+  if (array.indexOf(value) === -1) {
+    return [...array, value];
+  } else {
+    return array;
+  }
+}
 
 // Create the custom hook for card positions
-export function useCardPositions(initialPositions: CardPosition[]) {
-  const [cardPositions, setCardPositions] = useState(() => {
+export function useCardPositions(initialPositions: Record<string, CardPosition>) {
+  const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>(() => {
     // Try to load from local storage
-    const savedState = localStorage.getItem('cardPositions');
-    const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
-    const validState = jsonParsedState.map((cardPosition: CardPosition) => cardPosition) as CardPosition[]
+    // const savedState = localStorage.getItem('cardPositions');
+    // const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
+    // const validState = jsonParsedState.map((cardPosition: CardPosition) => cardPosition) as CardPosition[]
 
     return initialPositions;
   });
 
-  function getZIndex(cardPosition: CardPosition, attachedCardIndices: number[]): number {
+  function getZIndex(cardPosition: CardPosition, attachedCardIndices: string[]): number {
     const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
       return Math.max(acc, cardPositions[i].zIndex);
     }, 0);
@@ -37,7 +37,7 @@ export function useCardPositions(initialPositions: CardPosition[]) {
     }
   }
 
-  function getIndexOfHighestAttachedZIndex (attachedCardIndices: number[]): number|undefined {
+  function getIndexOfHighestAttachedZIndex (attachedCardIndices: string[]): string|undefined {
     let highestAttachedZIndex = 0;
     let highestAttachedIndex = undefined;
     attachedCardIndices.forEach((i) => {
@@ -50,19 +50,19 @@ export function useCardPositions(initialPositions: CardPosition[]) {
     return highestAttachedIndex;
   }
 
-  function getNewCardPosition (index: number): CardPosition {
+function getNewCardPosition (index: string): CardPosition {
     const cardPosition = cardPositions[index];  
-    const attachedCardIndices = isAttached(index);
+    const attachedCardIndexes = getAttachedIndexes(index);
     clearTimeout(cardPosition.timerId);
     const newCardData = { ...cardPosition,
-      zIndex: getZIndex(cardPosition, attachedCardIndices),
+      zIndex: getZIndex(cardPosition, attachedCardIndexes),
       maybeAttached: [],
       timerEnd: undefined,
       timerStart: undefined,
       timerId: undefined,
-      attached: attachedCardIndices,
+      attached: attachedCardIndexes,
     }
-    const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndices);
+    const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndexes);
     if (attachedCardIndex !== undefined) {
       newCardData.x = cardPositions[attachedCardIndex].x + STACK_OFFSET_X;
       newCardData.y = cardPositions[attachedCardIndex].y + STACK_OFFSET_Y;
@@ -70,62 +70,80 @@ export function useCardPositions(initialPositions: CardPosition[]) {
     return newCardData;
   }
 
+  const isAttached = (cardPositions: Record<string, CardPosition>, i: string, j: string) => {
+    const cardsAreDifferent = i !== j;
+    const width = cardPositions[j].large ? LARGE_CARD_WIDTH : CARD_WIDTH;
+    const height = cardPositions[j].large ? LARGE_CARD_HEIGHT : CARD_HEIGHT;
+    
+    const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < width;
+    const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < height;
+    const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
+    return cardsAreDifferent && cardsOverlap;
+  }
+    
   // find an overlapping card wiht
-  const isAttached = useCallback((i: number) => {
-    let attachedCardIndex: number|undefined = undefined
-    for (let j = 0; j < cardPositions.length; j++) {
-      const cardsAreDifferent = i !== j;
-      const width = cardPositions[j].large ? LARGE_CARD_WIDTH : CARD_WIDTH;
-      const height = cardPositions[j].large ? LARGE_CARD_HEIGHT : CARD_HEIGHT;
-      
-      const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < width;
-      const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < height;
-      const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
-
-      if (cardsAreDifferent && cardsOverlap) {
+  const getAttachedIndexes = useCallback((id: string) => {
+    let attachedCardIndex: string|undefined = undefined
+     Object.keys(cardPositions).forEach(id2 => {
+      if (isAttached(cardPositions, id, id2)) {
         if (!attachedCardIndex) {
-          attachedCardIndex = j;
-        } else if (cardPositions[j].zIndex > cardPositions[attachedCardIndex].zIndex) {
-          attachedCardIndex = j;
+          attachedCardIndex = id2;
+        } else if (cardPositions[id2].zIndex > cardPositions[attachedCardIndex].zIndex) {
+          attachedCardIndex = id2;
         }
       }
-    }
+     })
     if (attachedCardIndex !== undefined) {
-      return [attachedCardIndex, ...cardPositions[attachedCardIndex].attached];
+      const otherAttachedCards = cardPositions[attachedCardIndex].attached.filter((j) => j !== id);
+      return [attachedCardIndex, ...otherAttachedCards];
     } else {
       return []
     }
   }, [cardPositions]);
 
-  const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: number) => {
-    const newPositions = [...cardPositions];
+  const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: string) => {
+    const newPositions = {...cardPositions};
     const cardPosition = cardPositions[i];
     newPositions[i] = { ...cardPosition, 
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
-      maybeAttached: isAttached(i),
+      maybeAttached: getAttachedIndexes(i),
       zIndex: 1000000
     };
     
     setCardPositions(newPositions);
-  }, [cardPositions, isAttached]);
+  }, [cardPositions, getAttachedIndexes]);
 
-  const onStop = useCallback((index: number) => {
-    const newPositions = [...cardPositions];
-    // const oldCardPosition = cardPositions[index];
+  const onStop = useCallback((index: string) => {
+    const newPositions = {...cardPositions};
     const newCardPosition = getNewCardPosition(index);
     newPositions[index] = newCardPosition;
 
-    // disabled till I figured out all edge cases
-    // newCardPosition.attached.forEach((i) => {
-    //   newPositions[i] = {
-    //     ...getNewCardPosition(i),
-    //     attached: addIfNotInArray(newPositions[i].attached, index)
-    //   }
-    // })
+    newCardPosition.attached.forEach((id) => {
+      newPositions[id].attached = addIfNotInArray(newPositions[id].attached, index)
+    })
+
+    const cardsNoLongerAttachedToIndex = cardPositions[index].attached.filter((id) => {
+      return newCardPosition.attached.indexOf(id) === -1;
+    });
+
+    cardsNoLongerAttachedToIndex.forEach((id) => {
+      newPositions[id].attached = newPositions[id].attached.filter((j) => j !== index);
+    });
+
+    // find less janky way to do this
+    Object.keys(cardPositions).forEach((i) => {
+      const attached = []
+      for (const j in cardPositions) {
+        if (isAttached(cardPositions, i, j)) attached.push(j)
+      }
+      if (attached.length === 0) {
+        newPositions[i].attached = []
+      }
+    })
 
     setCardPositions(newPositions);
-  }, [cardPositions, isAttached]);
+  }, [cardPositions, getAttachedIndexes]);
 
   return { cardPositions, setCardPositions, onDrag, onStop };
 }
