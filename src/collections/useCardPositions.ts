@@ -45,6 +45,53 @@ export const getAttachedIndexes = (cardPositions: Record<string, CardPosition>, 
   }
 }
 
+interface GridPosition {
+  x: number;
+  y: number;
+}
+
+export const findNearestNonOverlappingSpace = (cardPositions: Record<string, CardPosition>, currentId: string): GridPosition => {
+  const currentCard = cardPositions[currentId];
+  if (!currentCard) return {x: 0, y: 0}
+  const { width: cardWidth, height: cardHeight } = getCardDimensions(currentCard);
+
+  // Start searching from the card's current position
+  const queue: GridPosition[] = [{ x: currentCard.x, y: currentCard.y }];
+
+  while (queue.length > 0) {
+    const currentPos = queue.shift()!; // It's safe to use '!' because we check that queue.length > 0
+
+    // Check if the current position overlaps with any other card
+    const isOverlapping = Object.values(cardPositions).some(({ x, y, id }) => {
+      if (id === currentId) return false; // Don't check the card against itself
+
+      const { width, height } = getCardDimensions(cardPositions[id]);
+
+      const horizontalOverlap = Math.abs(currentPos.x - x) < Math.max(cardWidth, width);
+      const verticalOverlap = Math.abs(currentPos.y - y) < Math.max(cardHeight, height);
+
+      return horizontalOverlap && verticalOverlap;
+    });
+
+    if (!isOverlapping) {
+      // If it doesn't overlap, return the current position
+      return currentPos;
+    } else {
+      // Otherwise, enqueue the neighboring positions
+      queue.push(
+        { x: currentPos.x - 1, y: currentPos.y },
+        { x: currentPos.x + 1, y: currentPos.y },
+        { x: currentPos.x, y: currentPos.y - 1 },
+        { x: currentPos.x, y: currentPos.y + 1 }
+      );
+    }
+  }
+
+  // If no non-overlapping position was found, return the card's current position
+  // (this should never happen unless the grid is completely filled)
+  return { x: currentCard.x, y: currentCard.y };
+};
+
 export const getOverlappingCards = (cardPositions: Record<string, CardPosition>, id: string) => {
   const overlappingCards: CardPosition[] = []
   Object.keys(cardPositions).forEach(id2 => {

@@ -2,6 +2,7 @@ import sample from "lodash/sample"
 import { CardPosition, CardPositionInfo } from "./types"
 import { CardSlug, units } from "./cards"
 import { filter, includes, some } from "lodash"
+import { findNearestNonOverlappingSpace } from "./useCardPositions";
 
 export const randomHexId = () => {
   return Math.floor(Math.random() * 16777215).toString(16);
@@ -51,11 +52,24 @@ export const updateCardPosition = (
   });
 };
 
-function spawnNearby(slug: CardSlug, parent: CardPosition) {
+function spawnNearby(slug: CardSlug, parent: CardPosition, i?: number) {
+  if (i) return spawnInSemiCircle(slug, parent, i)
   return createCardPosition(slug,
-    parent.x+100 + Math.random() * 50, 
+    parent.x+100 + Math.random() * 50,
     parent.y+15 + Math.random() * 50
   )
+}
+
+function spawnInSemiCircle(slug: CardSlug, parent: CardPosition, i = 0, radius = 180, angleIncrement: number = Math.PI / 6) {
+  // Calculate the angle for the current card
+  const angle = i * angleIncrement;
+
+  // Calculate the new position using the circle's equation
+  const x = parent.x + radius * Math.cos(angle) + Math.random() * 50;
+  const y = parent.y + radius * Math.sin(angle) + Math.random() * 50;
+
+  // Create and return the new card position
+  return createCardPosition(slug, x, y);
 }
 
 function getLoot (cardPositions: Record<string, CardPosition>, index: string, slug: CardSlug) {
@@ -255,8 +269,8 @@ export function spawnFromSet({inputStack, output, cardPositionInfo, preserve, co
         const newCardPosition = spawnNearby(output, cardPosition)
         newCardPositions[newCardPosition.id] = newCardPosition
       } else {
-        output.forEach((outputSlug) => {
-          const newCardPosition = spawnNearby(outputSlug, cardPosition)
+        output.forEach((outputSlug, i) => {
+          const newCardPosition = spawnNearby(outputSlug, cardPosition, i)
           newCardPositions[newCardPosition.id] = newCardPosition
         })
       }

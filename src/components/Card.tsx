@@ -15,8 +15,8 @@ export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 220
 export const CARD_HEIGHT = 180;
 export const CARD_WIDTH = 110;
-export const IDEA_CARD_WIDTH = 100;
-export const IDEA_CARD_HEIGHT = 160;
+export const IDEA_CARD_WIDTH = 120;
+export const IDEA_CARD_HEIGHT = 190;
 
 export const getCardDimensions = (card: CardPosition) => {
   if (card.large) {
