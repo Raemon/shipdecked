@@ -8,13 +8,47 @@ import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
 import HungerStatus from './Statuses/HungerStatus';
 import FuelStatus from './Statuses/FuelStatus';
-import { STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
+import { getOverlappingCards, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 import { StaminaStatus } from './Statuses/StaminaStatus';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 220
 export const CARD_HEIGHT = 180;
 export const CARD_WIDTH = 110;
+export const IDEA_CARD_WIDTH = 100;
+export const IDEA_CARD_HEIGHT = 160;
+
+export const getCardDimensions = (card: CardPosition) => {
+  if (card.large) {
+    return {
+      width: LARGE_CARD_WIDTH,
+      height: LARGE_CARD_HEIGHT
+    }
+  } else if (card.idea) {
+    return {
+      width: IDEA_CARD_WIDTH,
+      height: IDEA_CARD_HEIGHT
+    }
+  } else {
+    return {
+      width: CARD_WIDTH,
+      height: CARD_HEIGHT
+    }
+  }
+}
+
+export const getCardBackground = (cardPosition: CardPosition) => {
+  if (cardPosition.backgroundImage) {
+    return `url(${cardPosition.backgroundImage})`
+  } else if (cardPosition.maybeAttached.length) {
+    return 'rgba(255,255,255,.8)'
+  } else if (cardPosition.attached.length) {
+    return 'rgba(255,255,255,.8)'
+  } else if (cardPosition.idea) {
+    return 'rgba(255,255,255,.6)'
+  }
+  return 'white'
+}
 
 const useStyles = createUseStyles({
   root: {
@@ -112,8 +146,9 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
 
   function updateAttribute (attribute: keyof AttributeInfo, interval=3000) {
     setTimeout(() => {
+      if (!cardPosition) return
       if (cardPosition[attribute] === 0) {
-        setCardPositions((cardPositions: Record<string, CardPosition>) => {
+        setCardPositions((cardPositions: Record<string, CardPosition>,) => {
           const newCardPositions = {...cardPositions}
           delete newCardPositions[id]
           return newCardPositions
@@ -173,8 +208,6 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
 
   // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)
 
-  const backgroundColor = (cardPosition.maybeAttached.length || cardPosition.attached.length || cardPosition.idea) ? 'rgba(255,255,255,.8)' : 'white'
-
   const offsetStackSize = getAttachedCardsWithHigherZIndex(cardPositions, id).length
   const progressBarOffsetX = offsetStackSize * STACK_OFFSET_X
   const progressBarOffsetY = offsetStackSize * STACK_OFFSET_Y
@@ -203,11 +236,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
         zIndex: cardPosition.zIndex,
       }}>
         <div className={classes.styling} style={{
-          width: card.large ? LARGE_CARD_WIDTH : CARD_WIDTH,
-          height: card.large ? LARGE_CARD_HEIGHT : CARD_HEIGHT,
+          ...getCardDimensions(cardPosition),
           border: card.idea ? "dashed 2px rgba(0,0,0,.2)" : "",
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
-          background: card.backgroundImage ? `url(${card.backgroundImage})` : backgroundColor
+          background: getCardBackground(cardPosition)
         }}>
           <h2>{name}</h2>
           {

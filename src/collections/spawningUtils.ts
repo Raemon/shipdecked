@@ -43,8 +43,10 @@ export const updateCardPosition = (
   const { setCardPositions, id } = cardPositionInfo
   setCardPositions((prevCardPositions: Record<string, CardPosition>) => {
     const newCardPositions = {...prevCardPositions};
-    const cardPosition = newCardPositions[id];
-    newCardPositions[id] = updateFunction(cardPosition);
+    if (newCardPositions[id]) {
+      const cardPosition = newCardPositions[id];
+      newCardPositions[id] = updateFunction(cardPosition);
+    }
     return newCardPositions;
   });
 };
@@ -76,12 +78,12 @@ const removeOneInstance = (arr: CardSlug[], itemToRemove: CardSlug) => {
 };
 
 function popOffCard(cardPositionInfo: CardPositionInfo) {
-  const { cardPositions, id: i } = cardPositionInfo
+  const { cardPositions, id } = cardPositionInfo
   return {
-    ...cardPositions[i],
+    ...cardPositions[id],
     attached: [],
-    x: cardPositions[i].x - 50 - Math.random() * 50,
-    y: cardPositions[i].y + 15 + Math.random() * 50,
+    x: cardPositions[id].x - 50 - Math.random() * 50,
+    y: cardPositions[id].y + 15 + Math.random() * 50,
     timerEnd: undefined,
     timerStart: undefined,
     timerId: undefined,
@@ -130,9 +132,7 @@ export function spawnTimerFromLoot({attachedSlug, duration, cardPositionInfo, pr
   const cardPosition = cardPositions[id]
   const attachedSlugs = cardPosition.attached.map(i => cardPositions[i].slug)
   const spawnSlug = getLoot(cardPositions, id, attachedSlug).spawnSlug
-  console.log("spawnTimerFromLoot", {attachedSlug, attachedSlugs, cardPositionInfo, spawnSlug})
   if (attachedSlugs.includes(attachedSlug) && !cardPosition.timerEnd && spawnSlug) {
-    console.log("spawnTimerFromLoot 2")
     const timerId = setTimeout(() => spawnFromLoot({attachedSlug, cardPositionInfo, preserve}), duration);
     const attachedSpawnDescriptor = descriptor ?? units[attachedSlug].spawnDescriptor
     
@@ -149,12 +149,12 @@ export function spawnTimerFromLoot({attachedSlug, duration, cardPositionInfo, pr
 }
 
 export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attachedSlug: CardSlug, cardPositionInfo: CardPositionInfo, preserve?: boolean, output?: CardSlug|CardSlug[]}) {
-  const { cardPositions, id: i, setCardPositions } = cardPositionInfo
-  const cardPosition = cardPositions[i]
-  console.log("spawning from loot", {attachedSlug, cardPositionInfo})
+  const { cardPositions, id, setCardPositions } = cardPositionInfo
+  const cardPosition = cardPositions[id]
+  if (!cardPositions[id]) return
 
   setCardPositions(prevCardPositions => {
-    const { spawnSlug, attachedId } = getLoot(prevCardPositions, i, attachedSlug)
+    const { spawnSlug, attachedId } = getLoot(prevCardPositions, id, attachedSlug)
 
     if (spawnSlug && attachedId) {
       console.log("spawning from loot", {attachedId, attachedSlug, cardPositionInfo})
@@ -165,7 +165,7 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
       let newSpawnItems = removeOneInstance(oldSpawnItems, spawnSlug)
       let secondaryLoot = oldAttached.secondaryLoot ?? []
 
-      newCardPositions[i] = popOffCard(cardPositionInfo)
+      newCardPositions[id] = popOffCard(cardPositionInfo)
 
       const newCardPosition = spawnNearby(spawnSlug, cardPosition)
       newCardPositions[newCardPosition.id] = newCardPosition
@@ -204,8 +204,8 @@ export function spawnTimerFromSet({inputStack, output, duration, cardPositionInf
   preserve?: boolean,
   consumeInitiator?: boolean
 }) {
-  const { cardPositions, id: i, setCardPositions } = cardPositionInfo
-  const cardPosition = cardPositions[i] 
+  const { cardPositions, id, setCardPositions } = cardPositionInfo
+  const cardPosition = cardPositions[id] 
   const attachedSlugs = cardPosition.attached.map(i => cardPositions[i].slug)
 
   const completeStack = areArraysIdentical(attachedSlugs, inputStack)
@@ -219,7 +219,7 @@ export function spawnTimerFromSet({inputStack, output, duration, cardPositionInf
     const timerId = setTimeout(() => spawnFromSet({inputStack, output, cardPositionInfo, preserve, consumeInitiator}), duration);
     setCardPositions(prevCardPositions => {
       const newCardPositions = {...prevCardPositions}
-      newCardPositions[i] = ({
+      newCardPositions[id] = ({
         ...cardPosition, 
         timerId: timerId,
         timerStart: new Date(), 
@@ -239,14 +239,16 @@ export function spawnFromSet({inputStack, output, cardPositionInfo, preserve, co
   preserve?: boolean,
   consumeInitiator?: boolean
 }) {
-  const { id: i, setCardPositions } = cardPositionInfo
+  const { cardPositions, id, setCardPositions } = cardPositionInfo
+  if (!cardPositions[id]) return
+
   setCardPositions(prevCardPositions => {
     const newCardPositions = {...prevCardPositions}
     const cardPosition = newCardPositions[cardPositionInfo.id]
     const newCardPositionInfo = { ...cardPositionInfo, cardPositions: newCardPositions }
     const attachedSlugs = cardPosition.attached.map(i => newCardPositions[i].slug)
     if (areArraysIdentical(attachedSlugs, inputStack)) {
-      newCardPositions[i] = popOffCard(newCardPositionInfo)
+      newCardPositions[id] = popOffCard(newCardPositionInfo)
 
       // create the output card
       if (typeof output === "string") {
@@ -268,7 +270,7 @@ export function spawnFromSet({inputStack, output, cardPositionInfo, preserve, co
         })
       }
       if (consumeInitiator) {
-        delete newCardPositions[i]
+        delete newCardPositions[id]
       }
     }
     return newCardPositions
@@ -285,12 +287,11 @@ export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxA
   preserve?: boolean,
   descriptor?: string
 }) {
-  const { cardPositions, id: i } = cardPositionInfo
-  const cardPosition = cardPositions[i]
+  const { cardPositions, id } = cardPositionInfo
+  const cardPosition = cardPositions[id]
   const attachedId = cardPosition.attached.find(i => cardPositions[i][resource])
   const resourceAmount = attachedId && cardPositions[attachedId][resource]
   if (cardPosition[currentAttribute] && !cardPosition.timerEnd && resourceAmount && attachedId) {
-    console.log({resourceAmount, attachedId, cardPosition, resource})
     const timerId = setTimeout(() => {
       restore({
         cardPositionInfo,
@@ -321,16 +322,17 @@ function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribu
   attachedId: string,
   preserve?: boolean,
 }) {
-  const { id: i, setCardPositions } = cardPositionInfo;
+  const { cardPositions, id, setCardPositions } = cardPositionInfo;
+  if (!cardPositions[id]) return
 
   setCardPositions((prevCardPositions: Record<string, CardPosition>) => {
     const newCardPositions = {...prevCardPositions}
-    const cardPosition = newCardPositions[i];
+    const cardPosition = newCardPositions[id];
     const currentAttributeAmount = cardPosition[currentAttribute];
 
     if (currentAttributeAmount && resourceAmount) {
       // Update the current card position.
-      newCardPositions[i] = {
+      newCardPositions[id] = {
         ...cardPosition,
         timerId: undefined,
         timerStart: undefined,
@@ -342,7 +344,7 @@ function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribu
       };
 
       if (!preserve) {
-        newCardPositions[attachedId].deleted = true
+        delete newCardPositions[attachedId]
       }
     }
 

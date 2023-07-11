@@ -73,12 +73,19 @@ function Game() {
   }); 
 
   const { cardPositions, setCardPositions, onDrag, onStop } = useCardPositions(initialCardPositions);
+
+  function removeUndefinedValues(obj: Record<string, CardPosition>): Record<string, CardPosition> {
+    return Object.entries(obj).reduce((a, [k, v]) => (v === undefined ? a : {...a, [k]: v}), {});
+  }
+  const newCardPositions = removeUndefinedValues(cardPositions)
+  console.log(newCardPositions)
+
   useEffect(() => {
     localStorage.setItem('cardPositions', JSON.stringify(cardPositions));
   }, [cardPositions]); 
 
   const [dayCount, setDayCount] = useState(0);
-  const [lastMouseMoved, setLastMouseMoved] = useState(new Date().getTime());
+  // const [lastMouseMoved, setLastMouseMoved] = useState(new Date().getTime());
   const [paused, setPaused] = useState(false);
 
   // function handleMouseMove() {
@@ -106,14 +113,13 @@ function Game() {
   // //   }
   // //   pauseCheckTimer()
   // // }, [lastMouseMoved]);
-  const a = Object.values(cardPositions)
   return (
     <div className={classes.root}>
       {
         debugging &&
         <div style={{position: "absolute", top: 0, left: 0, zIndex: 9999}}>
         <button onClick={() => setPaused(!paused)}>Pause</button>
-        <div>Mouse moved {new Date().getTime() - lastMouseMoved}ms ago</div>
+        {/* <div>Mouse moved {new Date().getTime() - lastMouseMoved}ms ago</div> */}
       </div>}
       {paused && <div className={classes.pauseScreen} onClick={() => setPaused(false)}>
         Paused
@@ -122,7 +128,8 @@ function Game() {
         <ScalingField>
           <Draggable onStart={handleStart}>
             <div className={classes.map}>
-              {Object.values(cardPositions).map(cardPosition => {
+              {Object.values(newCardPositions).map(cardPosition => {
+                if (!cardPosition) return null
                 return <Card key={cardPosition.id} 
                   cardPositionInfo={{cardPositions, id:cardPosition.id, setCardPositions}} 
                   onDrag={onDrag} 

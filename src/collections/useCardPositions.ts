@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { DraggableData, DraggableEvent } from 'react-draggable';
-import { CARD_HEIGHT, CARD_WIDTH, LARGE_CARD_HEIGHT, LARGE_CARD_WIDTH } from '../components/Card';
+import { getCardDimensions } from '../components/Card';
 import { CardPosition } from './types';
 
 export const STACK_OFFSET_X = 10;
@@ -12,6 +12,47 @@ function addIfNotInArray (array: string[], value: string): string[] {
   } else {
     return array;
   }
+}
+
+
+export const isOverlapping = (cardPositions: Record<string, CardPosition>, i: string, j: string) => {
+  const cardsAreDifferent = i !== j;
+  const { width, height } = getCardDimensions(cardPositions[i])
+
+  const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < width;
+  const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < height;
+  const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
+  return cardsAreDifferent && cardsOverlap;
+}
+  
+// find an overlapping card wiht
+export const getAttachedIndexes = (cardPositions: Record<string, CardPosition>, id: string) => {
+  let attachedCardIndex: string|undefined = undefined
+   Object.keys(cardPositions).forEach(id2 => {
+    if (isOverlapping(cardPositions, id, id2)) {
+      if (!attachedCardIndex) {
+        attachedCardIndex = id2;
+      } else if (cardPositions[id2].zIndex > cardPositions[attachedCardIndex].zIndex) {
+        attachedCardIndex = id2;
+      }
+    }
+   })
+  if (attachedCardIndex !== undefined) {
+    const otherAttachedCards = cardPositions[attachedCardIndex].attached.filter((j) => j !== id);
+    return [attachedCardIndex, ...otherAttachedCards];
+  } else {
+    return []
+  }
+}
+
+export const getOverlappingCards = (cardPositions: Record<string, CardPosition>, id: string) => {
+  const overlappingCards: CardPosition[] = []
+  Object.keys(cardPositions).forEach(id2 => {
+    if (isOverlapping(cardPositions, id, id2)) {
+      overlappingCards.push(cardPositions[id2])
+    }
+  })
+  return overlappingCards;
 }
 
 // Create the custom hook for card positions
@@ -52,7 +93,7 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
 
 function getNewCardPosition (index: string): CardPosition {
     const cardPosition = cardPositions[index];  
-    const attachedCardIndexes = getAttachedIndexes(index);
+    const attachedCardIndexes = getAttachedIndexes(cardPositions, index);
     clearTimeout(cardPosition.timerId);
     const newCardData = { ...cardPosition,
       zIndex: getZIndex(cardPosition, attachedCardIndexes),
@@ -70,44 +111,13 @@ function getNewCardPosition (index: string): CardPosition {
     return newCardData;
   }
 
-  const isAttached = (cardPositions: Record<string, CardPosition>, i: string, j: string) => {
-    const cardsAreDifferent = i !== j;
-    const width = cardPositions[j].large ? LARGE_CARD_WIDTH : CARD_WIDTH;
-    const height = cardPositions[j].large ? LARGE_CARD_HEIGHT : CARD_HEIGHT;
-    
-    const cardsOverlapHorizontally = Math.abs(cardPositions[i].x - cardPositions[j].x) < width;
-    const cardsOverlapVertically = Math.abs(cardPositions[i].y - cardPositions[j].y) < height;
-    const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
-    return cardsAreDifferent && cardsOverlap;
-  }
-    
-  // find an overlapping card wiht
-  const getAttachedIndexes = useCallback((id: string) => {
-    let attachedCardIndex: string|undefined = undefined
-     Object.keys(cardPositions).forEach(id2 => {
-      if (isAttached(cardPositions, id, id2)) {
-        if (!attachedCardIndex) {
-          attachedCardIndex = id2;
-        } else if (cardPositions[id2].zIndex > cardPositions[attachedCardIndex].zIndex) {
-          attachedCardIndex = id2;
-        }
-      }
-     })
-    if (attachedCardIndex !== undefined) {
-      const otherAttachedCards = cardPositions[attachedCardIndex].attached.filter((j) => j !== id);
-      return [attachedCardIndex, ...otherAttachedCards];
-    } else {
-      return []
-    }
-  }, [cardPositions]);
-
   const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: string) => {
     const newPositions = {...cardPositions};
     const cardPosition = cardPositions[i];
     newPositions[i] = { ...cardPosition, 
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
-      maybeAttached: getAttachedIndexes(i),
+      maybeAttached: getAttachedIndexes(cardPositions, i),
       zIndex: 1000000
     };
     
@@ -135,7 +145,7 @@ function getNewCardPosition (index: string): CardPosition {
     Object.keys(cardPositions).forEach((i) => {
       const attached = []
       for (const j in cardPositions) {
-        if (isAttached(cardPositions, i, j)) attached.push(j)
+        if (isOverlapping(cardPositions, i, j)) attached.push(j)
       }
       if (attached.length === 0) {
         newPositions[i].attached = []

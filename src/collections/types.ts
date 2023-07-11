@@ -1,3 +1,4 @@
+import { type } from "os";
 import React from "react";
 import { CardSlug } from "./cards";
 
