@@ -4,7 +4,6 @@ import { CardType, SpawnInfo } from "./types"
 export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath', 'crate',
-  'carlos', 'milo', 'ancientTree', 'shelter', 'hatchet'
 ]
 
 export type CardSlug = 
@@ -22,7 +21,7 @@ export type CardSlug =
   'sexualTensionCarlosRuth'|
   'shelter'|
   'hatchet'|'spear'|
-  'distantFigure'|'feyHorror'|
+  'distantFigure'|'feyHorror'|'jungleShrine'|
   'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'
 
 const characterSpawnInfo: SpawnInfo = {
@@ -94,7 +93,13 @@ const characterSpawnInfo: SpawnInfo = {
     inputStack: ['distantFigure'], 
     consumeInitiator: true,
     output: 'feyHorror',
-  }
+  },
+  'jungleShrine': {
+    duration: 3000,
+    descriptor: "Sitting quietly...",
+    inputStack: ['jungleShrine'],
+    output: 'ideaEscape',
+  },
 }
 
 export const units: Record<CardSlug, CardType> = {
@@ -233,7 +238,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "junglePath.png",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'coconutTree', 'sticks', 'sticks', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree'],
+    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'coconutTree', 'sticks', 'sticks', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
   },
   'shelteredCove': {
     name: "Sheltered Cove",
@@ -354,6 +359,12 @@ export const units: Record<CardSlug, CardType> = {
         preserve: true,
       },
     }
+  },
+
+  'jungleShrine': {
+    name: "Jungle Shrine",
+    imageUrl: 'jungleShrine.png',
+    rest: 600,
   },
 
   // Ideas/Dreams
