@@ -41,9 +41,9 @@ export const getCardBackground = (cardPosition: CardPosition) => {
   if (cardPosition.backgroundImage) {
     return `url(${cardPosition.backgroundImage})`
   } else if (cardPosition.maybeAttached.length) {
-    return 'rgba(255,255,255,.8)'
+    return 'rgba(255,255,255,.9)'
   } else if (cardPosition.attached.length) {
-    return 'rgba(255,255,255,.8)'
+    return 'rgba(255,255,255,.9)'
   } else if (cardPosition.idea) {
     return 'rgba(255,255,255,.6)'
   }
@@ -235,6 +235,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
         left: cardPosition.x, 
         top: cardPosition.y, 
         zIndex: cardPosition.zIndex,
+        transition: cardPosition.transition ? 'all 1s ease-in-out' : 'none',
       }}>
         <div className={classes.styling} style={{
           ...getCardDimensions(cardPosition),
@@ -242,7 +243,6 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
           background: getCardBackground(cardPosition),
           borderRadius: card.idea ? 20 : 4,
-          transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
         }}>
           <h2>{name}</h2>
           {
