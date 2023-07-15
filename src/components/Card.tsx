@@ -103,7 +103,8 @@ const useStyles = createUseStyles({
   cardText: {
     fontSize: 11,
     color: 'rgba(0,0,0,.8)',
-    fontFamily: "Palatino"
+    fontFamily: "Palatino",
+    lineHeight: "1.3em",
   },
   statuses: {
     fontSize: 10,
@@ -239,7 +240,9 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
           ...getCardDimensions(cardPosition),
           border: card.idea ? "dashed 2px rgba(0,0,0,.2)" : "",
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
-          background: getCardBackground(cardPosition)
+          background: getCardBackground(cardPosition),
+          borderRadius: card.idea ? 20 : 4,
+          transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
         }}>
           <h2>{name}</h2>
           {

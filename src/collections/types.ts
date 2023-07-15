@@ -56,7 +56,8 @@ export interface CardPositionBase extends CardType {
   spawningStack?: CardSlug[],
   currentSpawnDescriptor?: string,
   hide?: boolean,
-  zIndex: number
+  zIndex: number,
+  transition?: boolean,
 }
 
 export interface CardPosition extends CardPositionBase, CurrentCardAttriutes, MaxCardAttributes {}

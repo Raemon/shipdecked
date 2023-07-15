@@ -149,6 +149,7 @@ function getNewCardPosition (index: string): CardPosition {
       timerStart: undefined,
       timerId: undefined,
       attached: attachedCardIndexes,
+      transition: true
     }
     const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndexes);
     if (attachedCardIndex !== undefined) {
@@ -164,6 +165,7 @@ function getNewCardPosition (index: string): CardPosition {
     newPositions[i] = { ...cardPosition, 
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
+      transition: false,
       maybeAttached: getAttachedIndexes(cardPositions, i),
       zIndex: 1000000
     };
