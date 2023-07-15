@@ -92,6 +92,7 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
     return highestAttachedIndex;
   }
 
+
   const onDrag = useCallback((event: DraggableEvent, data: DraggableData, id: string) => {
     const newPositions = {...cardPositions};
     const cardPosition = cardPositions[id];
@@ -109,6 +110,7 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
       maybeAttached: getAttachedIndexes(cardPositions, id),
+      transition: false,
       zIndex: 1000000
     };
     

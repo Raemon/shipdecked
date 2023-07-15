@@ -25,6 +25,7 @@ export function createCardPosition(slug: CardSlug, x: number, y: number): CardPo
     y,
     ...card,
     id: randomHexId(),
+    transition: true,
   }
 }
 

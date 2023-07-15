@@ -245,7 +245,8 @@ export const units: Record<CardSlug, CardType> = {
     name: "Sheltered Cove",
     backgroundImage: "shelteredCove.png",
     large: true,
-    loot: ['carlos', 'driftWoodLog', 'rocks', 'driftWoodLog', 'seaweed', 'denseJungle' ],
+    loot: ['carlos', 'driftWoodLog'], 
+    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'denseJungle' ],
     spawnDescriptor: "Exploring...",
   },
   'craggyCliffs': {
@@ -407,7 +408,7 @@ export const units: Record<CardSlug, CardType> = {
     imageUrl: "ideaHatchet.png",
     idea: true,
     cardText: <div>
-      <div>Sticks and Flint</div>
+      <div>Attach Ruth to <br/> <b><em>Sticks</em></b> and <b><em>Flint</em></b><br/> to make a hatchet</div>
     </div>
   },
   'ideaShelter': {
