@@ -2,7 +2,6 @@ import sample from "lodash/sample"
 import { CardPosition, CardPositionInfo } from "./types"
 import { CardSlug, units } from "./cards"
 import { filter, includes, some } from "lodash"
-import { findNearestNonOverlappingSpace } from "./useCardPositions";
 
 export const randomHexId = () => {
   return Math.floor(Math.random() * 16777215).toString(16);

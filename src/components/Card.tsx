@@ -243,7 +243,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
         }}>
           <h2>{name}</h2>
           {
-            debugging && 
+            // debugging && 
               <div>
                 <div className={classes.meta} style={{left: 5, top: 5}}>
                   {id}

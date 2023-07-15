@@ -14,7 +14,6 @@ function addIfNotInArray (array: string[], value: string): string[] {
   }
 }
 
-
 export const isOverlapping = (cardPositions: Record<string, CardPosition>, i: string, j: string) => {
   const cardsAreDifferent = i !== j;
   const { width, height } = getCardDimensions(cardPositions[i])
@@ -44,53 +43,6 @@ export const getAttachedIndexes = (cardPositions: Record<string, CardPosition>, 
     return []
   }
 }
-
-interface GridPosition {
-  x: number;
-  y: number;
-}
-
-export const findNearestNonOverlappingSpace = (cardPositions: Record<string, CardPosition>, currentId: string): GridPosition => {
-  const currentCard = cardPositions[currentId];
-  if (!currentCard) return {x: 0, y: 0}
-  const { width: cardWidth, height: cardHeight } = getCardDimensions(currentCard);
-
-  // Start searching from the card's current position
-  const queue: GridPosition[] = [{ x: currentCard.x, y: currentCard.y }];
-
-  while (queue.length > 0) {
-    const currentPos = queue.shift()!; // It's safe to use '!' because we check that queue.length > 0
-
-    // Check if the current position overlaps with any other card
-    const isOverlapping = Object.values(cardPositions).some(({ x, y, id }) => {
-      if (id === currentId) return false; // Don't check the card against itself
-
-      const { width, height } = getCardDimensions(cardPositions[id]);
-
-      const horizontalOverlap = Math.abs(currentPos.x - x) < Math.max(cardWidth, width);
-      const verticalOverlap = Math.abs(currentPos.y - y) < Math.max(cardHeight, height);
-
-      return horizontalOverlap && verticalOverlap;
-    });
-
-    if (!isOverlapping) {
-      // If it doesn't overlap, return the current position
-      return currentPos;
-    } else {
-      // Otherwise, enqueue the neighboring positions
-      queue.push(
-        { x: currentPos.x - 1, y: currentPos.y },
-        { x: currentPos.x + 1, y: currentPos.y },
-        { x: currentPos.x, y: currentPos.y - 1 },
-        { x: currentPos.x, y: currentPos.y + 1 }
-      );
-    }
-  }
-
-  // If no non-overlapping position was found, return the card's current position
-  // (this should never happen unless the grid is completely filled)
-  return { x: currentCard.x, y: currentCard.y };
-};
 
 export const getOverlappingCards = (cardPositions: Record<string, CardPosition>, id: string) => {
   const overlappingCards: CardPosition[] = []
@@ -125,12 +77,14 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
     }
   }
 
-  function getIndexOfHighestAttachedZIndex (attachedCardIndices: string[]): string|undefined {
+  // gets the index of the highest attached card with a lower z-index than the card being dragged
+
+  function getIndexOfHighestAttachedZIndex (attachedCardIndices: string[], cardZindex: number): string|undefined {
     let highestAttachedZIndex = 0;
     let highestAttachedIndex = undefined;
     attachedCardIndices.forEach((i) => {
       const zIndex = cardPositions[i].zIndex;
-      if (zIndex > highestAttachedZIndex) {
+      if (zIndex > highestAttachedZIndex && zIndex < cardZindex) {
         highestAttachedZIndex = zIndex;
         highestAttachedIndex = i;
       }
@@ -138,54 +92,70 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
     return highestAttachedIndex;
   }
 
-function getNewCardPosition (index: string): CardPosition {
-    const cardPosition = cardPositions[index];  
-    const attachedCardIndexes = getAttachedIndexes(cardPositions, index);
-    clearTimeout(cardPosition.timerId);
-    const newCardData = { ...cardPosition,
-      zIndex: getZIndex(cardPosition, attachedCardIndexes),
-      maybeAttached: [],
-      timerEnd: undefined,
-      timerStart: undefined,
-      timerId: undefined,
-      attached: attachedCardIndexes,
-    }
-    const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndexes);
-    if (attachedCardIndex !== undefined) {
-      newCardData.x = cardPositions[attachedCardIndex].x + STACK_OFFSET_X;
-      newCardData.y = cardPositions[attachedCardIndex].y + STACK_OFFSET_Y;
-    }
-    return newCardData;
-  }
-
-  const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: string) => {
+  const onDrag = useCallback((event: DraggableEvent, data: DraggableData, id: string) => {
     const newPositions = {...cardPositions};
-    const cardPosition = cardPositions[i];
-    newPositions[i] = { ...cardPosition, 
+    const cardPosition = cardPositions[id];
+
+    const attachedCards = cardPosition.attached.map((i) => cardPositions[i]);
+    const attachedCardsWithGreaterZIndex = attachedCards.filter((card) => card.zIndex > cardPosition.zIndex && card.id !== id)
+    
+    attachedCardsWithGreaterZIndex.forEach((c) => {
+      newPositions[c.id].x = c.x + data.deltaX;
+      newPositions[c.id].y = c.y + data.deltaY;
+      newPositions[c.id].zIndex = 1000000 + cardPositions[c.id].zIndex
+    })
+
+    newPositions[id] = { ...cardPosition, 
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
-      maybeAttached: getAttachedIndexes(cardPositions, i),
+      maybeAttached: getAttachedIndexes(cardPositions, id),
       zIndex: 1000000
     };
     
     setCardPositions(newPositions);
   }, [cardPositions, getAttachedIndexes]);
 
+  function getNewCardPosition (index: string): CardPosition {
+    const cardPosition = cardPositions[index];  
+    // const attachedCardIndexes = getAttachedIndexes(cardPositions, index);
+    clearTimeout(cardPosition.timerId);
+    const newCardData = { ...cardPosition,
+      // zIndex: getZIndex(cardPosition, attachedCardIndexes),
+      maybeAttached: [],
+      timerEnd: undefined,
+      timerStart: undefined,
+      timerId: undefined,
+      // attached: attachedCardIndexes,
+    }
+    // const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndexes, cardPosition.zIndex);
+    // if (attachedCardIndex !== undefined) {
+    //   newCardData.x = cardPositions[attachedCardIndex].x + STACK_OFFSET_X;
+    //   newCardData.y = cardPositions[attachedCardIndex].y + STACK_OFFSET_Y;
+    // }
+    return newCardData;
+  }
+
   const onStop = useCallback((index: string) => {
+    const newPositions = {...cardPositions};
+    const newCardPosition = getNewCardPosition(index);
+  }, [cardPositions, getAttachedIndexes]);
+
+  const onStopOld = useCallback((index: string) => {
     const newPositions = {...cardPositions};
     const newCardPosition = getNewCardPosition(index);
     newPositions[index] = newCardPosition;
 
-    newCardPosition.attached.forEach((id) => {
-      newPositions[id].attached = addIfNotInArray(newPositions[id].attached, index)
+    newCardPosition.attached.forEach((i) => {
+      newPositions[i].attached = addIfNotInArray(newPositions[i].attached, index)
     })
 
-    const cardsNoLongerAttachedToIndex = cardPositions[index].attached.filter((id) => {
-      return newCardPosition.attached.indexOf(id) === -1;
+    const cardsNoLongerAttachedToIndex = cardPositions[index].attached.filter((i) => {
+      return newCardPosition.attached.indexOf(i) === -1;
     });
 
     cardsNoLongerAttachedToIndex.forEach((id) => {
       newPositions[id].attached = newPositions[id].attached.filter((j) => j !== index);
+      newPositions[id].zIndex = 1
     });
 
     // find less janky way to do this
