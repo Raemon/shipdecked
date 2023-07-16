@@ -306,7 +306,11 @@ export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxA
   const cardPosition = cardPositions[id]
   const attachedId = cardPosition.attached.find(i => cardPositions[i][resource])
   const resourceAmount = attachedId && cardPositions[attachedId][resource]
+
+  console.log("b")
+
   if (cardPosition[currentAttribute] && !cardPosition.timerEnd && resourceAmount && attachedId) {
+    console.log("c")
     const timerId = setTimeout(() => {
       restore({
         cardPositionInfo,
@@ -339,7 +343,7 @@ function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribu
 }) {
   const { cardPositions, id, setCardPositions } = cardPositionInfo;
   if (!cardPositions[id]) return
-
+  console.log("restore e")
   setCardPositions((prevCardPositions: Record<string, CardPosition>) => {
     const newCardPositions = {...prevCardPositions}
     const cardPosition = newCardPositions[id];
@@ -384,6 +388,7 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
         spawnTimerFromLoot({attachedSlug: attachedCard.slug, duration, cardPositionInfo, preserve, descriptor})
       }
     } else if (attachedCard.calories) {
+      console.log("a")
       restoreTimer({
         duration: 1000, 
         cardPositionInfo, 

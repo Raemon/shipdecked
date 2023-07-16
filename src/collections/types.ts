@@ -36,6 +36,9 @@ export interface CardTypeBase {
   spawnDescriptor?: string,
   creatingDescriptor?: string,
   cardText?: string|React.ReactNode,
+  damagePerSecond?: number,
+  tracks?: CardSlug[],
+  enemy?: boolean,
   whileAttached?: (
     cardPositionInfo: CardPositionInfo
   ) => void

@@ -8,7 +8,7 @@ import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
 import HungerStatus from './Statuses/HungerStatus';
 import FuelStatus from './Statuses/FuelStatus';
-import { getOverlappingCards, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
+import { getNewCardPosition, getOverlappingCards, isOverlapping, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 import { StaminaStatus } from './Statuses/StaminaStatus';
 
 export const LARGE_CARD_WIDTH = 132
@@ -46,8 +46,19 @@ export const getCardBackground = (cardPosition: CardPosition) => {
     return 'rgba(255,255,255,.8)'
   } else if (cardPosition.idea) {
     return 'rgba(255,255,255,.6)'
+  } else if (cardPosition.enemy) {
+    return 'rgba(255,240,240,1)'
   }
   return 'white'
+}
+
+export const getCardBorder = (cardPosition: CardPosition) => {
+  if (cardPosition.idea) {
+    return "dashed 2px rgba(0,0,0,.2)"
+  } else if (cardPosition.enemy) {
+    return "solid 3px rgba(200,0,0,1)"
+  }
+  return ""
 }
 
 const useStyles = createUseStyles({
@@ -129,6 +140,11 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
   const classes = useStyles();
   const {cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id];
+  
+  const trackedCardId = Object.values(cardPositions).find((c: CardPosition) => {
+    return cardPosition.tracks?.includes(c.slug)
+  })?.id
+
 
   function handleDrag (event: DraggableEvent, data: DraggableData){
     onDrag(event, data, id)
@@ -207,6 +223,37 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
     updateFading()
   }, [cardPosition.currentFading])
 
+  useEffect(() => {
+    setTimeout(() => {
+      if (!cardPosition) return
+      if (!cardPosition.tracks?.length) return
+      if (!trackedCardId) return
+      const trackedCard = cardPositions[trackedCardId]
+      if (!trackedCard) return
+      updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
+        let newX = cardPosition.x
+        let newY = cardPosition.y
+        if (!isOverlapping(cardPositions, trackedCard.id, cardPosition.id)) {
+          if (trackedCard.x > cardPosition.x) {
+            newX = cardPosition.x + (Math.random()*10+5)
+          } else if (trackedCard.x < cardPosition.x) {
+            newX = cardPosition.x - (Math.random()*10+5)
+          }
+          if (trackedCard.y > cardPosition.y) {
+            newY = cardPosition.y + (Math.random()*10+5)
+          } else if (trackedCard.y < cardPosition.y) {
+            newY = cardPosition.y - (Math.random()*10+5)
+          }
+        }
+        return {
+          ...getNewCardPosition(cardPositions, cardPosition.id),
+          x: newX,
+          y: newY,
+        }
+      });
+    }, 1000);
+  }, [trackedCardId, cardPosition.tracks, cardPosition.x, cardPosition.y])
+
   // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)
 
   const offsetStackSize = getAttachedCardsWithHigherZIndex(cardPositions, id).length
@@ -238,11 +285,11 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
       }}>
         <div className={classes.styling} style={{
           ...getCardDimensions(cardPosition),
-          border: card.idea ? "dashed 2px rgba(0,0,0,.2)" : "",
+          border: getCardBorder(cardPosition),
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
           background: getCardBackground(cardPosition),
           borderRadius: card.idea ? 20 : 4,
-          transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
+          // transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
         }}>
           <h2>{name}</h2>
           {

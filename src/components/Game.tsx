@@ -78,7 +78,6 @@ function Game() {
     return Object.entries(obj).reduce((a, [k, v]) => (v === undefined ? a : {...a, [k]: v}), {});
   }
   const newCardPositions = removeUndefinedValues(cardPositions)
-  console.log(newCardPositions)
 
   useEffect(() => {
     localStorage.setItem('cardPositions', JSON.stringify(cardPositions));

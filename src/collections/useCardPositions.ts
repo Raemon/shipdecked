@@ -45,6 +45,84 @@ export const getAttachedIndexes = (cardPositions: Record<string, CardPosition>, 
   }
 }
 
+export function handleNewCardPosition(cardPositions: Record<string, CardPosition>, index: string, setCardPositions: (cardPositions: Record<string, CardPosition>) => void) {
+  const newPositions = {...cardPositions};
+  const newCardPosition = getNewCardPosition(cardPositions, index);
+  newPositions[index] = newCardPosition;
+
+  newCardPosition.attached.forEach((id) => {
+    newPositions[id].attached = addIfNotInArray(newPositions[id].attached, index)
+  })
+
+  const cardsNoLongerAttachedToIndex = cardPositions[index].attached.filter((id) => {
+    return newCardPosition.attached.indexOf(id) === -1;
+  });
+
+  cardsNoLongerAttachedToIndex.forEach((id) => {
+    newPositions[id].attached = newPositions[id].attached.filter((j) => j !== index);
+  });
+
+  // find less janky way to do this
+  Object.keys(cardPositions).forEach((i) => {
+    const attached = []
+    for (const j in cardPositions) {
+      if (isOverlapping(cardPositions, i, j)) attached.push(j)
+    }
+    if (attached.length === 0) {
+      newPositions[i].attached = []
+    }
+  })
+
+  setCardPositions(newPositions);
+}
+
+function getZIndex(cardPositions: Record<string, CardPosition>, cardPosition: CardPosition, attachedCardIndices: string[]): number {
+  const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
+    return Math.max(acc, cardPositions[i].zIndex);
+  }, 0);
+  const zIndex = 1
+  if (greatestAttachedZIndex === 0) {
+    return zIndex;
+  } else {
+    return zIndex + greatestAttachedZIndex + 1;
+  }
+}
+
+
+function getIndexOfHighestAttachedZIndex (cardPositions: Record<string, CardPosition>, attachedCardIndices: string[]): string|undefined {
+  let highestAttachedZIndex = 0;
+  let highestAttachedIndex = undefined;
+  attachedCardIndices.forEach((i) => {
+    const zIndex = cardPositions[i].zIndex;
+    if (zIndex > highestAttachedZIndex) {
+      highestAttachedZIndex = zIndex;
+      highestAttachedIndex = i;
+    }
+  });
+  return highestAttachedIndex;
+}
+
+export function getNewCardPosition (cardPositions: Record<string, CardPosition>, index: string): CardPosition {
+  const cardPosition = cardPositions[index];  
+  const attachedCardIndexes = getAttachedIndexes(cardPositions, index);
+  clearTimeout(cardPosition.timerId);
+  const newCardData = { ...cardPosition,
+    zIndex: getZIndex(cardPositions, cardPosition, attachedCardIndexes),
+    maybeAttached: [],
+    timerEnd: undefined,
+    timerStart: undefined,
+    timerId: undefined,
+    attached: attachedCardIndexes,
+    transition: true
+  }
+  const attachedCardIndex = getIndexOfHighestAttachedZIndex(cardPositions, attachedCardIndexes);
+  if (attachedCardIndex !== undefined) {
+    newCardData.x = cardPositions[attachedCardIndex].x + STACK_OFFSET_X;
+    newCardData.y = cardPositions[attachedCardIndex].y + STACK_OFFSET_Y;
+  }
+  return newCardData;
+}
+
 interface GridPosition {
   x: number;
   y: number;
@@ -106,62 +184,17 @@ export const getOverlappingCards = (cardPositions: Record<string, CardPosition>,
 export function useCardPositions(initialPositions: Record<string, CardPosition>) {
   const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>(() => {
     // Try to load from local storage
-    // const savedState = localStorage.getItem('cardPositions');
-    // const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
-    // const validState = jsonParsedState.map((cardPosition: CardPosition) => cardPosition) as CardPosition[]
+    const savedState = localStorage.getItem('cardPositions');
+    const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
+    // const validState = jsonParsedState.map((cardPosition: CardPosition) => cardPosition) as Record<string, CardPosition>
 
     return initialPositions;
   });
 
-  function getZIndex(cardPosition: CardPosition, attachedCardIndices: string[]): number {
-    const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
-      return Math.max(acc, cardPositions[i].zIndex);
-    }, 0);
-    const zIndex = 1
-    if (greatestAttachedZIndex === 0) {
-      return zIndex;
-    } else {
-      return zIndex + greatestAttachedZIndex + 1;
-    }
-  }
-
-  function getIndexOfHighestAttachedZIndex (attachedCardIndices: string[]): string|undefined {
-    let highestAttachedZIndex = 0;
-    let highestAttachedIndex = undefined;
-    attachedCardIndices.forEach((i) => {
-      const zIndex = cardPositions[i].zIndex;
-      if (zIndex > highestAttachedZIndex) {
-        highestAttachedZIndex = zIndex;
-        highestAttachedIndex = i;
-      }
-    });
-    return highestAttachedIndex;
-  }
-
-function getNewCardPosition (index: string): CardPosition {
-    const cardPosition = cardPositions[index];  
-    const attachedCardIndexes = getAttachedIndexes(cardPositions, index);
-    clearTimeout(cardPosition.timerId);
-    const newCardData = { ...cardPosition,
-      zIndex: getZIndex(cardPosition, attachedCardIndexes),
-      maybeAttached: [],
-      timerEnd: undefined,
-      timerStart: undefined,
-      timerId: undefined,
-      attached: attachedCardIndexes,
-      transition: true
-    }
-    const attachedCardIndex = getIndexOfHighestAttachedZIndex(attachedCardIndexes);
-    if (attachedCardIndex !== undefined) {
-      newCardData.x = cardPositions[attachedCardIndex].x + STACK_OFFSET_X;
-      newCardData.y = cardPositions[attachedCardIndex].y + STACK_OFFSET_Y;
-    }
-    return newCardData;
-  }
-
   const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: string) => {
     const newPositions = {...cardPositions};
     const cardPosition = cardPositions[i];
+    if (cardPosition.enemy) return
     newPositions[i] = { ...cardPosition, 
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
@@ -174,34 +207,7 @@ function getNewCardPosition (index: string): CardPosition {
   }, [cardPositions, getAttachedIndexes]);
 
   const onStop = useCallback((index: string) => {
-    const newPositions = {...cardPositions};
-    const newCardPosition = getNewCardPosition(index);
-    newPositions[index] = newCardPosition;
-
-    newCardPosition.attached.forEach((id) => {
-      newPositions[id].attached = addIfNotInArray(newPositions[id].attached, index)
-    })
-
-    const cardsNoLongerAttachedToIndex = cardPositions[index].attached.filter((id) => {
-      return newCardPosition.attached.indexOf(id) === -1;
-    });
-
-    cardsNoLongerAttachedToIndex.forEach((id) => {
-      newPositions[id].attached = newPositions[id].attached.filter((j) => j !== index);
-    });
-
-    // find less janky way to do this
-    Object.keys(cardPositions).forEach((i) => {
-      const attached = []
-      for (const j in cardPositions) {
-        if (isOverlapping(cardPositions, i, j)) attached.push(j)
-      }
-      if (attached.length === 0) {
-        newPositions[i].attached = []
-      }
-    })
-
-    setCardPositions(newPositions);
+    handleNewCardPosition(cardPositions, index, setCardPositions)
   }, [cardPositions, getAttachedIndexes]);
 
   return { cardPositions, setCardPositions, onDrag, onStop };

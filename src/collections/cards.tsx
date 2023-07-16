@@ -3,15 +3,14 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate',
-  'ideaHatchet'
+  'shoresidePath', 'crate','fallenLog'
   // 'sticks', 'sticks', 'sticks'
 ]
 
 export type CardSlug = 
   'carlos'|'ruth'|'milo'|
   'coconutTree'|'tree'|'ancientTree'|'jungleTree'|'bananaTree'|
-  'log'|'driftWoodLog'|'flint'|'sticks'|'rocks'|
+  'fallenLog'|'driftWoodLog'|'hewnLog'|'flint'|'sticks'|'rocks'|'smallRoundStone'|
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'palmLeaves'|
   'shoresidePath'|'denseJungle'|'birdIsland'|'shelteredCove'|'craggyCliffs'|
@@ -22,9 +21,10 @@ export type CardSlug =
   'ideaFire'|'ideaRaft'|'ideaEscape'|'ideaHatchet'|'ideaShelter'|'ideaGatherSurvivors'|
   'sexualTensionCarlosRuth'|
   'shelter'|
-  'hatchet'|'spear'|
+  'hatchet'|'spear'|'hammer'|'workBench'|
   'distantFigure'|'feyHorror'|'jungleShrine'|
-  'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'
+  'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'|
+  'wildBoar'
 
 const characterSpawnInfo: SpawnInfo = {
   'shoresidePath': { duration: 3000, descriptor: "Exploring...", preserve: true },
@@ -36,7 +36,7 @@ const characterSpawnInfo: SpawnInfo = {
   'flint': { 
     duration: 6000, 
     descriptor: "Building...", 
-    inputStack: ['flint', 'log', 'sticks'], 
+    inputStack: ['flint', 'fallenLog', 'sticks'], 
     output: 'smallFire', 
   },
   'driftWoodLog': { 
@@ -51,17 +51,23 @@ const characterSpawnInfo: SpawnInfo = {
     inputStack: ['flint', 'sticks'], 
     output: 'hatchet',
   },
-  'log': {
+  'fallenLog': {
     duration: 1000,
     descriptor: "Building...",
-    inputStack: ['log', 'log', 'log', 'palmLeaves', 'palmLeaves'],
+    inputStack: ['fallenLog', 'fallenLog', 'fallenLog', 'palmLeaves', 'palmLeaves'],
     output: 'shelter',
   },
   'hatchet': { 
     duration: 6000, 
     descriptor: "Chopping...", 
     inputStack: ['hatchet', 'coconutTree'], 
-    output: ["coconut", "coconut", "log", "hatchet", "palmLeaves"],
+    output: ["coconut", "coconut", "fallenLog", "hatchet", "palmLeaves"],
+  },
+  'smallRoundStone': {
+    duration: 6000,
+    descriptor: "Building...", 
+    inputStack: ['smallRoundStone', 'sticks'], 
+    output: 'hammer',
   },
   'coconutTree': {  
     duration: 3000, 
@@ -81,13 +87,13 @@ const characterSpawnInfo: SpawnInfo = {
     duration: 6000, 
     descriptor: "Chopping Tree...",  
     inputStack: ['hatchet', 'bananaTree'],
-    output: ['bananas', 'bananas', 'bananas', 'log', 'palmLeaves', 'hatchet'], 
+    output: ['bananas', 'bananas', 'bananas', 'fallenLog', 'palmLeaves', 'hatchet'], 
   },
   'jungleTree': {
     duration: 3000,
     descriptor: "Chopping",
     inputStack: ['jungleTree', 'hatchet'],
-    output: ['sticks', 'log', 'log', 'log', 'sticks', 'hatchet']
+    output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'sticks', 'hatchet']
   },
   'distantFigure': {
     duration: 3000,
@@ -124,7 +130,7 @@ export const units: Record<CardSlug, CardType> = {
         duration: 30000,
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
-        output: ['sticks', 'log', 'log', 'log', 'hatchet', 'ruthUnsettlingFeeling']
+        output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'ruthUnsettlingFeeling']
       },
       'smallFire': { 
         duration: 6000, 
@@ -155,7 +161,7 @@ export const units: Record<CardSlug, CardType> = {
         duration: 30000,
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
-        output: ['sticks', 'log', 'log', 'log', 'hatchet', 'carlosUnsettlingFeeling', 'palmLeaves']
+        output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'carlosUnsettlingFeeling', 'palmLeaves']
       },
     }
   },
@@ -171,7 +177,7 @@ export const units: Record<CardSlug, CardType> = {
         duration: 30000,
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
-        output: ['sticks', 'log', 'log', 'log', 'hatchet', 'miloUnsettlingFeeling']
+        output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'miloUnsettlingFeeling']
       },
     }
   },
@@ -214,9 +220,14 @@ export const units: Record<CardSlug, CardType> = {
     imageUrl: 'bananas.png',
     calories: 600,
   },
-  'log': {
-    name: "Log",
-    imageUrl: 'log.jpg',
+  'fallenLog': {
+    name: "Fallen Log",
+    imageUrl: 'fallenLog.png',
+    fuel: 400,
+  },
+  'hewnLog': {
+    name: "Hewn Logs",
+    imageUrl: 'log.png',
     fuel: 400,
   },
   'driftWoodLog': {
@@ -232,7 +243,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: 'shoresidepath.jpg',
     large: true,
     loot: ['coconutTree', 'flint', 'sticks', 'carlosFootprints'],
-    secondaryLoot: ['crate', 'coconutTree', 'bananaTree', 'rocks', 'sticks'],
+    secondaryLoot: ['crate', 'coconutTree', 'bananaTree', 'rocks', 'sticks', 'flint'],
     spawnDescriptor: "Exploring...",
   },
   'denseJungle': {
@@ -240,14 +251,14 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "junglePath.png",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'coconutTree', 'sticks', 'sticks', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
+    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'coconutTree', 'wildBoar', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
   },
   'shelteredCove': {
     name: "Sheltered Cove",
     backgroundImage: "shelteredCove.png",
     large: true,
-    loot: ['carlos', 'driftWoodLog'], 
-    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'denseJungle' ],
+    loot: ['carlos'], 
+    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle' ],
     spawnDescriptor: "Exploring...",
   },
   'craggyCliffs': {
@@ -271,7 +282,7 @@ export const units: Record<CardSlug, CardType> = {
   'rocks': {
     name: "Rocks",
     imageUrl: "rocks.png",
-    loot: ['flint', 'flint'],
+    loot: ['flint', 'smallRoundStone','flint', 'smallRoundStone'],
   },
   'seaweed': {
     name: "Seaweed",
@@ -302,6 +313,10 @@ export const units: Record<CardSlug, CardType> = {
   'flint': {
     name: "Flint",
     imageUrl: 'flint.png',
+  },
+  'smallRoundStone': {
+    name: "Small Stone",
+    imageUrl: 'smallRoundStone.png',
   },
   'cannedBeans': {
     name: "Canned Beans",
@@ -346,6 +361,15 @@ export const units: Record<CardSlug, CardType> = {
   'spear': {
     name: "Spear",
     imageUrl: 'spear.png',
+  },
+
+  'hammer': {
+    name: "Hammer",
+    imageUrl: 'hammer.png',
+  },
+  'workBench': {
+    name: "Work Bench",
+    imageUrl: 'crudeWorkbench.png',
   },
 
   'shelter': {
@@ -432,6 +456,19 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "feyHorror.jpg",
     maxFading: 20
   },
+  'wildBoar': {
+    name: "Wild Boar",
+    imageUrl: "wildBoar.png",
+    maxHealth: 20,
+    maxHunger: 3000,
+    damagePerSecond: 5,
+    tracks: ['bananas', 'coconut', 'openCoconut', 'cannedBeans'],
+    enemy: true,
+    spawnInfo: {
+    }
+  },
+
+
   'miloUnsettlingFeeling': {
     name: "Unsettled Feeling",
     backgroundImage: "miloUnsettledFeeling.jpg",
