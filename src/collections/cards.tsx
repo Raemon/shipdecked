@@ -3,17 +3,17 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate','fallenLog'
+  'shoresidePath', 'crate',
   // 'sticks', 'sticks', 'sticks'
 ]
 
 export type CardSlug = 
   'carlos'|'ruth'|'milo'|
   'coconutTree'|'tree'|'ancientTree'|'jungleTree'|'bananaTree'|
-  'fallenLog'|'driftWoodLog'|'hewnLog'|'flint'|'sticks'|'rocks'|'smallRoundStone'|
+  'fallenLog'|'driftWoodLog'|'hewnLog'|'flint'|'sticks'|'longStick'|'rocks'|'smallRoundStone'|
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'palmLeaves'|
-  'shoresidePath'|'denseJungle'|'birdIsland'|'shelteredCove'|'craggyCliffs'|
+  'shoresidePath'|'denseJungle'|'junglePath'|'birdIsland'|'shelteredCove'|'craggyCliffs'|
   'carlosFootprints'|'jungleFootprints'|
   'crate'|
   'smallFire'|
@@ -26,50 +26,62 @@ export type CardSlug =
   'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'|
   'wildBoar'
 
-const characterSpawnInfo: SpawnInfo = {
-  'shoresidePath': { duration: 3000, descriptor: "Exploring...", preserve: true },
-  'shelteredCove': { duration: 3000, descriptor: "Exploring...", preserve: true },
-  'craggyCliffs': { duration: 3000, descriptor: "Exploring...", preserve: true },
-  'denseJungle': { duration: 25000, descriptor: "Exploring...", preserve: true},
-  'crate': { duration: 1000, descriptor: "Opening..." },
-  'rocks': { duration: 3000, descriptor: "Chipping..." },
-  'flint': { 
+const characterSpawnInfo: SpawnInfo[] = [
+  { inputStack: ['shoresidePath'], duration: 3000, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['shelteredCove'], duration: 3000, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['craggyCliffs'], duration: 3000, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['denseJungle'], duration: 25000, descriptor: "Exploring...", preserve: true},
+  { inputStack: ['crate'], duration: 1000, descriptor: "Opening..." },
+  { inputStack: ['rocks'], duration: 3000, descriptor: "Chipping..." },
+  { 
     duration: 6000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'fallenLog', 'sticks'], 
     output: 'smallFire', 
   },
-  'driftWoodLog': { 
+  { 
     duration: 6000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'driftWoodLog', 'sticks'], 
     output: 'smallFire',  
   },
-  'sticks': {
+  {
     duration: 1000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'sticks'], 
     output: 'hatchet',
   },
-  'fallenLog': {
+  {
     duration: 1000,
     descriptor: "Building...",
     inputStack: ['fallenLog', 'fallenLog', 'fallenLog', 'palmLeaves', 'palmLeaves'],
     output: 'shelter',
   },
-  'hatchet': { 
+  { 
     duration: 6000, 
     descriptor: "Chopping...", 
     inputStack: ['hatchet', 'coconutTree'], 
     output: ["coconut", "coconut", "fallenLog", "hatchet", "palmLeaves"],
   },
-  'smallRoundStone': {
+  {
+    duration: 6000,
+    descriptor: "Chopping...",
+    inputStack: ['hatchet', 'fallenLog'],
+    output: ['hewnLog', 'hewnLog', 'hatchet', 'sticks']
+  },
+  {
+    duration: 6000,
+    descriptor: "Chopping...",
+    inputStack: ['hatchet', 'driftWoodLog'],
+    output: ['hewnLog', 'hewnLog', 'hatchet', 'longStick']
+  },
+  {
     duration: 6000,
     descriptor: "Building...", 
     inputStack: ['smallRoundStone', 'sticks'], 
     output: 'hammer',
   },
-  'coconutTree': {  
+  {  
     duration: 3000, 
     descriptor: "Staring Frustratedly...", 
     skipIfExists: ['hatchet', 'ideaHatchet'], 
@@ -77,38 +89,38 @@ const characterSpawnInfo: SpawnInfo = {
     inputStack: ['coconutTree'],
     output: 'ideaHatchet', 
   },
-  'coconut': {
+  {
     duration: 1500,
     descriptor: "Cracking...",
     inputStack: ['coconut', 'hatchet'],
     output: ['openCoconut', 'hatchet']
   },
-  'bananaTree': {
+  {
     duration: 6000, 
     descriptor: "Chopping Tree...",  
     inputStack: ['hatchet', 'bananaTree'],
     output: ['bananas', 'bananas', 'bananas', 'fallenLog', 'palmLeaves', 'hatchet'], 
   },
-  'jungleTree': {
+  {
     duration: 3000,
     descriptor: "Chopping",
     inputStack: ['jungleTree', 'hatchet'],
-    output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'sticks', 'hatchet']
+    output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'longStick', 'hatchet']
   },
-  'distantFigure': {
+  {
     duration: 3000,
     descriptor: "Following...",
     inputStack: ['distantFigure'], 
     consumeInitiator: true,
     output: 'feyHorror',
   },
-  'jungleShrine': {
+  {
     duration: 3000,
     descriptor: "Sitting quietly...",
     inputStack: ['jungleShrine'],
     output: 'ideaEscape',
   },
-}
+]
 
 export const units: Record<CardSlug, CardType> = {
   "ruth": {
@@ -118,21 +130,21 @@ export const units: Record<CardSlug, CardType> = {
     maxHunger: 2000,
     maxStamina: 2000,
     maxHealth: 6,
-    spawnInfo: {
+    spawnInfo: [
       ...characterSpawnInfo,
-      'carlosFootprints': { duration: 5000, descriptor: "Following..." },
-      'carlos': { 
+      { inputStack: ['carlosFootprints'], duration: 5000, descriptor: "Following..." },
+      { 
         skipIfExists: ['ideaFire'], 
         inputStack: ['carlos'],
         duration: 3000, preserve: true, descriptor: "Talking...", output: 'ideaFire' 
       },
-      'ancientTree': {
+      {
         duration: 30000,
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
         output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'ruthUnsettlingFeeling']
       },
-      'smallFire': { 
+      { 
         duration: 6000, 
         descriptor: "Stare into flames...", 
         inputStack: ['smallFire'], 
@@ -140,7 +152,7 @@ export const units: Record<CardSlug, CardType> = {
         output: "ideaGatherSurvivors",
         preserve: true,
       }
-    } 
+    ]
   },
   "carlos": {
     name: 'Carlos',
@@ -148,22 +160,22 @@ export const units: Record<CardSlug, CardType> = {
     maxHunger: 2800,
     maxStamina: 2000,
     maxHealth: 10,
-    spawnInfo: {
+    spawnInfo: [
       ...characterSpawnInfo,
-      'ruth': { 
+      { 
         duration: 6000, 
         descriptor: "Talking...", 
         inputStack: ['smallFire', 'ruth'], 
         output: "ideaShelter",
         preserve: true,
       },
-      'ancientTree': {
+      {
         duration: 30000,
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
         output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'carlosUnsettlingFeeling', 'palmLeaves']
       },
-    }
+    ]
   },
   'milo': {
     name: 'Milo',
@@ -171,20 +183,25 @@ export const units: Record<CardSlug, CardType> = {
     maxHunger: 2000,
     maxStamina: 2000,
     maxHealth: 6,
-    spawnInfo: {
+    spawnInfo: [
       ...characterSpawnInfo,
-      'ancientTree': {
+      {
         duration: 30000,
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
         output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'miloUnsettlingFeeling']
       },
-    }
+    ]
   },
   'sticks': {
     name: "Sticks",
     imageUrl: 'sticks.png',
     fuel: 100,
+  },
+  'longStick': {
+    name: "Long Sticks",
+    imageUrl: 'longStick.jpg',
+    fuel: 200,
   },
   'coconutTree': {
     name: "Coconut Tree",
@@ -251,7 +268,14 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "junglePath.png",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'coconutTree', 'wildBoar', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
+    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'longStick', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
+  },
+  'junglePath': {
+    name: "Jungle Path",
+    backgroundImage: "junglePath.png",
+    large: true,
+    spawnDescriptor: "Exploring...",
+    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'longStick', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
   },
   'shelteredCove': {
     name: "Sheltered Cove",
@@ -265,7 +289,7 @@ export const units: Record<CardSlug, CardType> = {
     name: "Craggy Cliffs",
     backgroundImage: "craggyCliffs.jpg",
     large: true,
-    loot: ['rocks', 'rocks', 'milo', 'sticks', 'sticks'],
+    loot: ['rocks', 'rocks', 'milo', 'sticks', 'sticks', 'longStick'],
     spawnDescriptor: "Exploring...",
   },
 
@@ -288,8 +312,8 @@ export const units: Record<CardSlug, CardType> = {
     name: "Seaweed",
     imageUrl: "seaweed.png",
     calories: 100,
-    spawnInfo: {
-      'smallFire': {
+    spawnInfo: [
+      {
         duration: 3000,
         descriptor: "Cooking...",
         inputStack: ['smallFire'],
@@ -297,7 +321,7 @@ export const units: Record<CardSlug, CardType> = {
         preserve: true,
         consumeInitiator: true
       }
-    }
+    ]
   },
   'bakedSeaweed': {
     name: "Baked Seaweed",
@@ -376,8 +400,8 @@ export const units: Record<CardSlug, CardType> = {
     name: "Small Shelter",
     imageUrl: 'shelter.png',
     rest: 600,
-    spawnInfo: {
-      'ruth': {
+    spawnInfo: [
+      {
         duration: 6000,
         descriptor: "Awkwardly resting...",
         inputStack: ['carlos', 'ruth'],
@@ -385,7 +409,7 @@ export const units: Record<CardSlug, CardType> = {
         skipIfExists: ['sexualTensionCarlosRuth'],
         preserve: true,
       },
-    }
+    ]
   },
 
   'jungleShrine': {
@@ -464,8 +488,7 @@ export const units: Record<CardSlug, CardType> = {
     damagePerSecond: 5,
     tracks: ['bananas', 'coconut', 'openCoconut', 'cannedBeans'],
     enemy: true,
-    spawnInfo: {
-    }
+    spawnInfo: []
   },
 
 

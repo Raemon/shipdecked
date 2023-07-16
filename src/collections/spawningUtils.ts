@@ -379,7 +379,7 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
   const attachedSortedByZIndex = getAttachedCardsSortedByZIndex(cardPositionInfo)
 
   attachedSortedByZIndex.forEach((attachedCard) => {
-    const spawnCardInfo = spawnInfo[attachedCard.slug]
+    const spawnCardInfo = spawnInfo.find(spawnInfo => spawnInfo.inputStack && spawnInfo.inputStack.includes(attachedCard.slug))
     if (spawnCardInfo) {
       const { duration, inputStack, preserve, output, descriptor, skipIfExists, consumeInitiator } = spawnCardInfo
       if (inputStack && output) {

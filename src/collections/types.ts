@@ -32,7 +32,7 @@ export interface CardTypeBase {
   rest?: number;
   loot?: CardSlug[];
   secondaryLoot?: CardSlug[];
-  spawnInfo?: SpawnInfo;
+  spawnInfo?: SpawnInfo[];
   spawnDescriptor?: string,
   creatingDescriptor?: string,
   cardText?: string|React.ReactNode,
@@ -71,7 +71,8 @@ export type CardPositionInfo = {
   setCardPositions: React.Dispatch<React.SetStateAction<Record<string, CardPosition>>>
 }
 
-export type SpawnInfo = Partial<Record<CardSlug, {
+export type SpawnInfo = {
+  lootInput?: CardSlug,
   duration: number, 
   inputStack?: CardSlug[], 
   output?: CardSlug|CardSlug[], 
@@ -79,4 +80,4 @@ export type SpawnInfo = Partial<Record<CardSlug, {
   consumeInitiator?: boolean,
   descriptor: string,
   skipIfExists?: CardSlug[],
-}>>
+}
