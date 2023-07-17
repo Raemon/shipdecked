@@ -51,6 +51,9 @@ export interface CardPositionBase extends CardType {
   slug: CardSlug,
   x: number,
   y: number,
+  destinationX?: number,
+  destinationY?: number,
+  destinationSpeed?: number,
   maybeAttached: string[],
   attached: string[],
   timerStart?: Date,
@@ -60,7 +63,7 @@ export interface CardPositionBase extends CardType {
   currentSpawnDescriptor?: string,
   hide?: boolean,
   zIndex: number,
-  transition?: boolean,
+  dragging?: boolean,
 }
 
 export interface CardPosition extends CardPositionBase, CurrentCardAttriutes, MaxCardAttributes {}
@@ -75,7 +78,8 @@ export type SpawnInfo = {
   lootInput?: CardSlug,
   duration: number, 
   inputStack?: CardSlug[], 
-  output?: CardSlug|CardSlug[], 
+  output?: CardSlug[], 
+  attachedOutput?: CardSlug[],
   preserve?:boolean, 
   consumeInitiator?: boolean,
   descriptor: string,

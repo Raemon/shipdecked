@@ -8,6 +8,7 @@ import { startingCards } from '../collections/cards';
 import { createCardPosition } from '../collections/spawningUtils';
 import { useCardPositions } from '../collections/useCardPositions';
 import { CardPosition } from '../collections/types';
+import { initial } from 'lodash';
 
 export const debugging = false
 
@@ -62,17 +63,21 @@ const useStyles = createUseStyles({
 
 function Game() {
   const classes = useStyles();
-
+  const [hasSetInitialState, setHasSetInitialState] = useState(false);
 
   const initialCardPositions: Record<string, CardPosition> = {}
-  startingCards.forEach((slug, i) => {
-    const cardPosition = createCardPosition(slug, 
-      i*160+260+Math.random()*100, 
-      200+Math.random()*100)
-    initialCardPositions[cardPosition.id] = cardPosition
-  }); 
 
-  const { cardPositions, setCardPositions, onDrag, onStop } = useCardPositions(initialCardPositions);
+  if (!hasSetInitialState) {
+    startingCards.forEach((slug, i) => {
+      const cardPosition = createCardPosition(initialCardPositions, slug, 
+        Math.round(i*25+260+Math.random()*100), 
+        Math.round(200+Math.random()*100))
+      initialCardPositions[cardPosition.id] = cardPosition
+    }); 
+    setHasSetInitialState(true)
+  }
+
+  const { cardPositions, setCardPositions, onDrag, onStop, isDragging } = useCardPositions(initialCardPositions);
 
   function removeUndefinedValues(obj: Record<string, CardPosition>): Record<string, CardPosition> {
     return Object.entries(obj).reduce((a, [k, v]) => (v === undefined ? a : {...a, [k]: v}), {});
@@ -134,6 +139,7 @@ function Game() {
                   onDrag={onDrag} 
                   onStop={onStop}
                   paused={paused}
+                  isDragging={isDragging}
                 />
               })}
             </div>

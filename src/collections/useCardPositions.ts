@@ -14,7 +14,6 @@ function addIfNotInArray (array: string[], value: string): string[] {
   }
 }
 
-
 export const isOverlapping = (cardPositions: Record<string, CardPosition>, i: string, j: string) => {
   const cardsAreDifferent = i !== j;
   const { width, height } = getCardDimensions(cardPositions[i])
@@ -24,6 +23,7 @@ export const isOverlapping = (cardPositions: Record<string, CardPosition>, i: st
   const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
   return cardsAreDifferent && cardsOverlap;
 }
+
   
 // find an overlapping card wiht
 export const getAttachedIndexes = (cardPositions: Record<string, CardPosition>, id: string) => {
@@ -113,7 +113,7 @@ export function getNewCardPosition (cardPositions: Record<string, CardPosition>,
     timerStart: undefined,
     timerId: undefined,
     attached: attachedCardIndexes,
-    transition: true
+    dragging: false
   }
   const attachedCardIndex = getIndexOfHighestAttachedZIndex(cardPositions, attachedCardIndexes);
   if (attachedCardIndex !== undefined) {
@@ -126,49 +126,83 @@ export function getNewCardPosition (cardPositions: Record<string, CardPosition>,
 interface GridPosition {
   x: number;
   y: number;
+  destinationX?: number;
+  destinationY?: number;
+  destinationSpeed?: number;
 }
 
-export const findNearestNonOverlappingSpace = (cardPositions: Record<string, CardPosition>, currentId: string): GridPosition => {
+export function moveTowardsDestination(cardPositions: Record<string, CardPosition>, index: string): GridPosition {
+  const cardPosition = cardPositions[index];
+  const { x, y, destinationX, destinationY } = cardPosition;
+
+  let newX = cardPosition.x;
+  let newY = cardPosition.y;
+  if (destinationX && (x > destinationX)) {
+    newX = Math.round(cardPosition.x - 1)
+  } else if (destinationX && (x < destinationX)) {
+    newX = Math.round(cardPosition.x + 1)
+  }
+  if (destinationY && y > destinationY) {
+    newY = Math.round(cardPosition.y - 1)
+  } else if (destinationY && (y < destinationY)) {
+    newY = Math.round(cardPosition.y + 1)
+  }
+  const destinationXApproxDone = destinationX && (Math.abs(newX - destinationX) < 2);
+  const destinationYApproxDone = destinationY && (Math.abs(newY - destinationY) < 2);
+
+  const newDestinationX = destinationXApproxDone ? undefined : destinationX;
+  const newDestinationY = destinationYApproxDone ? undefined : destinationY;
+  return {
+    x: newX, 
+    y: newY, 
+    destinationX: newDestinationX, 
+    destinationY: newDestinationY
+  }
+}
+
+const convertCoordsToDistanceAndAngle = ({x1, y1, x2, y2}:{x1: number, y1: number, x2:number, y2:number}) => {
+  const distance = Math.sqrt(Math.pow(x1-x2, 2) + Math.pow(y1-y2, 2))
+  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  return {x1, y1, distance, angle}
+}
+
+const convertDistanceAngleToCoords = (x1: number, y1: number, distance: number, angle: number) => {
+  const x2 = x1 + distance * Math.cos(angle * Math.PI / 180);
+  const y2 = y1 + distance * Math.sin(angle * Math.PI / 180);
+  return {x1, y1, x2, y2}
+}
+
+export function findNonoverlappingDirection(cardPositions: Record<string, CardPosition>, currentId: string) {
   const currentCard = cardPositions[currentId];
   if (!currentCard) return {x: 0, y: 0}
-  const { width: cardWidth, height: cardHeight } = getCardDimensions(currentCard);
-
-  // Start searching from the card's current position
-  const queue: GridPosition[] = [{ x: currentCard.x, y: currentCard.y }];
-
-  while (queue.length > 0) {
-    const currentPos = queue.shift()!; // It's safe to use '!' because we check that queue.length > 0
-
-    // Check if the current position overlaps with any other card
-    const isOverlapping = Object.values(cardPositions).some(({ x, y, id }) => {
-      if (id === currentId) return false; // Don't check the card against itself
-
-      const { width, height } = getCardDimensions(cardPositions[id]);
-
-      const horizontalOverlap = Math.abs(currentPos.x - x) < Math.max(cardWidth, width);
-      const verticalOverlap = Math.abs(currentPos.y - y) < Math.max(cardHeight, height);
-
-      return horizontalOverlap && verticalOverlap;
-    });
-
-    if (!isOverlapping) {
-      // If it doesn't overlap, return the current position
-      return currentPos;
-    } else {
-      // Otherwise, enqueue the neighboring positions
-      queue.push(
-        { x: currentPos.x - 1, y: currentPos.y },
-        { x: currentPos.x + 1, y: currentPos.y },
-        { x: currentPos.x, y: currentPos.y - 1 },
-        { x: currentPos.x, y: currentPos.y + 1 }
-      );
-    }
+  if (currentCard.destinationX && currentCard.destinationY) {
+    return { x: currentCard.destinationX, y: currentCard.destinationY };
   }
+  const overlappingCards = getOverlappingNonattachedCards(cardPositions, currentId);
+  // const overlappingCards = overlappingCards2.filter((card) => card.slug !== currentCard.slug);
 
-  // If no non-overlapping position was found, return the card's current position
-  // (this should never happen unless the grid is completely filled)
-  return { x: currentCard.x, y: currentCard.y };
-};
+  if (overlappingCards.length === 0) {
+    return { destinationX: currentCard.x, destinationY: currentCard.y };
+  }
+  const averageOverlappingX = overlappingCards.reduce((acc, card) => {
+    return acc + card.x + getCardDimensions(card).width/2;
+  }, 0) / overlappingCards.length;
+  const averageOverlappingY = overlappingCards.reduce((acc, card) => {
+    return acc + card.y + getCardDimensions(card).height/2;
+  }, 0) / overlappingCards.length;
+
+
+  const {distance, angle} = convertCoordsToDistanceAndAngle({x1:currentCard.x, y1:currentCard.y, x2:averageOverlappingX, y2:averageOverlappingY})
+
+  const {x2,y2} = convertDistanceAngleToCoords(currentCard.x, currentCard.y, distance, angle+180)
+
+
+  const destinationX = Math.round(x2)
+  const destinationY = Math.round(y2) 
+  return {
+    destinationX, destinationY
+  }
+}
 
 export const getOverlappingCards = (cardPositions: Record<string, CardPosition>, id: string) => {
   const overlappingCards: CardPosition[] = []
@@ -178,6 +212,11 @@ export const getOverlappingCards = (cardPositions: Record<string, CardPosition>,
     }
   })
   return overlappingCards;
+}
+
+export const getOverlappingNonattachedCards = (cardPositions: Record<string, CardPosition>, id: string) => {
+  const overlappingCards = getOverlappingCards(cardPositions, id);
+  return overlappingCards.filter((card) => cardPositions[id].attached.indexOf(card.id) === -1);
 }
 
 // Create the custom hook for card positions
@@ -191,14 +230,17 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
     return initialPositions;
   });
 
+  const [isDragging, setIsDragging] = useState(false);
+
   const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: string) => {
+    setIsDragging(true);
     const newPositions = {...cardPositions};
     const cardPosition = cardPositions[i];
     if (cardPosition.enemy) return
     newPositions[i] = { ...cardPosition, 
       x: cardPosition.x + data.deltaX,
       y: cardPosition.y + data.deltaY,
-      transition: false,
+      dragging: true,
       maybeAttached: getAttachedIndexes(cardPositions, i),
       zIndex: 1000000
     };
@@ -207,8 +249,9 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
   }, [cardPositions, getAttachedIndexes]);
 
   const onStop = useCallback((index: string) => {
+    setIsDragging(false);
     handleNewCardPosition(cardPositions, index, setCardPositions)
   }, [cardPositions, getAttachedIndexes]);
 
-  return { cardPositions, setCardPositions, onDrag, onStop };
+  return { cardPositions, setCardPositions, onDrag, onStop, isDragging };
 }

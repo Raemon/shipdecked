@@ -8,7 +8,7 @@ import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
 import HungerStatus from './Statuses/HungerStatus';
 import FuelStatus from './Statuses/FuelStatus';
-import { getNewCardPosition, getOverlappingCards, isOverlapping, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
+import { getNewCardPosition, getOverlappingNonattachedCards, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 import { StaminaStatus } from './Statuses/StaminaStatus';
 
 export const LARGE_CARD_WIDTH = 132
@@ -133,13 +133,15 @@ type CardProps = {
   onDrag: (event: DraggableEvent, data: DraggableData, id: string) => void;
   onStop: (id: string) => void;
   paused: boolean;
+  isDragging: boolean;
 };
 
 
-const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
+const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) => {
   const classes = useStyles();
   const {cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id];
+  const numberOverlappingCards = getOverlappingNonattachedCards(cardPositions, id).length
   
   const trackedCardId = Object.values(cardPositions).find((c: CardPosition) => {
     return cardPosition.tracks?.includes(c.slug)
@@ -223,6 +225,47 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
     updateFading()
   }, [cardPosition.currentFading])
 
+  // // set new destination based on nonoverlap
+  // useEffect(() => {
+  //   if (!numberOverlappingCards) return
+  //   if (isDragging) return
+  //   const timeoutId = setTimeout(() => {
+  //     updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
+  //       return {
+  //         ...cardPosition,
+  //         ...findNonoverlappingDirection(cardPositions, id)
+  //       }
+  //     })
+  //   }, 10);
+  //   return () => clearTimeout(timeoutId);
+  // }, [numberOverlappingCards])
+
+  // move towards destination
+  useEffect(() => {
+    if (isDragging) return
+    const timeoutId = setTimeout(() => {
+      const { x, y, destinationX, destinationY } = moveTowardsDestination(cardPositions, id)
+      updateCardPosition(cardPositionInfo, (cardPosition) => {
+        if (cardPosition.x === cardPosition.destinationX) return {
+          ...cardPosition,
+          destinationX: undefined,
+          destinationY: undefined,
+        }
+        return {
+          ...cardPosition,
+          destinationX,
+          destinationY,
+          x,
+          y,
+        }
+      })
+    }, 1);
+  
+    // Cleanup function
+    return () => clearTimeout(timeoutId);
+  }, [cardPosition.x, cardPosition.y, cardPosition.destinationX, cardPosition.destinationY])
+
+  // Tracking
   useEffect(() => {
     setTimeout(() => {
       if (!cardPosition) return
@@ -235,14 +278,14 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
         let newY = cardPosition.y
         if (!isOverlapping(cardPositions, trackedCard.id, cardPosition.id)) {
           if (trackedCard.x > cardPosition.x) {
-            newX = cardPosition.x + (Math.random()*10+5)
+            newX = Math.round(cardPosition.x + (Math.random()*10+5))
           } else if (trackedCard.x < cardPosition.x) {
-            newX = cardPosition.x - (Math.random()*10+5)
+            newX = Math.round(cardPosition.x - (Math.random()*10+5))
           }
           if (trackedCard.y > cardPosition.y) {
-            newY = cardPosition.y + (Math.random()*10+5)
+            newY = Math.round(cardPosition.y + (Math.random()*10+5))
           } else if (trackedCard.y < cardPosition.y) {
-            newY = cardPosition.y - (Math.random()*10+5)
+            newY = Math.round(cardPosition.y - (Math.random()*10+5))
           }
         }
         return {
@@ -293,9 +336,16 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
         }}>
           <h2>{name}</h2>
           {
-            debugging && 
+            // debugging && 
               <div>
-                <div className={classes.meta} style={{left: 5, top: 5}}>
+                {/* <div className={classes.meta} style={{left: 5, top: 5}}>
+                  {cardPosition.x}, {cardPosition.y}
+                </div>
+                <div className={classes.meta} style={{right: 5, top: 5}}>
+                  {cardPosition.destinationX}, {cardPosition.destinationY}
+                </div> */}
+
+                {/* <div className={classes.meta} style={{left: 5, top: 5}}>
                   {id}
                 </div>
                 <div className={classes.meta} style={{left: 5, bottom: 5}}>
@@ -305,7 +355,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused}:CardProps) => {
                 </div>
                 <div className={classes.meta} style={{right: 5, top: 5}}>
                   {cardPosition.zIndex}
-                </div>
+                </div> */}
                 {/* <div className={classes.meta} style={{right: 5, bottom: 5}}>
                   {cardPosition.loot?.join(", ")}
                 </div> */}

@@ -2,20 +2,33 @@ import sample from "lodash/sample"
 import { CardPosition, CardPositionInfo } from "./types"
 import { CardSlug, units } from "./cards"
 import { filter, includes, some } from "lodash"
-import { findNearestNonOverlappingSpace } from "./useCardPositions";
+import { getCardDimensions } from "../components/Card";
+import { STACK_OFFSET_X, STACK_OFFSET_Y } from "./useCardPositions";
 
 export const randomHexId = () => {
   return Math.floor(Math.random() * 16777215).toString(16);
 };
 
-export function createCardPosition(slug: CardSlug, x: number, y: number): CardPosition {
+function wouldOverlap(cardPositions: Record<string, CardPosition>, cardPosition: CardPosition) {
+  const { width, height } = getCardDimensions(cardPosition)
+  return Object.values(cardPositions).some((otherCardPosition) => {
+    if (cardPosition.id === otherCardPosition.id) return false
+    const cardsOverlapHorizontally = Math.abs(cardPosition.x - otherCardPosition.x) < (width + 30);
+    const cardsOverlapVertically = Math.abs(cardPosition.y - otherCardPosition.y) < (height + 50);
+    const cardsOverlap = cardsOverlapHorizontally && cardsOverlapVertically;
+    return cardsOverlap;
+  })
+}
+
+export function createCardPosition(cardPositions: Record<string, CardPosition>, slug: CardSlug, x: number, y: number, attached?: string[], avoidOverlap = true): CardPosition {
   const card = units[slug]
-  return {
+
+  const newCardPosition = {
     slug,
     timerEnd: undefined,
     timerStart: undefined,
     timerId: undefined,
-    attached: [],
+    attached: attached ?? [],
     maybeAttached: [],
     zIndex: 1,
     currentHunger: card.maxHunger ? card.maxHunger/2 - 1: undefined,
@@ -26,8 +39,14 @@ export function createCardPosition(slug: CardSlug, x: number, y: number): CardPo
     y,
     ...card,
     id: randomHexId(),
-    transition: true,
+    dragging: false,
   }
+  while (wouldOverlap(cardPositions, newCardPosition) && avoidOverlap) {
+    newCardPosition.x += Math.random() * 20 - 10
+    newCardPosition.y += Math.random() * 10 - 5
+  }
+
+  return newCardPosition
 }
 
 export function getAttachedCardsSortedByZIndex (cardPositionInfo: CardPositionInfo) {
@@ -53,24 +72,38 @@ export const updateCardPosition = (
   });
 };
 
-function spawnNearby(slug: CardSlug, parent: CardPosition, i?: number) {
-  if (i) return spawnInSemiCircle(slug, parent, i)
-  return createCardPosition(slug,
-    parent.x+100 + Math.random() * 50,
-    parent.y+15 + Math.random() * 50
+function spawnNearby(cardPositions: Record<string, CardPosition>, slug: CardSlug, parent: CardPosition, soFarOutput: CardPosition[] = []) {
+  const cardPositionsList = Object.values(cardPositions)
+  const cardPositionsSlugs = Object.values(cardPositions).map(cardPosition => cardPosition.slug)
+  if (cardPositionsSlugs.includes(slug)) {
+    const highestIndexedCardWithSlug = cardPositionsList.sort((a, b) => b.zIndex - a.zIndex).find(cardPosition => cardPosition.slug === slug)
+    if (highestIndexedCardWithSlug) {
+      return createCardPosition(cardPositions, slug,
+        highestIndexedCardWithSlug.x + STACK_OFFSET_X,
+        highestIndexedCardWithSlug.y + STACK_OFFSET_Y,
+        [highestIndexedCardWithSlug.id],
+        false
+      )
+    }
+  }
+  if (soFarOutput) return spawnInSemiCircle(cardPositions, slug, parent, soFarOutput.length)
+  const { width } = getCardDimensions(parent)
+  return createCardPosition(cardPositions, slug,
+    Math.round(parent.x + width + Math.random() * 50),
+    Math.round(parent.y + 15 + Math.random() * 50)
   )
 }
 
-function spawnInSemiCircle(slug: CardSlug, parent: CardPosition, i = 0, radius = 180, angleIncrement: number = Math.PI / 6) {
+function spawnInSemiCircle(cardPositions: Record<string, CardPosition>,  slug: CardSlug, parent: CardPosition, i = 0, radius = 50, angleIncrement: number = Math.PI / 5) {
   // Calculate the angle for the current card
   const angle = i * angleIncrement;
 
   // Calculate the new position using the circle's equation
-  const x = parent.x + radius * Math.cos(angle) + Math.random() * 50;
-  const y = parent.y + radius * Math.sin(angle) + Math.random() * 50;
+  const x = Math.round(parent.x + radius * Math.sin(angle) + Math.random() * 25)
+  const y = Math.round(parent.y + radius * -Math.cos(angle) + Math.random() * 25)
 
   // Create and return the new card position
-  return createCardPosition(slug, x, y);
+  return createCardPosition(cardPositions, slug, x, y);
 }
 
 function getLoot (cardPositions: Record<string, CardPosition>, index: string, slug: CardSlug) {
@@ -97,8 +130,8 @@ function popOffCard(cardPositionInfo: CardPositionInfo) {
   return {
     ...cardPositions[id],
     attached: [],
-    x: cardPositions[id].x - 50 - Math.random() * 50,
-    y: cardPositions[id].y + 15 + Math.random() * 50,
+    x: Math.round(cardPositions[id].x - 50 - Math.random() * 50),
+    y: Math.round(cardPositions[id].y + 15 + Math.random() * 50),
     timerEnd: undefined,
     timerStart: undefined,
     timerId: undefined,
@@ -172,7 +205,6 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
     const { spawnSlug, attachedId } = getLoot(prevCardPositions, id, attachedSlug)
 
     if (spawnSlug && attachedId) {
-      console.log("spawning from loot", {attachedId, attachedSlug, cardPositionInfo})
       const newCardPositions = {...prevCardPositions}
 
       const oldAttached = cardPositions[attachedId]
@@ -182,7 +214,7 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
 
       newCardPositions[id] = popOffCard(cardPositionInfo)
 
-      const newCardPosition = spawnNearby(spawnSlug, cardPosition)
+      const newCardPosition = spawnNearby(newCardPositions, spawnSlug, cardPosition)
       newCardPositions[newCardPosition.id] = newCardPosition
 
       // If there are no more items to spawn, add the secondary loot
@@ -209,9 +241,10 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
   })
 }
 
-export function spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists}:{
+export function spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists}:{
   inputStack: CardSlug[], 
-  output: CardSlug|CardSlug[], 
+  output: CardSlug[], 
+  attachedOutput?: CardSlug[],
   duration: number, 
   cardPositionInfo: CardPositionInfo, 
   descriptor: string,
@@ -231,7 +264,7 @@ export function spawnTimerFromSet({inputStack, output, duration, cardPositionInf
   });
 
   if (completeStack && !cardPosition.timerEnd && !alreadySpawned) {
-    const timerId = setTimeout(() => spawnFromSet({inputStack, output, cardPositionInfo, preserve, consumeInitiator}), duration);
+    const timerId = setTimeout(() => spawnFromSet({inputStack, output, attachedOutput,cardPositionInfo, preserve, consumeInitiator}), duration);
     setCardPositions(prevCardPositions => {
       const newCardPositions = {...prevCardPositions}
       newCardPositions[id] = ({
@@ -247,9 +280,10 @@ export function spawnTimerFromSet({inputStack, output, duration, cardPositionInf
   }
 }
 
-export function spawnFromSet({inputStack, output, cardPositionInfo, preserve, consumeInitiator}:{
+export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator}:{
   inputStack: CardSlug[], 
-  output: CardSlug|CardSlug[], 
+  output: CardSlug[], 
+  attachedOutput?: CardSlug[],
   cardPositionInfo: CardPositionInfo
   preserve?: boolean,
   consumeInitiator?: boolean
@@ -266,15 +300,24 @@ export function spawnFromSet({inputStack, output, cardPositionInfo, preserve, co
       newCardPositions[id] = popOffCard(newCardPositionInfo)
 
       // create the output card
-      if (typeof output === "string") {
-        const newCardPosition = spawnNearby(output, cardPosition)
+
+      const soFarOutput: CardPosition[] = []
+      output.forEach((outputSlug) => {
+        const newCardPosition = spawnNearby(newCardPositions, outputSlug, cardPosition, soFarOutput)
+        soFarOutput.push(newCardPosition)
         newCardPositions[newCardPosition.id] = newCardPosition
-      } else {
-        output.forEach((outputSlug, i) => {
-          const newCardPosition = spawnNearby(outputSlug, cardPosition, i)
-          newCardPositions[newCardPosition.id] = newCardPosition
-        })
-      }
+      })
+      attachedOutput?.forEach((slug) => {
+        const newCardPosition = spawnNearby(newCardPositions, slug, cardPosition)
+
+        // attach the output card to the initiator
+        newCardPositions[newCardPosition.id] = newCardPosition
+        newCardPosition.x = newCardPositions[id].x + STACK_OFFSET_X
+        newCardPosition.y = newCardPositions[id].y + STACK_OFFSET_Y
+        newCardPosition.zIndex = newCardPositions[id].zIndex + 1
+        newCardPosition.attached = [id]
+        newCardPositions[id].attached.push(newCardPosition.id)
+      })
 
       const attachedCardPositions = cardPosition.attached.map(i => newCardPositions[i])
       const attachedCardsInStack = attachedCardPositions.filter(attachedCardPosition => inputStack.includes(attachedCardPosition.slug))
@@ -307,10 +350,7 @@ export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxA
   const attachedId = cardPosition.attached.find(i => cardPositions[i][resource])
   const resourceAmount = attachedId && cardPositions[attachedId][resource]
 
-  console.log("b")
-
   if (cardPosition[currentAttribute] && !cardPosition.timerEnd && resourceAmount && attachedId) {
-    console.log("c")
     const timerId = setTimeout(() => {
       restore({
         cardPositionInfo,
@@ -343,7 +383,6 @@ function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribu
 }) {
   const { cardPositions, id, setCardPositions } = cardPositionInfo;
   if (!cardPositions[id]) return
-  console.log("restore e")
   setCardPositions((prevCardPositions: Record<string, CardPosition>) => {
     const newCardPositions = {...prevCardPositions}
     const cardPosition = newCardPositions[id];
@@ -376,46 +415,49 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
   const spawnInfo = cardPositions[id].spawnInfo
   if (!spawnInfo) return
 
-  const attachedSortedByZIndex = getAttachedCardsSortedByZIndex(cardPositionInfo)
+  const attachedSlugs = cardPositions[id].attached.map(i => cardPositions[i].slug)
+  const attachedCard = cardPositions[cardPositions[id].attached[0]]
 
-  attachedSortedByZIndex.forEach((attachedCard) => {
-    const spawnCardInfo = spawnInfo.find(spawnInfo => spawnInfo.inputStack && spawnInfo.inputStack.includes(attachedCard.slug))
-    if (spawnCardInfo) {
-      const { duration, inputStack, preserve, output, descriptor, skipIfExists, consumeInitiator } = spawnCardInfo
-      if (inputStack && output) {
-        spawnTimerFromSet({inputStack, output, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator})
-      } else if (duration && attachedSortedByZIndex.length === 1) {  
-        spawnTimerFromLoot({attachedSlug: attachedCard.slug, duration, cardPositionInfo, preserve, descriptor})
+  if (attachedCard) {
+    spawnInfo.forEach(({ duration, inputStack, preserve, output, attachedOutput,  descriptor, skipIfExists, consumeInitiator }) => {
+      const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
+      if (inputEqualsAttached) {
+        const attachedSlugs = cardPositions[id].attached.map(i => cardPositions[i].slug)
+        const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
+        if (inputEqualsAttached && output) {
+          spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator})
+        } else if (duration && attachedSlugs.length === 1) {  
+          spawnTimerFromLoot({attachedSlug: inputStack[0], duration, cardPositionInfo, preserve, descriptor})
+        }
+      } else if (attachedCard?.calories) {
+        restoreTimer({
+          duration: 1000, 
+          cardPositionInfo, 
+          resource: "calories", 
+          currentAttribute: "currentHunger",
+          maxAttribute: "maxHunger",
+          descriptor: "Eating..."
+        })
+      } else if (attachedCard.fuel) {
+        restoreTimer({
+          duration:1000, 
+          cardPositionInfo, 
+          resource: "fuel", 
+          currentAttribute: "currentFuel",
+          maxAttribute: "maxFuel",
+          descriptor: "Fueling..."
+        })
+      } else if (attachedCard.rest) {
+        restoreTimer({
+          duration:6000, 
+          cardPositionInfo, 
+          resource: "rest", 
+          currentAttribute: "currentStamina",
+          maxAttribute: "maxStamina",
+          preserve: true,
+          descriptor: "Resting..."
+        })
       }
-    } else if (attachedCard.calories) {
-      console.log("a")
-      restoreTimer({
-        duration: 1000, 
-        cardPositionInfo, 
-        resource: "calories", 
-        currentAttribute: "currentHunger",
-        maxAttribute: "maxHunger",
-        descriptor: "Eating..."
-      })
-    } else if (attachedCard.fuel) {
-      restoreTimer({
-        duration:1000, 
-        cardPositionInfo, 
-        resource: "fuel", 
-        currentAttribute: "currentFuel",
-        maxAttribute: "maxFuel",
-        descriptor: "Fueling..."
-      })
-    } else if (attachedCard.rest) {
-      restoreTimer({
-        duration:6000, 
-        cardPositionInfo, 
-        resource: "rest", 
-        currentAttribute: "currentStamina",
-        maxAttribute: "maxStamina",
-        preserve: true,
-        descriptor: "Resting..."
-      })
-    }
-  })
+    })
+  }
 }

@@ -3,8 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate',
-  // 'sticks', 'sticks', 'sticks'
+  'shoresidePath', 'crate', 
 ]
 
 export type CardSlug = 
@@ -13,7 +12,7 @@ export type CardSlug =
   'fallenLog'|'driftWoodLog'|'hewnLog'|'flint'|'sticks'|'longStick'|'rocks'|'smallRoundStone'|
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'palmLeaves'|
-  'shoresidePath'|'denseJungle'|'junglePath'|'birdIsland'|'shelteredCove'|'craggyCliffs'|
+  'shoresidePath'|'denseJungle'|'junglePath'|'birdIsland'|'shelteredCove'|'craggyCliffs'|'coastalWaters'|
   'carlosFootprints'|'jungleFootprints'|
   'crate'|
   'smallFire'|
@@ -37,49 +36,52 @@ const characterSpawnInfo: SpawnInfo[] = [
     duration: 6000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'fallenLog', 'sticks'], 
-    output: 'smallFire', 
+    output: ['smallFire'], 
   },
   { 
     duration: 6000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'driftWoodLog', 'sticks'], 
-    output: 'smallFire',  
+    output: ['smallFire'],  
   },
   {
     duration: 1000, 
     descriptor: "Building...", 
     inputStack: ['flint', 'sticks'], 
-    output: 'hatchet',
+    output: ['hatchet'],
   },
   {
     duration: 1000,
     descriptor: "Building...",
     inputStack: ['fallenLog', 'fallenLog', 'fallenLog', 'palmLeaves', 'palmLeaves'],
-    output: 'shelter',
+    output: ['shelter'],
   },
   { 
     duration: 6000, 
     descriptor: "Chopping...", 
     inputStack: ['hatchet', 'coconutTree'], 
-    output: ["coconut", "coconut", "fallenLog", "hatchet", "palmLeaves"],
+    output: ["coconut", "coconut", "fallenLog", "palmLeaves"],
+    attachedOutput: ['hatchet']
   },
   {
     duration: 6000,
     descriptor: "Chopping...",
     inputStack: ['hatchet', 'fallenLog'],
-    output: ['hewnLog', 'hewnLog', 'hatchet', 'sticks']
+    output: ['hewnLog', 'hewnLog', 'sticks'],
+    attachedOutput: ['hatchet']
   },
   {
     duration: 6000,
     descriptor: "Chopping...",
     inputStack: ['hatchet', 'driftWoodLog'],
-    output: ['hewnLog', 'hewnLog', 'hatchet', 'longStick']
+    output: ['hewnLog', 'hewnLog', 'longStick'],
+    attachedOutput: ['hatchet']
   },
   {
     duration: 6000,
     descriptor: "Building...", 
     inputStack: ['smallRoundStone', 'sticks'], 
-    output: 'hammer',
+    output: ['hammer'],
   },
   {  
     duration: 3000, 
@@ -87,7 +89,7 @@ const characterSpawnInfo: SpawnInfo[] = [
     skipIfExists: ['hatchet', 'ideaHatchet'], 
     preserve: true,
     inputStack: ['coconutTree'],
-    output: 'ideaHatchet', 
+    output: ['ideaHatchet'], 
   },
   {
     duration: 1500,
@@ -112,13 +114,13 @@ const characterSpawnInfo: SpawnInfo[] = [
     descriptor: "Following...",
     inputStack: ['distantFigure'], 
     consumeInitiator: true,
-    output: 'feyHorror',
+    output: ['feyHorror'],
   },
   {
     duration: 3000,
     descriptor: "Sitting quietly...",
     inputStack: ['jungleShrine'],
-    output: 'ideaEscape',
+    output: ['ideaEscape'],
   },
 ]
 
@@ -136,7 +138,8 @@ export const units: Record<CardSlug, CardType> = {
       { 
         skipIfExists: ['ideaFire'], 
         inputStack: ['carlos'],
-        duration: 3000, preserve: true, descriptor: "Talking...", output: 'ideaFire' 
+        duration: 3000, preserve: true, descriptor: "Talking...", 
+        output: ['ideaFire'] 
       },
       {
         duration: 30000,
@@ -149,7 +152,7 @@ export const units: Record<CardSlug, CardType> = {
         descriptor: "Stare into flames...", 
         inputStack: ['smallFire'], 
         skipIfExists: ['ideaGatherSurvivors'], 
-        output: "ideaGatherSurvivors",
+        output: ["ideaGatherSurvivors"],
         preserve: true,
       }
     ]
@@ -166,7 +169,7 @@ export const units: Record<CardSlug, CardType> = {
         duration: 6000, 
         descriptor: "Talking...", 
         inputStack: ['smallFire', 'ruth'], 
-        output: "ideaShelter",
+        output: ["ideaShelter"],
         preserve: true,
       },
       {
@@ -244,7 +247,7 @@ export const units: Record<CardSlug, CardType> = {
   },
   'hewnLog': {
     name: "Hewn Logs",
-    imageUrl: 'log.png',
+    imageUrl: 'hewnLogs.png',
     fuel: 400,
   },
   'driftWoodLog': {
@@ -265,7 +268,7 @@ export const units: Record<CardSlug, CardType> = {
   },
   'denseJungle': {
     name: "Dense Jungle",
-    backgroundImage: "junglePath.png",
+    backgroundImage: "denseJungle.jpg",
     large: true,
     spawnDescriptor: "Exploring...",
     loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'longStick', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
@@ -282,7 +285,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "shelteredCove.png",
     large: true,
     loot: ['carlos'], 
-    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle' ],
+    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle', 'coastalWaters' ],
     spawnDescriptor: "Exploring...",
   },
   'craggyCliffs': {
@@ -292,7 +295,12 @@ export const units: Record<CardSlug, CardType> = {
     loot: ['rocks', 'rocks', 'milo', 'sticks', 'sticks', 'longStick'],
     spawnDescriptor: "Exploring...",
   },
-
+  'coastalWaters': {
+    name: "Coastal Waters",
+    backgroundImage: "shallowWaters.jpg",
+    large: true,
+    loot: ['seaweed', 'seaweed'],
+  },
 
   'carlosFootprints': {
     name: "Footprints",
@@ -317,7 +325,7 @@ export const units: Record<CardSlug, CardType> = {
         duration: 3000,
         descriptor: "Cooking...",
         inputStack: ['smallFire'],
-        output: 'bakedSeaweed',
+        output: ['bakedSeaweed'],
         preserve: true,
         consumeInitiator: true
       }
@@ -340,7 +348,7 @@ export const units: Record<CardSlug, CardType> = {
   },
   'smallRoundStone': {
     name: "Small Stone",
-    imageUrl: 'smallRoundStone.png',
+    imageUrl: 'smalRoundStone.png',
   },
   'cannedBeans': {
     name: "Canned Beans",
@@ -405,7 +413,7 @@ export const units: Record<CardSlug, CardType> = {
         duration: 6000,
         descriptor: "Awkwardly resting...",
         inputStack: ['carlos', 'ruth'],
-        output: 'sexualTensionCarlosRuth',
+        output: ['sexualTensionCarlosRuth'],
         skipIfExists: ['sexualTensionCarlosRuth'],
         preserve: true,
       },
@@ -448,6 +456,7 @@ export const units: Record<CardSlug, CardType> = {
     name: 'Idea: Gather Survivors',
     imageUrl: "ideaGatherSurvivors.png",
     idea: true,
+    large: true,
     cardText: <div>
       Small Fire,<br/> 4 Survivors
     </div>
