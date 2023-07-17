@@ -42,10 +42,9 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     dragging: false,
   }
   while (wouldOverlap(cardPositions, newCardPosition) && avoidOverlap) {
-    newCardPosition.x += Math.random() * 20 - 10
-    newCardPosition.y += Math.random() * 10 - 5
+    newCardPosition.x += Math.random() * 50 - 25
+    newCardPosition.y += Math.random() * 50 - 25
   }
-
   return newCardPosition
 }
 
