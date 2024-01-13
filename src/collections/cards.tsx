@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate',
+  'shoresidePath', 'crate', 'shipwreckedCorpse'
 ]
 
 export type CardSlug = 
@@ -271,7 +271,7 @@ export const units: Record<CardSlug, CardType> = {
     name: "Shoreside path",
     backgroundImage: 'shoresidepath.jpg',
     large: true,
-    loot: ['coconutTree', 'flint', 'sticks', 'carlosFootprints'],
+    loot: ['coconutTree', 'flint', 'sticks', 'shipwreckedCove'],
     secondaryLoot: ['crate', 'coconutTree', 'bananaTree', 'rocks', 'sticks', 'flint'],
     spawnDescriptor: "Exploring...",
   },
@@ -294,7 +294,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "shipwreckedCove.jpg",
     large: true,
     loot: ['shipwreckedCorpse'], 
-    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle' ],
+    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle', 'carlosFootprints' ],
     spawnDescriptor: "Exploring...",
   },
   'craggyCliffs': {
@@ -395,6 +395,7 @@ export const units: Record<CardSlug, CardType> = {
     name: "Shipwrecked Corpse",
     imageUrl: "shipwreckedCorpse.png",
     loot: ['ideaEscape'],
+    maxDecay: 1500,
     spawnDescriptor: "Staring in horror....",
   },
 
@@ -464,7 +465,7 @@ export const units: Record<CardSlug, CardType> = {
     large: true,
     cardText: <div>
       <p><em>Need to get out of here...</em></p>
-      <div>Covered Boat, Sheltered Cove</div>
+      <div>Raft, Sheltered Cove</div>
     </div>
   },
   'ideaGatherSurvivors': {
@@ -510,7 +511,7 @@ export const units: Record<CardSlug, CardType> = {
     maxHealth: 20,
     maxHunger: 3000,
     damagePerSecond: 5,
-    tracks: ['bananas', 'openCoconut', 'cannedBeans'],
+    tracks: ['bananas', 'openCoconut', 'cannedBeans', 'bakedSeaweed'],
     enemy: true,
     spawnInfo: []
   },

@@ -8,6 +8,7 @@ export interface MaxCardAttributes {
   maxFuel?: number;
   maxStamina?: number;
   maxFading?: number;
+  maxDecay?: number;
 }
 
 export interface CurrentCardAttriutes {
@@ -16,6 +17,7 @@ export interface CurrentCardAttriutes {
   currentFuel?: number;
   currentStamina?: number;
   currentFading?: number;
+  currentDecay?: number;
 }
 
 export interface AttributeInfo extends MaxCardAttributes, CurrentCardAttriutes {}

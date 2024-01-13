@@ -10,6 +10,7 @@ import HungerStatus from './Statuses/HungerStatus';
 import FuelStatus from './Statuses/FuelStatus';
 import { findNonoverlappingDirection, getNewCardPosition, getOverlappingNonattachedCards, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 import { StaminaStatus } from './Statuses/StaminaStatus';
+import DecayStatus from './Statuses/DecayStatus';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 220
@@ -205,6 +206,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
     updateAttribute('currentStamina')
   }, [cardPositionInfo, cardPosition])
 
+  const updateDecaying = useCallback(() => {
+    updateAttribute('currentDecay')
+  }, [cardPositionInfo, cardPosition])
+
   const updateFading = useCallback(() => {
     updateAttribute('currentFading', 10)
   }, [cardPositionInfo, cardPosition])
@@ -224,6 +229,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
   useEffect(() => {
     updateFading()
   }, [cardPosition.currentFading])
+
+  useEffect(() => {
+    updateDecaying()
+  }, [cardPosition.currentDecay])
 
   // set new destination based on nonoverlap
   // useEffect(() => {
@@ -305,8 +314,8 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
 
   if (!cardPosition) return null
 
-  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, 
-    currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,    
+    currentDecay,currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack } = cardPosition;
   const card = units[slug]
   if (!card) throw Error
 
@@ -374,6 +383,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
             {!!(maxStamina && currentStamina) && <StaminaStatus
               max={maxStamina} 
               current={currentStamina}
+              />}
+            {!!(maxDecay && currentDecay) && <DecayStatus
+              max={maxDecay} 
+              current={currentDecay}
               />}
           </div>
 
