@@ -72,7 +72,7 @@ const useStyles = createUseStyles({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-between',
-    border: "solid 1px rgba(0,0,0,.15)",
+    border: "solid 1px #aaa",
     outline: "solid 1px rgba(0,0,0,1)",
     borderRadius: 4,
     boxShadow: '0 4px 0 0 rgba(0,0,0,0)',
