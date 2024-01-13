@@ -236,7 +236,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
           ...findNonoverlappingDirection(cardPositions, id)
         }
       })
-    }, 10);
+    }, 1);
     return () => clearTimeout(timeoutId);
   }, [numberOverlappingCards])
 
