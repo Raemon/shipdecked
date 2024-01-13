@@ -387,7 +387,7 @@ export const units: Record<CardSlug, CardType> = {
     name: "Shipwrecked Corpse",
     imageUrl: "shipwreckedCorpse.png",
     loot: ['ideaEscape'],
-    spawnDescriptor: "Staring in horror...",
+    spawnDescriptor: "Staring in horror....",
   },
 
   // Tools
