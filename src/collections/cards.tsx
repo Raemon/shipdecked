@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate',
+  'shoresidePath', 'crate', 'shipwreckedCorpse'
 ]
 
 export type CardSlug = 
@@ -154,6 +154,14 @@ export const units: Record<CardSlug, CardType> = {
         inputStack: ['smallFire'], 
         skipIfExists: ['ideaGatherSurvivors'], 
         output: ["ideaGatherSurvivors"],
+        preserve: true,
+      },
+      { 
+        duration: 6000, 
+        descriptor: "Stare in horror...", 
+        inputStack: ['shipwreckedCorpse'], 
+        skipIfExists: ['ideaEscape'], 
+        output: ["ideaEscape"],
         preserve: true,
       }
     ]
