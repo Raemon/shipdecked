@@ -8,7 +8,7 @@ import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
 import HungerStatus from './Statuses/HungerStatus';
 import FuelStatus from './Statuses/FuelStatus';
-import { getNewCardPosition, getOverlappingNonattachedCards, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
+import { findNonoverlappingDirection, getNewCardPosition, getOverlappingNonattachedCards, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 import { StaminaStatus } from './Statuses/StaminaStatus';
 
 export const LARGE_CARD_WIDTH = 132
@@ -225,20 +225,20 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
     updateFading()
   }, [cardPosition.currentFading])
 
-  // // set new destination based on nonoverlap
-  // useEffect(() => {
-  //   if (!numberOverlappingCards) return
-  //   if (isDragging) return
-  //   const timeoutId = setTimeout(() => {
-  //     updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
-  //       return {
-  //         ...cardPosition,
-  //         ...findNonoverlappingDirection(cardPositions, id)
-  //       }
-  //     })
-  //   }, 10);
-  //   return () => clearTimeout(timeoutId);
-  // }, [numberOverlappingCards])
+  // set new destination based on nonoverlap
+  useEffect(() => {
+    if (!numberOverlappingCards) return
+    if (isDragging) return
+    const timeoutId = setTimeout(() => {
+      updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
+        return {
+          ...cardPosition,
+          ...findNonoverlappingDirection(cardPositions, id)
+        }
+      })
+    }, 10);
+    return () => clearTimeout(timeoutId);
+  }, [numberOverlappingCards])
 
   // move towards destination
   useEffect(() => {
