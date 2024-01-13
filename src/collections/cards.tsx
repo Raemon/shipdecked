@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate', 'shipwreckedCorpse'
+  'shoresidePath', 'crate',
 ]
 
 export type CardSlug = 
@@ -75,7 +75,7 @@ const characterSpawnInfo: SpawnInfo[] = [
     duration: 6000,
     descriptor: "Chopping...",
     inputStack: ['hatchet', 'driftWoodLog'],
-    output: ['hewnLog', 'hewnLog', 'longStick'],
+    output: ['hewnLog', 'hewnLog', 'sticks'],
     attachedOutput: ['hatchet']
   },
   {
@@ -108,14 +108,14 @@ const characterSpawnInfo: SpawnInfo[] = [
     duration: 3000,
     descriptor: "Chopping",
     inputStack: ['jungleTree', 'hatchet'],
-    output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'longStick', 'hatchet']
+    output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet']
   },
   {
     duration: 3000,
     descriptor: "Following...",
     inputStack: ['distantFigure'], 
     consumeInitiator: true,
-    output: ['feyHorror'],
+    output: ['feyHorror', 'jungleFootprints'],
   },
   {
     duration: 3000,
@@ -280,14 +280,14 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "denseJungle.jpg",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'longStick', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
+    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'ancientTree', 'distantFigure', 'tree', 'jungleShrine'],
   },
   'junglePath': {
     name: "Jungle Path",
     backgroundImage: "junglePath.png",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'longStick', 'ancientTree', 'jungleFootprints', 'distantFigure', 'tree', 'jungleShrine'],
+    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'ancientTree', 'distantFigure', 'tree', 'jungleShrine'],
   },
   'shipwreckedCove': {
     name: "Shipwreck Cove",
@@ -301,7 +301,7 @@ export const units: Record<CardSlug, CardType> = {
     name: "Craggy Cliffs",
     backgroundImage: "craggyCliffs.jpg",
     large: true,
-    loot: ['rocks', 'rocks', 'milo', 'sticks', 'sticks', 'longStick'],
+    loot: ['rocks', 'rocks', 'carlos', 'sticks', 'sticks'],
     spawnDescriptor: "Exploring...",
   },
   'coastalWaters': {
@@ -314,7 +314,7 @@ export const units: Record<CardSlug, CardType> = {
   'carlosFootprints': {
     name: "Footprints",
     imageUrl: "footprints.png",
-    loot: ['shipwreckedCove'],
+    loot: ['craggyCliffs'],
   },
   'jungleFootprints': {
     name: "Footprints",

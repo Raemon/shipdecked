@@ -43,8 +43,10 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     dragging: false,
   }
   while (wouldOverlap(cardPositions, newCardPosition) && avoidOverlap) {
-    newCardPosition.x += Math.random() * 50 - 25
-    newCardPosition.y += Math.random() * 50 - 25
+    const newX = Math.max(newCardPosition.x + Math.round(Math.random() * 50 - 25), 0)
+    const newY = Math.max(newCardPosition.y + Math.round(Math.random() * 50 - 25), 0)
+    newCardPosition.x = newX
+    newCardPosition.y = newY
   }
   return newCardPosition
 }
@@ -74,8 +76,10 @@ export const updateCardPosition = (
 
 function spawnNearby(cardPositions: Record<string, CardPosition>, slug: CardSlug, parent: CardPosition, soFarOutput: CardPosition[] = []) {
   const cardPositionsList = Object.values(cardPositions)
+  console.log("spawnNearby")
   const cardPositionsSlugs = Object.values(cardPositions).map(cardPosition => cardPosition.slug)
   if (cardPositionsSlugs.includes(slug)) {
+    console.log("spawn in stack")
     const highestIndexedCardWithSlug = cardPositionsList.sort((a, b) => b.zIndex - a.zIndex).find(cardPosition => cardPosition.slug === slug)
     if (highestIndexedCardWithSlug) {
       return createCardPosition(cardPositions, slug,
@@ -86,11 +90,13 @@ function spawnNearby(cardPositions: Record<string, CardPosition>, slug: CardSlug
       )
     }
   }
+  console.log("soFarOutput")
   if (soFarOutput) return spawnInSemiCircle(cardPositions, slug, parent, soFarOutput.length)
   const { width } = getCardDimensions(parent)
+  console.log("final spawnNearby")
   return createCardPosition(cardPositions, slug,
-    Math.round(parent.x + width + Math.random() * 50),
-    Math.round(parent.y + 15 + Math.random() * 50)
+    Math.round(parent.x + width + Math.random() * 25 + 25),
+    Math.round(parent.y + 15 + Math.random() * 25 + 25)
   )
 }
 
