@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate', 'shipwreckedCove'
+  'shoresidePath', 'crate',
 ]
 
 export type CardSlug = 
@@ -11,6 +11,7 @@ export type CardSlug =
   'coconutTree'|'tree'|'ancientTree'|'jungleTree'|'bananaTree'|
   'fallenLog'|'driftWoodLog'|'hewnLog'|'flint'|'sticks'|'longStick'|'rocks'|'smallRoundStone'|
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
+  'shipwreckedCorpse'|
   'palmLeaves'|
   'shoresidePath'|'denseJungle'|'junglePath'|'birdIsland'|'shipwreckedCove'|'craggyCliffs'|'coastalWaters'|
   'carlosFootprints'|'jungleFootprints'|
@@ -284,8 +285,8 @@ export const units: Record<CardSlug, CardType> = {
     name: "Shipwreck Cove",
     backgroundImage: "shipwreckedCove.jpg",
     large: true,
-    loot: ['carlos'], 
-    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle', 'coastalWaters' ],
+    loot: ['shipwreckedCorpse'], 
+    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle' ],
     spawnDescriptor: "Exploring...",
   },
   'craggyCliffs': {
@@ -381,6 +382,12 @@ export const units: Record<CardSlug, CardType> = {
     name: "Ancient Tree",
     large: true,
     backgroundImage: "ancientTree.jpg",
+  },
+  'shipwreckedCorpse': {
+    name: "Shipwrecked Corpse",
+    imageUrl: "shipwreckedCorpse.png",
+    loot: ['ideaEscape'],
+    spawnDescriptor: "Staring in horror...",
   },
 
   // Tools

@@ -226,19 +226,19 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
   }, [cardPosition.currentFading])
 
   // set new destination based on nonoverlap
-  useEffect(() => {
-    if (!numberOverlappingCards) return
-    if (isDragging) return
-    const timeoutId = setTimeout(() => {
-      updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
-        return {
-          ...cardPosition,
-          ...findNonoverlappingDirection(cardPositions, id)
-        }
-      })
-    }, 1);
-    return () => clearTimeout(timeoutId);
-  }, [numberOverlappingCards])
+  // useEffect(() => {
+  //   if (!numberOverlappingCards) return
+  //   if (isDragging) return
+  //   const timeoutId = setTimeout(() => {
+  //     updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
+  //       return {
+  //         ...cardPosition,
+  //         ...findNonoverlappingDirection(cardPositions, id)
+  //       }
+  //     })
+  //   }, 1);
+  //   return () => clearTimeout(timeoutId);
+  // }, [numberOverlappingCards])
 
   // move towards destination
   useEffect(() => {
