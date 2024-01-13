@@ -12,7 +12,7 @@ const DecayStatus = ({max, current}:{max: number, current:number}) => {
     descriptor = "Rotted"
   }
   if (descriptor) return (
-    <span >{descriptor} {current}</span>
+    <span >{descriptor}</span>
   );
   return null
 }
