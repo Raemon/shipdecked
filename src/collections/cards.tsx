@@ -13,7 +13,7 @@ export type CardSlug =
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'shipwreckedCorpse'|
   'palmLeaves'|
-  'shoresidePath'|'denseJungle'|'junglePath'|'birdIsland'|'shipwreckedCove'|'craggyCliffs'|'coastalWaters'|
+  'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'shipwreckedCove'|'craggyCliffs'|'coastalWaters'|
   'carlosFootprints'|'jungleFootprints'|
   'crate'|
   'smallFire'|
@@ -27,7 +27,7 @@ export type CardSlug =
   'wildBoar'
 
 const characterSpawnInfo: SpawnInfo[] = [
-  { inputStack: ['shoresidePath'], duration: 3000, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['shoresidePath'], duration: 500, descriptor: "Exploring...", preserve: true },
   { inputStack: ['shipwreckedCove'], duration: 3000, descriptor: "Exploring...", preserve: true },
   { inputStack: ['craggyCliffs'], duration: 3000, descriptor: "Exploring...", preserve: true },
   { inputStack: ['denseJungle'], duration: 25000, descriptor: "Exploring...", preserve: true},
@@ -51,6 +51,13 @@ const characterSpawnInfo: SpawnInfo[] = [
     inputStack: ['flint', 'sticks'], 
     output: ['hatchet'],
   },
+  {
+    duration: 1000,
+    descriptor: "Building...",
+    inputStack: ['hewnLog', 'hewnLog', 'hewnLog', 'palmLeaves', 'palmLeaves'],
+    output: ['shelter'],
+  },
+
   {
     duration: 1000,
     descriptor: "Building...",
@@ -272,7 +279,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: 'shoresidepath.jpg',
     large: true,
     loot: ['coconutTree', 'flint', 'sticks', 'shipwreckedCove'],
-    secondaryLoot: ['crate', 'coconutTree', 'bananaTree', 'rocks', 'sticks', 'flint'],
+    secondaryLoot: ['crate', 'coconutTree', 'coconutTree', 'rocks', 'sticks', 'flint'],
     spawnDescriptor: "Exploring...",
   },
   'denseJungle': {
@@ -280,7 +287,7 @@ export const units: Record<CardSlug, CardType> = {
     backgroundImage: "denseJungle.jpg",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'ancientTree', 'distantFigure', 'tree', 'jungleShrine'],
+    loot: ['craggyCliffs', 'jungleTree', 'jungleTree', 'wildBoar', 'ancientTree', 'distantFigure', 'jungleShrine'],
   },
   'junglePath': {
     name: "Jungle Path",
@@ -290,12 +297,19 @@ export const units: Record<CardSlug, CardType> = {
     loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'ancientTree', 'distantFigure', 'tree', 'jungleShrine'],
   },
   'shipwreckedCove': {
-    name: "Shipwreck Cove",
+    name: "The Shipwreck",
     backgroundImage: "shipwreckedCove.jpg",
     large: true,
     loot: ['shipwreckedCorpse'], 
-    secondaryLoot: ['rocks', 'driftWoodLog', 'seaweed', 'driftWoodLog', 'flint', 'denseJungle', 'carlosFootprints' ],
+    secondaryLoot: ['rocks', 'crate', 'seaweed', 'crate', 'flint', 'denseJungle', 'carlosFootprints' ],
     spawnDescriptor: "Exploring...",
+  },
+  'shelteredCove': {
+    name: "Sheltered Cove",
+    backgroundImage: "shelteredCove.jpg",
+    large: true,
+    loot: ['carlos'],
+    secondaryLoot: ['rocks', 'coconutTree', 'seaweed', 'fallenLog', 'coconutTree', 'flint'],
   },
   'craggyCliffs': {
     name: "Craggy Cliffs",
@@ -362,7 +376,7 @@ export const units: Record<CardSlug, CardType> = {
   'cannedBeans': {
     name: "Canned Beans",
     imageUrl: "cannedBeans.png",
-    calories: 600,
+    calories: 500,
   },
   'smallFire': {
     name: "Small Fire",
@@ -465,7 +479,7 @@ export const units: Record<CardSlug, CardType> = {
     large: true,
     cardText: <div>
       <p><em>Need to get out of here...</em></p>
-      <div>Raft, Sheltered Cove</div>
+      <div>Raft, Shipwreck Cove</div>
     </div>
   },
   'ideaGatherSurvivors': {
@@ -490,7 +504,7 @@ export const units: Record<CardSlug, CardType> = {
     imageUrl: "ideaShelter.png",
     idea: true,
     cardText: <div>
-      <div>3 Logs, 2 Palm Leaves</div>
+      <div>3 Hewn Logs, 2 Palm Leaves</div>
     </div>
   },
 
@@ -535,7 +549,7 @@ export const units: Record<CardSlug, CardType> = {
   },
   'carlosUnsettlingFeeling': {
     name: "Unsettled Feeling",
-    backgroundImage: "carlosUnsettlingFeeling.jpg",
+    backgroundImage: "carlosUnsettledFeeling.jpg",
     idea: true,
     cardText: <div>
       <em>I felt the tree screaming as my axe bit into it</em>

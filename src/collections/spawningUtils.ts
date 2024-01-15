@@ -2,7 +2,7 @@ import sample from "lodash/sample"
 import { CardPosition, CardPositionInfo } from "./types"
 import { CardSlug, units } from "./cards"
 import { filter, includes, some } from "lodash"
-import { getCardDimensions } from "../components/Card";
+import { CARD_HEIGHT, CARD_WIDTH, getCardDimensions } from "../components/Card";
 import { STACK_OFFSET_X, STACK_OFFSET_Y } from "./useCardPositions";
 
 export const randomHexId = () => {
@@ -20,7 +20,7 @@ function wouldOverlap(cardPositions: Record<string, CardPosition>, cardPosition:
   })
 }
 
-export function createCardPosition(cardPositions: Record<string, CardPosition>, slug: CardSlug, x: number, y: number, attached?: string[], avoidOverlap = true): CardPosition {
+export function createCardPosition(cardPositions: Record<string, CardPosition>, slug: CardSlug, x: number, y: number, attached?: string[], avoidOverlap = true, zIndex?: number): CardPosition {
   const card = units[slug]
 
   const newCardPosition = {
@@ -30,7 +30,7 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     timerId: undefined,
     attached: attached ?? [],
     maybeAttached: [],
-    zIndex: 1,
+    zIndex: zIndex ?? 1,
     currentHunger: card.maxHunger ? card.maxHunger/2 - 1: undefined,
     currentFuel: card.maxFuel ? card.maxFuel/2 - 1: undefined,
     currentStamina: card.maxStamina ? card.maxStamina/1.5 - 1: undefined,
@@ -74,30 +74,45 @@ export const updateCardPosition = (
   });
 };
 
+function fitCardToScreen(x: number, y: number) {
+  const screenWidth = window.innerWidth
+  const screenHeight = window.innerHeight
+  const margin = 50
+  const maxX = screenWidth - CARD_WIDTH - margin
+  const maxY = screenHeight - CARD_HEIGHT - margin
+  const minX = margin
+  const minY = margin
+  const newX = Math.max(Math.min(x, maxX), minX)
+  const newY = Math.max(Math.min(y, maxY), minY)
+  return {x: newX, y: newY}
+}
+
 function spawnNearby(cardPositions: Record<string, CardPosition>, slug: CardSlug, parent: CardPosition, soFarOutput: CardPosition[] = []) {
   const cardPositionsList = Object.values(cardPositions)
-  console.log("spawnNearby")
   const cardPositionsSlugs = Object.values(cardPositions).map(cardPosition => cardPosition.slug)
+
+  // if there is already a card with this slug, spawn it on top of that card
   if (cardPositionsSlugs.includes(slug)) {
-    console.log("spawn in stack")
-    const highestIndexedCardWithSlug = cardPositionsList.sort((a, b) => b.zIndex - a.zIndex).find(cardPosition => cardPosition.slug === slug)
+    const matchingCardPositions = cardPositionsList.filter(cardPosition => cardPosition.slug === slug) ?? []
+    const sortedPositions = matchingCardPositions.sort((a, b) => b.zIndex - a.zIndex)
+    const highestIndexedCardWithSlug = sortedPositions[0]
     if (highestIndexedCardWithSlug) {
       return createCardPosition(cardPositions, slug,
         highestIndexedCardWithSlug.x + STACK_OFFSET_X,
         highestIndexedCardWithSlug.y + STACK_OFFSET_Y,
         [highestIndexedCardWithSlug.id],
-        false
+        false,
+        highestIndexedCardWithSlug.zIndex + 1
       )
     }
   }
-  console.log("soFarOutput")
   if (soFarOutput) return spawnInSemiCircle(cardPositions, slug, parent, soFarOutput.length)
   const { width } = getCardDimensions(parent)
-  console.log("final spawnNearby")
-  return createCardPosition(cardPositions, slug,
-    Math.round(parent.x + width + Math.random() * 25 + 25),
-    Math.round(parent.y + 15 + Math.random() * 25 + 25)
+  const {x, y} = fitCardToScreen(
+    parent.x + width + Math.random() * 25 + 25, 
+    parent.y + 15 + Math.random() * 25 + 25
   )
+  return createCardPosition(cardPositions, slug, x, y)
 }
 
 function spawnInSemiCircle(cardPositions: Record<string, CardPosition>,  slug: CardSlug, parent: CardPosition, i = 0, radius = 50, angleIncrement: number = Math.PI / 5) {
@@ -105,9 +120,11 @@ function spawnInSemiCircle(cardPositions: Record<string, CardPosition>,  slug: C
   const angle = i * angleIncrement;
 
   // Calculate the new position using the circle's equation
-  const x = Math.round(parent.x + radius * Math.sin(angle) + Math.random() * 25)
-  const y = Math.round(parent.y + radius * -Math.cos(angle) + Math.random() * 25)
 
+  const {x, y} = fitCardToScreen(
+    Math.round(parent.x + radius * Math.sin(angle) + Math.random() * 25),
+    Math.round(parent.y + radius * -Math.cos(angle) + Math.random() * 25)
+  )
   // Create and return the new card position
   return createCardPosition(cardPositions, slug, x, y);
 }
@@ -355,7 +372,7 @@ export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxA
   const cardPosition = cardPositions[id]
   const attachedId = cardPosition.attached.find(i => cardPositions[i][resource])
   const resourceAmount = attachedId && cardPositions[attachedId][resource]
-
+  // TODO: restore timer is set repeatedly. 
   if (cardPosition[currentAttribute] && !cardPosition.timerEnd && resourceAmount && attachedId) {
     const timerId = setTimeout(() => {
       restore({
@@ -367,6 +384,7 @@ export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxA
         preserve,
       })
     }, duration)
+
     return updateCardPosition(cardPositionInfo, (cardPosition) => ({
       ...cardPosition,
       timerId: timerId,
@@ -404,7 +422,7 @@ function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribu
         currentSpawnDescriptor: undefined,
         attached: [],
         spawningStack: undefined,
-        [currentAttribute]: Math.min(currentAttributeAmount + resourceAmount, cardPosition[maxAttribute] ?? 0),
+        [currentAttribute]: Math.min(currentAttributeAmount + resourceAmount, (cardPosition[maxAttribute] ?? 0)),
       };
 
       if (!preserve) {

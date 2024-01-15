@@ -11,9 +11,10 @@ import FuelStatus from './Statuses/FuelStatus';
 import { findNonoverlappingDirection, getNewCardPosition, getOverlappingNonattachedCards, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 import { StaminaStatus } from './Statuses/StaminaStatus';
 import DecayStatus from './Statuses/DecayStatus';
+import ExploredStatus from './Statuses/ExploredStatus';
 
 export const LARGE_CARD_WIDTH = 132
-export const LARGE_CARD_HEIGHT = 220
+export const LARGE_CARD_HEIGHT = 218
 export const CARD_HEIGHT = 180;
 export const CARD_WIDTH = 110;
 export const IDEA_CARD_WIDTH = 120;
@@ -353,8 +354,8 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
                 {/* <div className={classes.meta} style={{right: 5, top: 5}}>
                   {cardPosition.destinationX}, {cardPosition.destinationY}
                 </div> */}
-                {/* 
-                <div className={classes.meta} style={{left: 5, top: 5}}>
+                
+                {/* <div className={classes.meta} style={{left: 5, top: 5}}>
                   {id}
                 </div> */}
                 {/* <div className={classes.meta} style={{left: 5, bottom: 5}}>
@@ -388,6 +389,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
               max={maxDecay} 
               current={currentDecay}
               />}
+            <ExploredStatus card={card} cardPosition={cardPosition}/>
           </div>
 
           {cardText && <div className={classes.cardText}>
