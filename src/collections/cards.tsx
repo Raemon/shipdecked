@@ -138,7 +138,7 @@ const characterSpawnInfo: SpawnInfo[] = [
   },
 ]
 
-export const units: Record<CardSlug, CardType> = {
+export const allCards: Record<CardSlug, CardType> = {
   "ruth": {
     name: 'Ruth',
     imageUrl: 'ruth.png',

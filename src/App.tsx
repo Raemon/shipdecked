@@ -1,10 +1,10 @@
 import React from 'react';
 import Game from './components/Game';
-import { units } from './collections/cards';
+import { allCards } from './collections/cards';
 
 
 function App() {
-  Object.values(units).forEach(unit => {
+  Object.values(allCards).forEach(unit => {
     const img = new Image();
     console.log("loading", unit.imageUrl)
     img.src = unit.imageUrl || ""

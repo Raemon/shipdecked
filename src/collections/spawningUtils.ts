@@ -1,6 +1,6 @@
 import sample from "lodash/sample"
 import { CardPosition, CardPositionInfo } from "./types"
-import { CardSlug, units } from "./cards"
+import { CardSlug, allCards } from "./cards"
 import { filter, includes, some } from "lodash"
 import { CARD_HEIGHT, CARD_WIDTH, getCardDimensions } from "../components/Card";
 import { STACK_OFFSET_X, STACK_OFFSET_Y } from "./useCardPositions";
@@ -21,7 +21,7 @@ function wouldOverlap(cardPositions: Record<string, CardPosition>, cardPosition:
 }
 
 export function createCardPosition(cardPositions: Record<string, CardPosition>, slug: CardSlug, x: number, y: number, attached?: string[], avoidOverlap = true, zIndex?: number): CardPosition {
-  const card = units[slug]
+  const card = allCards[slug]
 
   const newCardPosition = {
     slug,
@@ -207,7 +207,7 @@ export function spawnTimerFromLoot({attachedSlug, duration, cardPositionInfo, pr
   const spawnSlug = getLoot(cardPositions, id, attachedSlug).spawnSlug
   if (attachedSlugs.includes(attachedSlug) && !cardPosition.timerEnd && spawnSlug) {
     const timerId = setTimeout(() => spawnFromLoot({attachedSlug, cardPositionInfo, preserve}), duration);
-    const attachedSpawnDescriptor = descriptor ?? units[attachedSlug].spawnDescriptor
+    const attachedSpawnDescriptor = descriptor ?? allCards[attachedSlug].spawnDescriptor
     
     return updateCardPosition(cardPositionInfo, (cardPosition) => ({
       ...cardPosition, 

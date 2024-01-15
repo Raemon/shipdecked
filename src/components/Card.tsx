@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
 import { AttributeInfo, CardPosition, CardPositionInfo } from '../collections/types';
-import { units } from '../collections/cards';
+import { allCards } from '../collections/cards';
 import { getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
 import CardTimer from './CardTimer';
 import { debugging, handleStart } from './Game';
@@ -322,7 +322,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) 
 
   const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,    
     currentDecay,currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack } = cardPosition;
-  const card = units[slug]
+  const card = allCards[slug]
   if (!card) throw Error
 
   if (cardPosition.hide) return null
