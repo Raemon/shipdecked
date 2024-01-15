@@ -85,7 +85,7 @@ function fitCardToScreen(x: number, y: number) {
   const minY = margin
   const newX = Math.max(Math.min(x, maxX), minX)
   const newY = Math.max(Math.min(y, maxY), minY)
-  console.log({x, y, newX, newY, maxX, maxY, minX, minY})
+  // console.log({x, y, newX, newY, maxX, maxY, minX, minY})
   return {x: newX, y: newY}
 }
 
