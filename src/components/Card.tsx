@@ -64,6 +64,10 @@ export const getCardBorder = (cardPosition: CardPosition) => {
 }
 
 const useStyles = createUseStyles({
+  '@keyframes fadeOutOutline': {
+    from: { outline: '3px solid rgba(0, 0, 0, 1)' }, // Full opacity
+    to: { outline: '3px solid rgba(0, 0, 0, 0)' } // Zero opacity
+  },
   root: {
     display: "inline-block",
     position: "absolute",
@@ -80,6 +84,7 @@ const useStyles = createUseStyles({
     boxShadow: '0 4px 0 0 rgba(0,0,0,0)',
     backgroundSize: "cover !important",
     transition: 'all .1s ease-in-out',
+    animation: '$fadeOutOutline 2s forwards', // Apply the animation
     cursor: "grab", 
     '&:hover': {
       transform: 'scale(1.01)',

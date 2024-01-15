@@ -27,10 +27,10 @@ export type CardSlug =
   'wildBoar'
 
 const characterSpawnInfo: SpawnInfo[] = [
-  { inputStack: ['shoresidePath'], duration: 500, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['shoresidePath'], duration: 1000, descriptor: "Exploring...", preserve: true },
   { inputStack: ['shipwreckedCove'], duration: 3000, descriptor: "Exploring...", preserve: true },
   { inputStack: ['craggyCliffs'], duration: 3000, descriptor: "Exploring...", preserve: true },
-  { inputStack: ['denseJungle'], duration: 25000, descriptor: "Exploring...", preserve: true},
+  { inputStack: ['denseJungle'], duration: 60000, descriptor: "Exploring...", preserve: true},
   { inputStack: ['crate'], duration: 1000, descriptor: "Opening..." },
   { inputStack: ['rocks'], duration: 3000, descriptor: "Chipping..." },
   { 
@@ -45,6 +45,12 @@ const characterSpawnInfo: SpawnInfo[] = [
     inputStack: ['flint', 'driftWoodLog', 'sticks'], 
     output: ['smallFire'],  
   },
+  { 
+    duration: 6000, 
+    descriptor: "Building...", 
+    inputStack: ['flint', 'hewnLog', 'sticks'], 
+    output: ['smallFire'],  
+  },
   {
     duration: 1000, 
     descriptor: "Building...", 
@@ -54,21 +60,21 @@ const characterSpawnInfo: SpawnInfo[] = [
   {
     duration: 1000,
     descriptor: "Building...",
-    inputStack: ['hewnLog', 'hewnLog', 'hewnLog', 'palmLeaves', 'palmLeaves'],
+    inputStack: ['hewnLog', 'hewnLog', 'palmLeaves'],
     output: ['shelter'],
   },
 
   {
     duration: 1000,
     descriptor: "Building...",
-    inputStack: ['fallenLog', 'fallenLog', 'fallenLog', 'palmLeaves', 'palmLeaves'],
+    inputStack: ['fallenLog', 'fallenLog', 'palmLeaves'],
     output: ['shelter'],
   },
   { 
     duration: 6000, 
     descriptor: "Chopping...", 
     inputStack: ['hatchet', 'coconutTree'], 
-    output: ["coconut", "coconut", "fallenLog", "palmLeaves"],
+    output: ["coconut", "fallenLog", "palmLeaves"],
     attachedOutput: ['hatchet']
   },
   {
@@ -315,7 +321,7 @@ export const units: Record<CardSlug, CardType> = {
     name: "Craggy Cliffs",
     backgroundImage: "craggyCliffs.jpg",
     large: true,
-    loot: ['rocks', 'rocks', 'carlos', 'sticks', 'sticks'],
+    loot: ['rocks', 'rocks', 'milo', 'sticks', 'sticks'],
     spawnDescriptor: "Exploring...",
   },
   'coastalWaters': {
@@ -328,7 +334,7 @@ export const units: Record<CardSlug, CardType> = {
   'carlosFootprints': {
     name: "Footprints",
     imageUrl: "footprints.png",
-    loot: ['craggyCliffs'],
+    loot: ['shelteredCove'],
   },
   'jungleFootprints': {
     name: "Footprints",
@@ -452,8 +458,7 @@ export const units: Record<CardSlug, CardType> = {
 
   'jungleShrine': {
     name: "Jungle Shrine",
-    imageUrl: 'jungleShrine.png',
-    rest: 600,
+    imageUrl: 'jungleShrine.png'
   },
 
   // Ideas/Dreams
@@ -479,7 +484,7 @@ export const units: Record<CardSlug, CardType> = {
     large: true,
     cardText: <div>
       <p><em>Need to get out of here...</em></p>
-      <div>Raft, Shipwreck Cove</div>
+      <div>Raft, Sheltered Cove</div>
     </div>
   },
   'ideaGatherSurvivors': {
@@ -504,7 +509,7 @@ export const units: Record<CardSlug, CardType> = {
     imageUrl: "ideaShelter.png",
     idea: true,
     cardText: <div>
-      <div>3 Hewn Logs, 2 Palm Leaves</div>
+      <div>2 Hewn Logs, Palm Leaves</div>
     </div>
   },
 

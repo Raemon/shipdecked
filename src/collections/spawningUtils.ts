@@ -36,6 +36,7 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     currentStamina: card.maxStamina ? card.maxStamina/1.5 - 1: undefined,
     currentFading: card.maxFading,
     currentDecay: card.maxDecay,
+    createdAt: new Date(),
     x,
     y,
     ...card,
@@ -77,13 +78,14 @@ export const updateCardPosition = (
 function fitCardToScreen(x: number, y: number) {
   const screenWidth = window.innerWidth
   const screenHeight = window.innerHeight
-  const margin = 50
+  const margin = 200
   const maxX = screenWidth - CARD_WIDTH - margin
   const maxY = screenHeight - CARD_HEIGHT - margin
   const minX = margin
   const minY = margin
   const newX = Math.max(Math.min(x, maxX), minX)
   const newY = Math.max(Math.min(y, maxY), minY)
+  console.log({x, y, newX, newY, maxX, maxY, minX, minY})
   return {x: newX, y: newY}
 }
 

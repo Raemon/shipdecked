@@ -66,6 +66,7 @@ export interface CardPositionBase extends CardType {
   hide?: boolean,
   zIndex: number,
   dragging?: boolean,
+  createdAt: Date,
 }
 
 export interface CardPosition extends CardPositionBase, CurrentCardAttriutes, MaxCardAttributes {}
