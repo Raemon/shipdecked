@@ -1,7 +1,6 @@
 {
   "name": "my-app",
   "version": "0.1.0",
-  "homepage": "https://raemon.github.io/sro-game",
   "private": true,
   "dependencies": {
     "@mui/material": "^5.13.6",
