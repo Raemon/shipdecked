@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate'
+  'shoresidePath', 'crate', 'raft', 'shelteredCove'
 ]
 
 export type CardSlug = 
@@ -13,7 +13,8 @@ export type CardSlug =
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'shipwreckedCorpse'|
   'palmLeaves'|'vine'|
-  'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'theShipwreck'|'craggyCliffs'|'coastalWaters'|
+  'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'theShipwreck'|'craggyCliffs'|
+  'ominousWaters'|'coastalWaters'|'unnaturalStorm'|
   'carlosFootprints'|'jungleFootprints'|
   'crate'|
   'smallFire'|
@@ -33,6 +34,8 @@ const characterSpawnInfo: SpawnInfo[] = [
   { inputStack: ['craggyCliffs'], duration: 2500, descriptor: "Exploring...", preserve: true },
   { inputStack: ['denseJungle'], duration: 60000, descriptor: "Exploring...", preserve: true},
   { inputStack: ['shelteredCove'], duration: 2500, descriptor: "Exploring...", preserve: true},
+  { inputStack: ['coastalWaters'], duration: 2500, descriptor: "Exploring...", preserve: true},
+  { inputStack: ['ominousWaters'], duration: 2500, descriptor: "Exploring...", preserve: true},
   { inputStack: ['crate'], duration: 1000, descriptor: "Opening..." },
   { inputStack: ['rocks'], duration: 3000, descriptor: "Chipping..." },
   { 
@@ -160,7 +163,15 @@ const characterSpawnInfo: SpawnInfo[] = [
     duration: 6000,
     descriptor: "Rowing...",
     inputStack: ['raft', 'shelteredCove'],
-    output: ['ideaEscape'],
+    preserve: true, 
+    output: ['ominousWaters'],
+  },
+  {
+    duration: 12000,
+    descriptor: "Rowing...",
+    inputStack: ['raft', 'ominousWaters'],
+    preserve: true, 
+    output: ['unnaturalStorm'],
   },
 ]
 
@@ -335,6 +346,16 @@ export const allCards: Record<CardSlug, CardType> = {
     large: true,
     spawnDescriptor: "Exploring...",
     loot: ['craggyCliffs', 'jungleTree', 'jungleTree', 'wildBoar', 'ancientTree', 'distantFigure', 'jungleShrine'],
+  },
+  'ominousWaters': {
+    name: "Ominous Waters",
+    backgroundImage: "ominousWaters.jpg",
+    large: true,
+  },
+  'unnaturalStorm': {
+    name: "Unnatural Storm",
+    large: true,
+    backgroundImage: "unnaturalStorm.jpg",
   },
   'junglePath': {
     name: "Jungle Path",
@@ -522,7 +543,7 @@ export const allCards: Record<CardSlug, CardType> = {
     imageUrl: "ideaRaft.png",
     idea: true,
     cardText: <div>
-      <div>2 Rope, 5 Logs</div>
+      <div>2 Rope, 5 Logs,<br/> 2 Characters</div>
     </div>
   },
   'ideaEscape': {
