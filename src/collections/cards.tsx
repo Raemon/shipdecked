@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate', 'raft', 'shelteredCove'
+  'shoresidePath', 'crate',
 ]
 
 export type CardSlug = 
