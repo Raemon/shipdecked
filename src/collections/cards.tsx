@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate',
+  'shoresidePath', 'crate', 'raft', 'shelteredCove'
 ]
 
 export type CardSlug = 
@@ -154,6 +154,12 @@ const characterSpawnInfo: SpawnInfo[] = [
     inputStack: ['vine'],
     duration: 3000, preserve: true, descriptor: "Thinking...", 
     output: ['ideaRope'] 
+  },
+  {
+    duration: 6000,
+    descriptor: "Rowing...",
+    inputStack: ['raft', 'shelteredCove'],
+    output: ['ideaEscape'],
   },
 ]
 
@@ -337,7 +343,7 @@ export const allCards: Record<CardSlug, CardType> = {
   },
   'shelteredCove': {
     name: "Sheltered Cove",
-    backgroundImage: "shelteredCove.jpg",
+    backgroundImage: "shelteredCove.png",
     large: true,
     loot: ['carlos'],
     secondaryLoot: ['rocks', 'coconutTree', 'seaweed', 'fallenLog', 'coconutTree', 'flint'],
