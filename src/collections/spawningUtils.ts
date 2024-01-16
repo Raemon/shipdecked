@@ -44,8 +44,10 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     dragging: false,
   }
   while (wouldOverlap(cardPositions, newCardPosition) && avoidOverlap) {
-    const newX = Math.max(newCardPosition.x + Math.round(Math.random() * 50 - 25), 0)
-    const newY = Math.max(newCardPosition.y + Math.round(Math.random() * 50 - 25), 0)
+    const { x: newX, y: newY} = fitCardToScreen(
+      Math.max(newCardPosition.x + Math.round(Math.random() * 50 - 25), 0),
+      Math.max(newCardPosition.y + Math.round(Math.random() * 50 - 25), 0)
+    )
     newCardPosition.x = newX
     newCardPosition.y = newY
   }
@@ -111,8 +113,8 @@ function spawnNearby(cardPositions: Record<string, CardPosition>, slug: CardSlug
   if (soFarOutput) return spawnInSemiCircle(cardPositions, slug, parent, soFarOutput.length)
   const { width } = getCardDimensions(parent)
   const {x, y} = fitCardToScreen(
-    parent.x + width + Math.random() * 25 + 25, 
-    parent.y + 15 + Math.random() * 25 + 25
+    parent.x + width + 25, 
+    parent.y + 25
   )
   return createCardPosition(cardPositions, slug, x, y)
 }

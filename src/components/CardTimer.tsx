@@ -4,23 +4,23 @@ import { createUseStyles } from 'react-jss';
 const useStyles = createUseStyles({
   root: {
     position: "absolute",
-    bottom: -20,
-    marginTop: 6,
-    fontSize: 10,
+    bottom: "100%",
+    fontSize: 12,
+    marginTop: 12,
     color: "rgba(0,0,0,.8)",
     width: "100%",
-    height: 14,
+    height: 18,
     border: "solid 1px #979090",
     background: "#efefef",
     borderRadius: 3,
   },
   timer: {
     background: "#d1c7c2",
-    height: 14
+    height: 18
   },
   descriptor: {
     position: "absolute",
-    top: 7,
+    top: 8,
     left: "50%",
     transform: "translate(-50%, -50%)",
     width: "100%"

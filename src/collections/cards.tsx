@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate',
+  'shoresidePath', 'crate'
 ]
 
 export type CardSlug = 
@@ -13,7 +13,7 @@ export type CardSlug =
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'shipwreckedCorpse'|
   'palmLeaves'|'vine'|
-  'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'shipwreckedCove'|'craggyCliffs'|'coastalWaters'|
+  'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'theShipwreck'|'craggyCliffs'|'coastalWaters'|
   'carlosFootprints'|'jungleFootprints'|
   'crate'|
   'smallFire'|
@@ -28,10 +28,11 @@ export type CardSlug =
   'wildBoar'
 
 const characterSpawnInfo: SpawnInfo[] = [
-  { inputStack: ['shoresidePath'], duration: 1000, descriptor: "Exploring...", preserve: true },
-  { inputStack: ['shipwreckedCove'], duration: 3000, descriptor: "Exploring...", preserve: true },
-  { inputStack: ['craggyCliffs'], duration: 3000, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['shoresidePath'], duration: 2500, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['theShipwreck'], duration: 2500, descriptor: "Exploring...", preserve: true },
+  { inputStack: ['craggyCliffs'], duration: 2500, descriptor: "Exploring...", preserve: true },
   { inputStack: ['denseJungle'], duration: 60000, descriptor: "Exploring...", preserve: true},
+  { inputStack: ['shelteredCove'], duration: 2500, descriptor: "Exploring...", preserve: true},
   { inputStack: ['crate'], duration: 1000, descriptor: "Opening..." },
   { inputStack: ['rocks'], duration: 3000, descriptor: "Chipping..." },
   { 
@@ -315,8 +316,17 @@ export const allCards: Record<CardSlug, CardType> = {
     name: "Shoreside path",
     backgroundImage: 'shoresidepath.jpg',
     large: true,
-    loot: ['coconutTree', 'flint', 'sticks', 'shipwreckedCove'],
+    // loot: ['carlos'],
+    loot: ['coconutTree', 'flint', 'sticks', 'theShipwreck'],
     secondaryLoot: ['crate', 'coconutTree', 'coconutTree', 'rocks', 'sticks', 'flint'],
+    spawnDescriptor: "Exploring...",
+  },
+  'shelteredCove': {
+    name: "Sheltered Cove",
+    backgroundImage: "shelteredCove.png",
+    large: true,
+    loot: ['carlos'],
+    secondaryLoot: ['rocks', 'coconutTree', 'seaweed', 'fallenLog', 'coconutTree', 'flint'],
     spawnDescriptor: "Exploring...",
   },
   'denseJungle': {
@@ -333,20 +343,13 @@ export const allCards: Record<CardSlug, CardType> = {
     spawnDescriptor: "Exploring...",
     loot: ['coconutTree', 'craggyCliffs', 'jungleTree', 'jungleTree', 'coconutTree', 'wildBoar', 'ancientTree', 'distantFigure', 'tree', 'jungleShrine'],
   },
-  'shipwreckedCove': {
+  'theShipwreck': {
     name: "The Shipwreck",
-    backgroundImage: "shipwreckedCove.jpg",
+    backgroundImage: "theShipwreck.jpg",
     large: true,
-    loot: ['shipwreckedCorpse'], 
-    secondaryLoot: ['rocks', 'crate', 'seaweed', 'crate', 'flint', 'denseJungle', 'carlosFootprints' ],
+    loot: ['shipwreckedCorpse', 'carlosFootprints'], 
+    secondaryLoot: ['rocks', 'crate', 'seaweed', 'crate', 'flint', 'denseJungle' ],
     spawnDescriptor: "Exploring...",
-  },
-  'shelteredCove': {
-    name: "Sheltered Cove",
-    backgroundImage: "shelteredCove.png",
-    large: true,
-    loot: ['carlos'],
-    secondaryLoot: ['rocks', 'coconutTree', 'seaweed', 'fallenLog', 'coconutTree', 'flint'],
   },
   'craggyCliffs': {
     name: "Craggy Cliffs",
@@ -372,7 +375,7 @@ export const allCards: Record<CardSlug, CardType> = {
     imageUrl: "jungleFootprints.png",
   },
   'rocks': {
-    name: "Rocks",
+    name: "Rock Pile",
     imageUrl: "rocks.png",
     loot: ['flint', 'flint', 'smallRoundStone'],
   },
