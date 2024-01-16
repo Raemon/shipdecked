@@ -141,10 +141,11 @@ type CardProps = {
   onStop: (id: string) => void;
   paused: boolean;
   isDragging: boolean;
+  soundEnabled: boolean;
 };
 
 
-const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging}:CardProps) => {
+const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnabled}:CardProps) => {
   const classes = useStyles();
   const {cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id];

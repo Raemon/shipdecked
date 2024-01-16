@@ -117,6 +117,14 @@ function Game() {
   // //   }
   // //   pauseCheckTimer()
   // // }, [lastMouseMoved]);
+
+  // TODO: actually implement or give up on sound
+  let soundEnabled = false;
+
+  document.addEventListener('click', () => {
+    soundEnabled = true;
+  });
+
   return (
     <div className={classes.root}>
       {
@@ -135,6 +143,7 @@ function Game() {
               {Object.values(newCardPositions).map(cardPosition => {
                 if (!cardPosition) return null
                 return <Card key={cardPosition.id} 
+                  soundEnabled={soundEnabled}
                   cardPositionInfo={{cardPositions, id:cardPosition.id, setCardPositions}} 
                   onDrag={onDrag} 
                   onStop={onStop}

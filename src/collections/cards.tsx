@@ -12,16 +12,17 @@ export type CardSlug =
   'fallenLog'|'driftWoodLog'|'hewnLog'|'flint'|'sticks'|'longStick'|'rocks'|'smallRoundStone'|
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'shipwreckedCorpse'|
-  'palmLeaves'|
+  'palmLeaves'|'vine'|
   'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'shipwreckedCove'|'craggyCliffs'|'coastalWaters'|
   'carlosFootprints'|'jungleFootprints'|
   'crate'|
   'smallFire'|
   'raft'|'birdDroppings'|
-  'ideaFire'|'ideaRaft'|'ideaEscape'|'ideaHatchet'|'ideaShelter'|'ideaGatherSurvivors'|
+  'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaRope'|
+  'ideaGatherSurvivors'|'ideaEscape'|
   'sexualTensionCarlosRuth'|
   'shelter'|
-  'hatchet'|'spear'|'hammer'|'workBench'|
+  'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
   'distantFigure'|'feyHorror'|'jungleShrine'|
   'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'|
   'wildBoar'
@@ -38,6 +39,12 @@ const characterSpawnInfo: SpawnInfo[] = [
     descriptor: "Building...", 
     inputStack: ['flint', 'fallenLog', 'sticks'], 
     output: ['smallFire'], 
+  },
+  {
+    duration: 12000,
+    descriptor: "Building...",
+    inputStack: ['rope', 'rope', 'fallenLog', 'fallenLog', 'fallenLog', 'fallenLog', 'fallenLog'],
+    output: ['raft'], 
   },
   { 
     duration: 6000, 
@@ -121,7 +128,13 @@ const characterSpawnInfo: SpawnInfo[] = [
     duration: 3000,
     descriptor: "Chopping",
     inputStack: ['jungleTree', 'hatchet'],
-    output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet']
+    output: ['sticks', 'fallenLog', 'fallenLog', 'vine', 'hatchet']
+  },
+  {
+    duration: 3000,
+    descriptor: "Weaving",
+    inputStack: ['vine', 'vine', 'vine'],
+    output: ['rope']
   },
   {
     duration: 3000,
@@ -135,6 +148,12 @@ const characterSpawnInfo: SpawnInfo[] = [
     descriptor: "Sitting quietly...",
     inputStack: ['jungleShrine'],
     output: ['ideaEscape'],
+  },
+  { 
+    skipIfExists: ['ideaRope'], 
+    inputStack: ['vine'],
+    duration: 3000, preserve: true, descriptor: "Thinking...", 
+    output: ['ideaRope'] 
   },
 ]
 
@@ -154,6 +173,12 @@ export const allCards: Record<CardSlug, CardType> = {
         inputStack: ['carlos'],
         duration: 3000, preserve: true, descriptor: "Talking...", 
         output: ['ideaFire'] 
+      },
+      { 
+        skipIfExists: ['ideaRaft'], 
+        inputStack: ['milo'],
+        duration: 3000, preserve: true, descriptor: "Talking...", 
+        output: ['ideaRaft'] 
       },
       {
         duration: 30000,
@@ -343,7 +368,15 @@ export const allCards: Record<CardSlug, CardType> = {
   'rocks': {
     name: "Rocks",
     imageUrl: "rocks.png",
-    loot: ['flint', 'smallRoundStone','flint', 'smallRoundStone'],
+    loot: ['flint', 'flint', 'smallRoundStone'],
+  },
+  'vine': {
+    name: "Vine",
+    imageUrl: "vine.png"
+  },
+  'rope': {
+    name: "Rope",
+    imageUrl: "rope.png"
   },
   'seaweed': {
     name: "Seaweed",
@@ -469,12 +502,18 @@ export const allCards: Record<CardSlug, CardType> = {
     idea: true,
     cardText: <div>Sticks, Log and Flint</div>
   },
+  'ideaRope':{
+    name: "Idea: Rope",
+    imageUrl: 'ideaRope.png',
+    idea: true,
+    cardText: <div>3 Vines</div>
+  },
   'ideaRaft': {
     name: 'Idea: Raft',
     imageUrl: "ideaRaft.png",
     idea: true,
     cardText: <div>
-      <div>Sticks, 2 Rope, 5 Logs</div>
+      <div>2 Rope, 5 Logs</div>
     </div>
   },
   'ideaEscape': {

@@ -9,7 +9,6 @@ function App() {
     console.log("loading", unit.imageUrl)
     img.src = unit.imageUrl || ""
   })
-
   return (
     <Game/>
   );
