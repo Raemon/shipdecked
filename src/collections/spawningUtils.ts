@@ -43,7 +43,9 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     id: randomHexId(),
     dragging: false,
   }
-  while (wouldOverlap(cardPositions, newCardPosition) && avoidOverlap) {
+  let i = 0
+  while (wouldOverlap(cardPositions, newCardPosition) && avoidOverlap && i < 1000) {
+    i++
     const { x: newX, y: newY} = fitCardToScreen(
       Math.max(newCardPosition.x + Math.round(Math.random() * 50 - 25), 0),
       Math.max(newCardPosition.y + Math.round(Math.random() * 50 - 25), 0)
@@ -210,7 +212,6 @@ export function spawnTimerFromLoot({attachedSlug, duration, cardPositionInfo, pr
   if (attachedSlugs.includes(attachedSlug) && !cardPosition.timerEnd && spawnSlug) {
     const timerId = setTimeout(() => spawnFromLoot({attachedSlug, cardPositionInfo, preserve}), duration);
     const attachedSpawnDescriptor = descriptor ?? allCards[attachedSlug].spawnDescriptor
-    
     return updateCardPosition(cardPositionInfo, (cardPosition) => ({
       ...cardPosition, 
       timerId: timerId,
@@ -227,7 +228,6 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
   const { cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id]
   if (!cardPositions[id]) return
-
   setCardPositions(prevCardPositions => {
     const { spawnSlug, attachedId } = getLoot(prevCardPositions, id, attachedSlug)
 
@@ -238,7 +238,6 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
       const oldSpawnItems = [...(oldAttached.loot ?? [])]
       let newSpawnItems = removeOneInstance(oldSpawnItems, spawnSlug)
       let secondaryLoot = oldAttached.secondaryLoot ?? []
-
       newCardPositions[id] = popOffCard(cardPositionInfo)
 
       const newCardPosition = spawnNearby(newCardPositions, spawnSlug, cardPosition)

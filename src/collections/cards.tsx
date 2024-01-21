@@ -3,7 +3,7 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate', 'raft', 'shelteredCove'
+  'shoresidePath', 'crate'
 ]
 
 export type CardSlug = 
@@ -20,7 +20,7 @@ export type CardSlug =
   'smallFire'|
   'raft'|'birdDroppings'|
   'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaRope'|
-  'ideaGatherSurvivors'|'ideaEscape'|
+  'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|
   'sexualTensionCarlosRuth'|
   'shelter'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
@@ -164,6 +164,7 @@ const characterSpawnInfo: SpawnInfo[] = [
     descriptor: "Rowing...",
     inputStack: ['raft', 'shelteredCove'],
     preserve: true, 
+    skipIfExists: ['ominousWaters'], 
     output: ['ominousWaters'],
   },
   {
@@ -171,8 +172,24 @@ const characterSpawnInfo: SpawnInfo[] = [
     descriptor: "Rowing...",
     inputStack: ['raft', 'ominousWaters'],
     preserve: true, 
+    skipIfExists: ['unnaturalStorm'], 
     output: ['unnaturalStorm'],
   },
+  {
+    duration: 3000,
+    descriptor: "Rowing...",
+    inputStack: ['raft', 'unnaturalStorm'], 
+    consumeInitiator: true,
+    output: ['ideaBiggerBoat'],
+  },
+  { 
+    duration: 6000, 
+    descriptor: "Stare in horror...", 
+    inputStack: ['shipwreckedCorpse'], 
+    skipIfExists: ['ideaEscape'], 
+    output: ["ideaEscape"],
+    preserve: true,
+  }
 ]
 
 export const allCards: Record<CardSlug, CardType> = {
@@ -210,14 +227,6 @@ export const allCards: Record<CardSlug, CardType> = {
         inputStack: ['smallFire'], 
         skipIfExists: ['ideaGatherSurvivors'], 
         output: ["ideaGatherSurvivors"],
-        preserve: true,
-      },
-      { 
-        duration: 6000, 
-        descriptor: "Stare in horror...", 
-        inputStack: ['shipwreckedCorpse'], 
-        skipIfExists: ['ideaEscape'], 
-        output: ["ideaEscape"],
         preserve: true,
       }
     ]
@@ -554,6 +563,16 @@ export const allCards: Record<CardSlug, CardType> = {
     cardText: <div>
       <p><em>Need to get out of here...</em></p>
       <div>Raft, Sheltered Cove</div>
+    </div>
+  },
+  'ideaBiggerBoat': {
+    name: 'Idea: A Bigger Boat?',
+    backgroundImage: "ideaShip.jpg",
+    idea: true,
+    large: true,
+    cardText: <div>
+      <p><em>What the hell was that?</em></p>
+      <div>Ship, Unnatural Storm</div>
     </div>
   },
   'ideaGatherSurvivors': {
