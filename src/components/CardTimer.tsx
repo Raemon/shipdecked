@@ -4,7 +4,6 @@ import { createUseStyles } from 'react-jss';
 const useStyles = createUseStyles({
   root: {
     position: "absolute",
-    bottom: "100%",
     fontSize: 12,
     marginTop: 12,
     color: "rgba(0,0,0,.8)",
@@ -58,7 +57,7 @@ const CardTimer = ({timerStart, timerEnd, descriptor, offsetX, offsetY}:{
   }, []);
 
   return (
-    <div className={classes.root} style={{bottom: -20 - offsetY, left: offsetX}}>
+    <div className={classes.root} style={{bottom: -24 - offsetY, left: offsetX}}>
       <div className={classes.descriptor}>{descriptor}</div>
       <div className={classes.timer} style={{ width: `${progressWidth}%`}} />
     </div>
