@@ -4,7 +4,7 @@ import { CardType, SpawnInfo } from "./types"
 export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath', 
-  'crate',
+  'crate'
   // 'hatchet',
   // 'jungleShrine', 'shipwreckedCorpse', 'openCoconut',
   // 'wildBoar', 'smallFire',
@@ -464,15 +464,15 @@ export const allCards: Record<CardSlug, CardType> = {
   },
   'carlosJungleFootprints': {
     name: "Carlos' Footprints",
-    imageUrl: "jungleFootprints.png",
+    backgroundImage: "jungleFootprints.png",
   },
   'ruthJungleFootprints': {
     name: "Ruth's Footprints",
-    imageUrl: "jungleFootprints.png",
+    backgroundImage: "jungleFootprints.png",
   },
   'miloJungleFootprints': {
     name: "Milo's Footprints",
-    imageUrl: "jungleFootprints.png",
+    backgroundImage: "jungleFootprints.png",
   },
   'rocks': {
     name: "Rock Pile",
