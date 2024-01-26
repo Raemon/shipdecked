@@ -12,6 +12,7 @@ import { findNonoverlappingDirection, getNewCardPosition, getOverlappingNonattac
 import { StaminaStatus } from './Statuses/StaminaStatus';
 import DecayStatus from './Statuses/DecayStatus';
 import ExploredStatus from './Statuses/ExploredStatus';
+import HealthStatus from './Statuses/HealthStatus';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 218
@@ -94,9 +95,9 @@ const useStyles = createUseStyles({
     transform: 'scale(1)',
     '& h2': {
       margin: 0,
-      fontSize: 14,
+      fontSize: 12,
       fontWeight: 500,
-      color: 'rgba(0,0,0,.75)',
+      color: 'rgba(0,0,0,.9)',
       fontFamily: "Papyrus"
     }
   },
@@ -126,7 +127,7 @@ const useStyles = createUseStyles({
   },
   statuses: {
     fontSize: 10,
-    color: "rgba(0,0,0,.65)",
+    color: "rgba(0,0,0,.75)",
     fontStyle: "italic",
     fontFamily: "Palatino",
     '& span:not(:last-child):after': {
@@ -149,12 +150,11 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
   const classes = useStyles();
   const {cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id];
-  const numberOverlappingCards = getOverlappingNonattachedCards(cardPositions, id).length
+  // const numberOverlappingCards = getOverlappingNonattachedCards(cardPositions, id).length
   
   const trackedCardId = Object.values(cardPositions).find((c: CardPosition) => {
     return cardPosition.tracks?.includes(c.slug)
   })?.id
-
 
   function handleDrag (event: DraggableEvent, data: DraggableData){
     onDrag(event, data, id)
@@ -286,23 +286,24 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
     setTimeout(() => {
       if (!cardPosition) return
       if (!cardPosition.tracks?.length) return
-      if (!trackedCardId) return
-      const trackedCard = cardPositions[trackedCardId]
-      if (!trackedCard) return
       updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
         let newX = cardPosition.x
         let newY = cardPosition.y
-        if (!isOverlapping(cardPositions, trackedCard.id, cardPosition.id)) {
+        const trackedCard = trackedCardId ? cardPositions[trackedCardId] : undefined
+        if (trackedCard && !isOverlapping(cardPositions, trackedCard.id, cardPosition.id)) {
           if (trackedCard.x > cardPosition.x) {
-            newX = Math.round(cardPosition.x + (Math.random()*10+5))
+            newX = Math.round(cardPosition.x + (Math.random()*20+10))
           } else if (trackedCard.x < cardPosition.x) {
-            newX = Math.round(cardPosition.x - (Math.random()*10+5))
+            newX = Math.round(cardPosition.x - (Math.random()*20+10))
           }
           if (trackedCard.y > cardPosition.y) {
-            newY = Math.round(cardPosition.y + (Math.random()*10+5))
+            newY = Math.round(cardPosition.y + (Math.random()*20+10))
           } else if (trackedCard.y < cardPosition.y) {
-            newY = Math.round(cardPosition.y - (Math.random()*10+5))
+            newY = Math.round(cardPosition.y - (Math.random()*20+10))
           }
+        } else {
+          newX = Math.round(cardPosition.x + (Math.random()*40 - 20))
+          newY = Math.round(cardPosition.y + (Math.random()*40 - 20))
         }
         return {
           ...getNewCardPosition(cardPositions, cardPosition.id),
@@ -310,7 +311,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
           y: newY,
         }
       });
-    }, 1000);
+    }, 2200);
   }, [trackedCardId, cardPosition.tracks, cardPosition.x, cardPosition.y])
 
   // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)
@@ -321,8 +322,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
 
   if (!cardPosition) return null
 
-  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,    
-    currentDecay,currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,  maxHealth, currentHealth, currentDecay,currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack } = cardPosition;
   const card = allCards[slug]
   if (!card) throw Error
 
@@ -360,8 +360,8 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
                 {/* <div className={classes.meta} style={{right: 5, top: 5}}>
                   {cardPosition.destinationX}, {cardPosition.destinationY}
                 </div> */}
-                
-                {/* <div className={classes.meta} style={{left: 5, top: 5}}>
+{/*                 
+                <div className={classes.meta} style={{left: 5, top: 5}}>
                   {id}
                 </div> */}
                 {/* <div className={classes.meta} style={{left: 5, bottom: 5}}>
@@ -382,6 +382,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
             {!!(maxHunger && currentHunger) && <HungerStatus
               max={maxHunger} 
               current={currentHunger}
+              />}
+            {!!(maxHealth && currentHealth) && <HealthStatus
+              max={maxHealth} 
+              current={currentHealth}
               />}
             {!!(maxFuel && currentFuel) && <FuelStatus
               max={maxFuel} 

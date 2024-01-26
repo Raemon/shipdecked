@@ -3,7 +3,11 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'crate',
+  'shoresidePath', 
+  'crate',
+  // 'hatchet',
+  // 'jungleShrine', 'shipwreckedCorpse', 'openCoconut',
+  // 'wildBoar', 'smallFire',
 ]
 
 export type CardSlug = 
@@ -11,7 +15,7 @@ export type CardSlug =
   'coconutTree'|'tree'|'ancientTree'|'jungleTree'|'bananaTree'|
   'fallenLog'|'driftWoodLog'|'hewnLog'|'flint'|'sticks'|'longStick'|'rocks'|'smallRoundStone'|
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
-  'shipwreckedCorpse'|
+  'shipwreckedCorpse'|'ruthCorpse'|'carlosCorpse'|'miloCorpse'|
   'palmLeaves'|'vine'|
   'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'theShipwreck'|'craggyCliffs'|
   'ominousWaters'|'coastalWaters'|'unnaturalStorm'|
@@ -20,19 +24,19 @@ export type CardSlug =
   'smallFire'|
   'raft'|'birdDroppings'|
   'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaRope'|
-  'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|
+  'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|'visionDryCourtOffering'|
   'sexualTensionCarlosRuth'|
   'shelter'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
-  'distantFigure'|'feyHorror'|'jungleShrine'|
+  'distantFigure'|'feyHorror'|'jungleShrine'|'visionDryCourtSacrifice'|'protectionDryCourt'|
   'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'|
-  'wildBoar'
+  'wildBoar'|'boarCarcass'|'rawMeat'|'cookedMeat'
 
 const characterSpawnInfo: SpawnInfo[] = [
   { inputStack: ['shoresidePath'], duration: 2500, descriptor: "Exploring...", preserve: true },
   { inputStack: ['theShipwreck'], duration: 2500, descriptor: "Exploring...", preserve: true },
   { inputStack: ['craggyCliffs'], duration: 2500, descriptor: "Exploring...", preserve: true },
-  { inputStack: ['denseJungle'], duration: 60000, descriptor: "Exploring...", preserve: true},
+  { inputStack: ['denseJungle'], duration: 35000, descriptor: "Exploring...", preserve: true},
   { inputStack: ['shelteredCove'], duration: 2500, descriptor: "Exploring...", preserve: true},
   { inputStack: ['coastalWaters'], duration: 2500, descriptor: "Exploring...", preserve: true},
   { inputStack: ['ominousWaters'], duration: 2500, descriptor: "Exploring...", preserve: true},
@@ -151,7 +155,15 @@ const characterSpawnInfo: SpawnInfo[] = [
     duration: 3000,
     descriptor: "Sitting quietly...",
     inputStack: ['jungleShrine'],
-    output: ['ideaEscape'],
+    output: ['jungleShrine', 'visionDryCourtOffering'],
+    skipIfExists: ['visionDryCourtOffering'], 
+  },
+  {
+    duration: 6000,
+    descriptor: "Praying...",
+    inputStack: ['jungleShrine', 'boarCarcass'],
+    output: ['jungleShrine', 'protectionDryCourt', 'visionDryCourtSacrifice'],
+    skipIfExists: ['visionDryCourtSacrifice'], 
   },
   { 
     skipIfExists: ['ideaRope'], 
@@ -189,6 +201,12 @@ const characterSpawnInfo: SpawnInfo[] = [
     skipIfExists: ['ideaEscape'], 
     output: ["ideaEscape"],
     preserve: true,
+  },
+  {
+    inputStack: ['boarCarcass', 'hatchet'],
+    duration: 3000,
+    descriptor: "Butchering...",
+    output: ['rawMeat', 'rawMeat', 'rawMeat', 'hatchet'],
   }
 ]
 
@@ -228,7 +246,22 @@ export const allCards: Record<CardSlug, CardType> = {
         skipIfExists: ['ideaGatherSurvivors'], 
         output: ["ideaGatherSurvivors"],
         preserve: true,
-      }
+      },
+      {
+        duration: 500,
+        descriptor: "Fighting",
+        inputStack: ['wildBoar'],
+        consumeInitiator: true,
+        output: ['ruthCorpse'],
+        preserve: true,
+      },
+      {
+        duration: 1500,
+        descriptor: "Fighting",
+        inputStack: ['wildBoar', 'hatchet'],
+        output: ['boarCarcass', 'hatchet'],
+        damage: 5
+      },
     ]
   },
   "carlos": {
@@ -251,6 +284,21 @@ export const allCards: Record<CardSlug, CardType> = {
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
         output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'carlosUnsettlingFeeling', 'palmLeaves']
+      },
+      {
+        duration: 500,
+        descriptor: "Fighting",
+        inputStack: ['wildBoar'],
+        consumeInitiator: true,
+        damage: 5,
+        preserve: true,
+      },
+      {
+        duration: 1000,
+        descriptor: "Fighting",
+        inputStack: ['wildBoar', 'hatchet'],
+        output: ['boarCarcass', 'hatchet'],
+        damage: 3
       },
     ]
   },
@@ -490,6 +538,21 @@ export const allCards: Record<CardSlug, CardType> = {
     maxDecay: 1500,
     spawnDescriptor: "Staring in horror....",
   },
+  'ruthCorpse': {
+    name: "Ruth's Corpse",
+    imageUrl: "shipwreckedCorpse.png",
+    maxDecay: 1500,
+  },
+  'carlosCorpse': {
+    name: "Carlos' Corpse",
+    imageUrl: "shipwreckedCorpse.png",
+    maxDecay: 1500,
+  },
+  'miloCorpse': {
+    name: "Milo's Corpse",
+    imageUrl: "shipwreckedCorpse.png",
+    maxDecay: 1500,
+  },
 
   // Tools
 
@@ -584,6 +647,28 @@ export const allCards: Record<CardSlug, CardType> = {
       Small Fire,<br/> 4 Survivors
     </div>
   },
+  'visionDryCourtOffering': {
+    name: <div><div>Vision:</div>Dry Court Offering</div>,
+    idea: true,
+    large: true,
+    imageUrl: "visionDryCourtOffering.png",
+    cardText: <div>
+      Jungle Shrine, Boar Carcass
+    </div>
+  },
+  'visionDryCourtSacrifice': {
+    name: <div><div>Vision:</div>Dry Court Sacrifice</div>,
+    idea: true,
+    large: true,
+    backgroundImage: "dryCourtSacrifice.jpg",
+    cardText: <div>
+      Jungle Shrine, Corpse
+    </div>
+  },
+  'protectionDryCourt': {
+    name: "Protection of the Dry Court",
+    imageUrl: "protectionDryCourt.png",
+  },
   'ideaHatchet': {
     name: 'Idea: Hatchet',
     imageUrl: "ideaHatchet.png",
@@ -614,15 +699,37 @@ export const allCards: Record<CardSlug, CardType> = {
   },
   'wildBoar': {
     name: "Wild Boar",
-    imageUrl: "wildBoar.png",
+    backgroundImage: "wildBoar.jpg",
     maxHealth: 20,
     maxHunger: 3000,
-    damagePerSecond: 5,
     tracks: ['bananas', 'openCoconut', 'cannedBeans', 'bakedSeaweed'],
     enemy: true,
     spawnInfo: []
   },
-
+  'boarCarcass': {
+    name: "Boar Carcass",
+    backgroundImage: "boarCarcass.jpg"
+  },
+  'rawMeat': {
+    name: "Raw Meat",
+    imageUrl: "rawMeat.png",
+    calories: 300,
+    spawnInfo: [
+      {
+        duration: 3000,
+        descriptor: "Cooking...",
+        inputStack: ['smallFire'],
+        output: ['cookedMeat'],
+        preserve: true,
+        consumeInitiator: true
+      }
+    ]
+  },
+  'cookedMeat': {
+    name: "Cooked Meat",
+    imageUrl: "cookedMeat.png",
+    calories: 800,
+  },
 
   'miloUnsettlingFeeling': {
     name: "Unsettled Feeling",

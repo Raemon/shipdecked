@@ -26,7 +26,7 @@ export interface CardTypeBase {
   nightImageUrl?: string,
   backgroundImage?: string,
   nightBackgroundImage?: string,
-  name: string,
+  name: string|React.ReactNode,
   large?: boolean,
   idea?: true,
   calories?: number;
@@ -81,6 +81,7 @@ export type SpawnInfo = {
   lootInput?: CardSlug,
   duration: number, 
   inputStack?: CardSlug[], 
+  damage?: number,
   output?: CardSlug[], 
   attachedOutput?: CardSlug[],
   preserve?:boolean, 

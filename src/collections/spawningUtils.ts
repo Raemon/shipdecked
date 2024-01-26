@@ -36,6 +36,7 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     currentStamina: card.maxStamina ? card.maxStamina/1.5 - 1: undefined,
     currentFading: card.maxFading,
     currentDecay: card.maxDecay,
+    currentHealth: card.maxHealth,
     createdAt: new Date(),
     x,
     y,
@@ -176,8 +177,7 @@ export function getAttachedCardsWithHigherZIndex (cardPositions: Record<string, 
     try {
       return attachedCard.zIndex > cardPosition.zIndex
     } catch(err) {
-      console.log(err)
-      console.log({attachedCards, attachedCard, cardPosition})
+      console.log({attachedCard, cardPosition})
     }
   })
   return attachedCardsWithHigherZIndex.sort((a, b) => b.zIndex - a.zIndex)
@@ -267,7 +267,7 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
   })
 }
 
-export function spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists}:{
+export function spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists, damage}:{
   inputStack: CardSlug[], 
   output: CardSlug[], 
   attachedOutput?: CardSlug[],
@@ -276,7 +276,8 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   descriptor: string,
   skipIfExists?: CardSlug[]
   preserve?: boolean,
-  consumeInitiator?: boolean
+  consumeInitiator?: boolean,
+  damage?: number,
 }) {
   const { cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id] 
@@ -290,7 +291,7 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   });
 
   if (completeStack && !cardPosition.timerEnd && !alreadySpawned) {
-    const timerId = setTimeout(() => spawnFromSet({inputStack, output, attachedOutput,cardPositionInfo, preserve, consumeInitiator}), duration);
+    const timerId = setTimeout(() => spawnFromSet({inputStack, output, attachedOutput,cardPositionInfo, preserve, consumeInitiator, damage}), duration);
     setCardPositions(prevCardPositions => {
       const newCardPositions = {...prevCardPositions}
       newCardPositions[id] = ({
@@ -306,13 +307,14 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   }
 }
 
-export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator}:{
+export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator, damage}:{
   inputStack: CardSlug[], 
   output: CardSlug[], 
   attachedOutput?: CardSlug[],
   cardPositionInfo: CardPositionInfo
   preserve?: boolean,
-  consumeInitiator?: boolean
+  consumeInitiator?: boolean,
+  damage?: number,
 }) {
   const { cardPositions, id, setCardPositions } = cardPositionInfo
   if (!cardPositions[id]) return
@@ -355,6 +357,10 @@ export function spawnFromSet({inputStack, output, attachedOutput, cardPositionIn
       }
       if (consumeInitiator) {
         delete newCardPositions[id]
+      }
+      const health = cardPosition.currentHealth
+      if (damage && health) {
+        newCardPositions[id].currentHealth = Math.max(health - damage, 0)
       }
     }
     return newCardPositions
@@ -440,19 +446,25 @@ function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribu
 export function whileAttached (cardPositionInfo: CardPositionInfo) {
   const { cardPositions, id } = cardPositionInfo
   const spawnInfo = cardPositions[id].spawnInfo
+  const cardPosition = cardPositions[id]
   if (!spawnInfo) return
 
-  const attachedSlugs = cardPositions[id].attached.map(i => cardPositions[i].slug)
-  const attachedCard = cardPositions[cardPositions[id].attached[0]]
+  const attachedSlugs = cardPosition.attached.map(i => {
+    if (cardPositions[i]) {
+      return cardPositions[i].slug
+    }
+  })
+  if (!attachedSlugs) return
+  const attachedCard = cardPositions[cardPosition.attached[0]]
 
   if (attachedCard) {
-    spawnInfo.forEach(({ duration, inputStack, preserve, output, attachedOutput,  descriptor, skipIfExists, consumeInitiator }) => {
+    spawnInfo.forEach(({ duration, inputStack, preserve, output, attachedOutput,  descriptor, skipIfExists, consumeInitiator, damage }) => {
       const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
       if (inputEqualsAttached) {
         const attachedSlugs = cardPositions[id].attached.map(i => cardPositions[i].slug)
         const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
         if (inputEqualsAttached && output) {
-          spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator})
+          spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator, damage})
         } else if (duration && attachedSlugs.length === 1) {  
           spawnTimerFromLoot({attachedSlug: inputStack[0], duration, cardPositionInfo, preserve, descriptor})
         }

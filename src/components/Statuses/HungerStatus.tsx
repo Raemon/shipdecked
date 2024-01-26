@@ -5,7 +5,7 @@ const HungerStatus = ({max, current}:{max: number, current:number}) => {
   let color = "rgba(0,0,0,.65)"
   if (current > max - max/8) {
     descriptor = "Gorged"
-    color = "orange"
+    color = "darkorange"
   }
   if (current < max/1.5) {
     descriptor = "Slightly Hungry"
@@ -15,7 +15,7 @@ const HungerStatus = ({max, current}:{max: number, current:number}) => {
   }
   if (current < max/4) {
     descriptor = "Very Hungry"
-    color = "orange"
+    color = "darkorange"
   }
   if (current < max/8) {
     descriptor = "Starving"

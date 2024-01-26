@@ -12,7 +12,7 @@ export const StaminaStatus = ({max, current}:{max: number, current:number}) => {
   }
   if (current < max/4) {
     descriptor = "Exhausted"
-    color = "orange"
+    color = "darkorange"
   }
   if (current < max/8) {
     descriptor = "Delirious"

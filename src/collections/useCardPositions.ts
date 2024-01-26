@@ -53,13 +53,16 @@ export function handleNewCardPosition(cardPositions: Record<string, CardPosition
   newCardPosition.attached.forEach((id) => {
     newPositions[id].attached = addIfNotInArray(newPositions[id].attached, index)
   })
-
+  console.log()
   const cardsNoLongerAttachedToIndex = cardPositions[index].attached.filter((id) => {
     return newCardPosition.attached.indexOf(id) === -1;
   });
 
   cardsNoLongerAttachedToIndex.forEach((id) => {
-    newPositions[id].attached = newPositions[id].attached.filter((j) => j !== index);
+    const newPosition = newPositions[id]
+    if (!newPosition) return
+    const oldAttached = (newPosition && newPositions[id].attached) ?? []
+    newPosition.attached = oldAttached.filter((j) => j !== index);
   });
 
   // find less janky way to do this
@@ -78,7 +81,8 @@ export function handleNewCardPosition(cardPositions: Record<string, CardPosition
 
 function getZIndex(cardPositions: Record<string, CardPosition>, cardPosition: CardPosition, attachedCardIndices: string[]): number {
   const greatestAttachedZIndex = attachedCardIndices.reduce((acc, i) => {
-    return Math.max(acc, cardPositions[i].zIndex);
+    const zIndex = cardPositions[i]?.zIndex ?? 0
+    return Math.max(acc, zIndex);
   }, 0);
   const zIndex = 1
   if (greatestAttachedZIndex === 0) {
@@ -93,8 +97,8 @@ function getIndexOfHighestAttachedZIndex (cardPositions: Record<string, CardPosi
   let highestAttachedZIndex = 0;
   let highestAttachedIndex = undefined;
   attachedCardIndices.forEach((i) => {
-    const zIndex = cardPositions[i].zIndex;
-    if (zIndex > highestAttachedZIndex) {
+    const zIndex = cardPositions[i]?.zIndex;
+    if (cardPositions[i] && (zIndex > highestAttachedZIndex)) {
       highestAttachedZIndex = zIndex;
       highestAttachedIndex = i;
     }
