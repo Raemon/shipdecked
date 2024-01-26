@@ -5,6 +5,7 @@ export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath', 
   'crate',
+  'milo', 'distantFigure', 'carlos'
   // 'hatchet',
   // 'jungleShrine', 'shipwreckedCorpse', 'openCoconut',
   // 'wildBoar', 'smallFire',
@@ -19,7 +20,7 @@ export type CardSlug =
   'palmLeaves'|'vine'|
   'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'theShipwreck'|'craggyCliffs'|
   'ominousWaters'|'coastalWaters'|'unnaturalStorm'|
-  'carlosFootprints'|'jungleFootprints'|
+  'carlosFootprints'|'carlosJungleFootprints'|'ruthJungleFootprints'|'miloJungleFootprints'|
   'crate'|
   'smallFire'|
   'raft'|'birdDroppings'|
@@ -146,13 +147,6 @@ const characterSpawnInfo: SpawnInfo[] = [
   },
   {
     duration: 3000,
-    descriptor: "Following...",
-    inputStack: ['distantFigure'], 
-    consumeInitiator: true,
-    output: ['feyHorror', 'jungleFootprints'],
-  },
-  {
-    duration: 3000,
     descriptor: "Sitting quietly...",
     inputStack: ['jungleShrine'],
     output: ['jungleShrine', 'visionDryCourtOffering'],
@@ -207,7 +201,13 @@ const characterSpawnInfo: SpawnInfo[] = [
     duration: 3000,
     descriptor: "Butchering...",
     output: ['rawMeat', 'rawMeat', 'rawMeat', 'hatchet'],
-  }
+  },
+  { 
+    skipIfExists: ['ideaRaft'], 
+    inputStack: ['milo'],
+    duration: 3000, preserve: true, descriptor: "Talking...", 
+    output: ['ideaRaft'] 
+  },
 ]
 
 export const allCards: Record<CardSlug, CardType> = {
@@ -226,12 +226,6 @@ export const allCards: Record<CardSlug, CardType> = {
         inputStack: ['carlos'],
         duration: 3000, preserve: true, descriptor: "Talking...", 
         output: ['ideaFire'] 
-      },
-      { 
-        skipIfExists: ['ideaRaft'], 
-        inputStack: ['milo'],
-        duration: 3000, preserve: true, descriptor: "Talking...", 
-        output: ['ideaRaft'] 
       },
       {
         duration: 30000,
@@ -261,6 +255,13 @@ export const allCards: Record<CardSlug, CardType> = {
         inputStack: ['wildBoar', 'hatchet'],
         output: ['boarCarcass', 'hatchet'],
         damage: 5
+      },
+      {
+        duration: 3000,
+        descriptor: "Following...",
+        inputStack: ['distantFigure'], 
+        consumeInitiator: true,
+        output: ['feyHorror', 'ruthJungleFootprints'],
       },
     ]
   },
@@ -300,6 +301,13 @@ export const allCards: Record<CardSlug, CardType> = {
         output: ['boarCarcass', 'hatchet'],
         damage: 3
       },
+      {
+        duration: 3000,
+        descriptor: "Following...",
+        inputStack: ['distantFigure'], 
+        consumeInitiator: true,
+        output: ['feyHorror', 'carlosJungleFootprints'],
+      },
     ]
   },
   'milo': {
@@ -315,6 +323,13 @@ export const allCards: Record<CardSlug, CardType> = {
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
         output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'miloUnsettlingFeeling']
+      },
+      {
+        duration: 3000,
+        descriptor: "Following...",
+        inputStack: ['distantFigure'], 
+        consumeInitiator: true,
+        output: ['feyHorror', 'miloJungleFootprints'],
       },
     ]
   },
@@ -448,8 +463,16 @@ export const allCards: Record<CardSlug, CardType> = {
     imageUrl: "footprints.png",
     loot: ['shelteredCove'],
   },
-  'jungleFootprints': {
-    name: "Footprints",
+  'carlosJungleFootprints': {
+    name: "Carlos' Footprints",
+    imageUrl: "jungleFootprints.png",
+  },
+  'ruthJungleFootprints': {
+    name: "Ruth's Footprints",
+    imageUrl: "jungleFootprints.png",
+  },
+  'miloJungleFootprints': {
+    name: "Milo's Footprints",
     imageUrl: "jungleFootprints.png",
   },
   'rocks': {
