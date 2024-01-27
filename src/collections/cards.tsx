@@ -3,8 +3,8 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 
-  'crate'
+  'shoresidePath', 'raft',
+  'crate', 'visionDryThroneJourney', 'distantFigure'
 ]
 
 export type CardSlug = 
@@ -14,7 +14,7 @@ export type CardSlug =
   'coconut'|'seaweed'|'cannedBeans'|'bakedSeaweed'|'bananas'|'openCoconut'|
   'shipwreckedCorpse'|'ruthCorpse'|'carlosCorpse'|'miloCorpse'|
   'palmLeaves'|'vine'|
-  'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'birdIsland'|'theShipwreck'|'craggyCliffs'|
+  'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'theShipwreck'|'craggyCliffs'|
   'ominousWaters'|'coastalWaters'|'unnaturalStorm'|
   'carlosFootprints'|'carlosJungleFootprints'|'ruthJungleFootprints'|'miloJungleFootprints'|
   'crate'|
@@ -256,7 +256,7 @@ export const allCards: Record<CardSlug, CardType> = {
         duration: 30000,
         descriptor: "Chopping...",
         inputStack: ['hatchet', 'ancientTree'],
-        output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'ruthUnsettlingFeeling']
+        output: ['vine', 'vine', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'ruthUnsettlingFeeling']
       },
       { 
         duration: 6000, 
@@ -563,17 +563,7 @@ export const allCards: Record<CardSlug, CardType> = {
   },
   'raft': {
     name: "Raft",
-    imageUrl: 'raft.png',
-    loot: ['birdIsland']
-  },
-  'birdIsland': {
-    name: "Bird Island",
-    imageUrl: "birdIsland.png",
-    loot: ['birdDroppings']
-  },
-  'birdDroppings': {
-    name: "Bird Droppings",
-    imageUrl: "Bird Droppings",
+    imageUrl: 'raft.png'
   },
   'ancientTree': {
     name: "Ancient Tree",
@@ -722,9 +712,10 @@ export const allCards: Record<CardSlug, CardType> = {
     name: <div>Vision: Journey to the Dry Throne</div>,
     idea: true,
     large: true,
-    backgroundImage: "dryThroneJourney.png",
+    backgroundImage: "dryThroneJourney.jpg",
     cardText: <div>
-      Dry Throne, Corpse
+      <div>Dry Throne, Corpse</div>
+      <div><em>(Not in demo)</em></div>
     </div>
   },
   'ideaHatchet': {
