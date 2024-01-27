@@ -5,9 +5,6 @@ export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath', 
   'crate'
-  // 'hatchet',
-  // 'jungleShrine', 'shipwreckedCorpse', 'openCoconut',
-  // 'wildBoar', 'smallFire',
 ]
 
 export type CardSlug = 
@@ -157,6 +154,35 @@ const characterSpawnInfo: SpawnInfo[] = [
     inputStack: ['jungleShrine', 'boarCarcass'],
     output: ['jungleShrine', 'protectionDryCourt', 'visionDryCourtSacrifice'],
     skipIfExists: ['visionDryCourtSacrifice'], 
+  },
+  {
+    duration: 6000,
+    descriptor: "Praying...",
+    inputStack: ['jungleShrine', 'shipwreckedCorpse'],
+    output: ['jungleShrine', 'visionDryThroneJourney'],
+    skipIfExists: ['visionDryThroneJourney'], 
+  },
+  // dry throne journeys
+  {
+    duration: 6000,
+    descriptor: "Praying...",
+    inputStack: ['jungleShrine', 'ruthCorpse'],
+    output: ['jungleShrine', 'visionDryThroneJourney'],
+    skipIfExists: ['visionDryThroneJourney'], 
+  },
+  {
+    duration: 6000,
+    descriptor: "Praying...",
+    inputStack: ['jungleShrine', 'carlosCorpse'],
+    output: ['jungleShrine', 'visionDryThroneJourney'],
+    skipIfExists: ['visionDryThroneJourney'], 
+  },
+  {
+    duration: 6000,
+    descriptor: "Praying...",
+    inputStack: ['jungleShrine', 'miloCorpse'],
+    output: ['jungleShrine', 'visionDryThroneJourney'],
+    skipIfExists: ['visionDryThroneJourney'], 
   },
   { 
     skipIfExists: ['ideaRope'], 
@@ -693,9 +719,10 @@ export const allCards: Record<CardSlug, CardType> = {
     imageUrl: "protectionDryCourt.png",
   },
   'visionDryThroneJourney': {
-    name: <div><div>Vision:</div>Journey to the Dry Throne</div>,
+    name: <div>Vision: Journey to the Dry Throne</div>,
     idea: true,
     large: true,
+    backgroundImage: "dryThroneJourney.png",
     cardText: <div>
       Dry Throne, Corpse
     </div>
