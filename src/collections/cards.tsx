@@ -3,8 +3,8 @@ import { CardType, SpawnInfo } from "./types"
 
 export const startingCards: CardSlug[] = [
   'ruth', 
-  'shoresidePath', 'raft',
-  'crate', 'visionDryThroneJourney', 'distantFigure'
+  'shoresidePath',
+  'crate', 
 ]
 
 export type CardSlug = 
@@ -19,13 +19,14 @@ export type CardSlug =
   'carlosFootprints'|'carlosJungleFootprints'|'ruthJungleFootprints'|'miloJungleFootprints'|
   'crate'|
   'smallFire'|
-  'raft'|'birdDroppings'|
+  'raft'|
   'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaRope'|
   'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|'visionDryCourtOffering'|'visionDryThroneJourney'|
   'sexualTensionCarlosRuth'|
   'shelter'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
-  'distantFigure'|'feyHorror'|'jungleShrine'|'visionDryCourtSacrifice'|'protectionDryCourt'|
+  'distantFigure'|'feyHorror'|'dryCourtGuardian'|
+  'jungleShrine'|'visionDryCourtSacrifice'|'protectionDryCourt'|
   'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'|
   'wildBoar'|'boarCarcass'|'rawMeat'|'cookedMeat'
 
@@ -288,6 +289,13 @@ export const allCards: Record<CardSlug, CardType> = {
         consumeInitiator: true,
         output: ['feyHorror', 'ruthJungleFootprints'],
       },
+      {
+        duration: 3000,
+        descriptor: "Following...",
+        inputStack: ['distantFigure', 'protectionDryCourt'], 
+        consumeInitiator: true,
+        output: ['dryCourtGuardian'],
+      },
     ]
   },
   "carlos": {
@@ -303,6 +311,7 @@ export const allCards: Record<CardSlug, CardType> = {
         descriptor: "Talking...", 
         inputStack: ['smallFire', 'ruth'], 
         output: ["ideaShelter"],
+        skipIfExists: ['ideaShelter'],
         preserve: true,
       },
       {
@@ -313,15 +322,16 @@ export const allCards: Record<CardSlug, CardType> = {
       },
       {
         duration: 500,
-        descriptor: "Fighting",
+        descriptor: "Fighting Unarmed",
         inputStack: ['wildBoar'],
         consumeInitiator: true,
+        output: ['carlosCorpse'],
         damage: 5,
         preserve: true,
       },
       {
         duration: 1000,
-        descriptor: "Fighting",
+        descriptor: "Fighting with Hatchet",
         inputStack: ['wildBoar', 'hatchet'],
         output: ['boarCarcass', 'hatchet'],
         damage: 3
@@ -355,6 +365,14 @@ export const allCards: Record<CardSlug, CardType> = {
         inputStack: ['distantFigure'], 
         consumeInitiator: true,
         output: ['feyHorror', 'miloJungleFootprints'],
+      },
+      {
+        duration: 500,
+        descriptor: "Fighting Unarmed",
+        inputStack: ['wildBoar'],
+        consumeInitiator: true,
+        damage: 5,
+        preserve: true,
       },
     ]
   },
@@ -492,14 +510,17 @@ export const allCards: Record<CardSlug, CardType> = {
   'carlosJungleFootprints': {
     name: "Carlos' Footprints",
     backgroundImage: "jungleFootprints.png",
+    cardText: <div><em>(Not in Demo)</em></div>
   },
   'ruthJungleFootprints': {
     name: "Ruth's Footprints",
     backgroundImage: "jungleFootprints.png",
+    cardText: <div><em>(Not in Demo)</em></div>
   },
   'miloJungleFootprints': {
     name: "Milo's Footprints",
     backgroundImage: "jungleFootprints.png",
+    cardText: <div><em>(Not in Demo)</em></div>
   },
   'rocks': {
     name: "Rock Pile",
@@ -675,6 +696,7 @@ export const allCards: Record<CardSlug, CardType> = {
     cardText: <div>
       <p><em>What the hell was that?</em></p>
       <div>Ship, Unnatural Storm</div>
+      <div><em>(Not in Demo)</em></div>
     </div>
   },
   'ideaGatherSurvivors': {
@@ -707,6 +729,9 @@ export const allCards: Record<CardSlug, CardType> = {
   'protectionDryCourt': {
     name: "Protection of the Dry Court",
     imageUrl: "protectionDryCourt.png",
+    cardText: <div>
+      <em>(Not in demo)</em>
+    </div>
   },
   'visionDryThroneJourney': {
     name: <div>Vision: Journey to the Dry Throne</div>,
@@ -745,6 +770,12 @@ export const allCards: Record<CardSlug, CardType> = {
     name: "Fey Horror",
     backgroundImage: "feyHorror.jpg",
     maxFading: 100
+  },
+  'dryCourtGuardian': {
+    name: "Dry Court Guardian",
+    backgroundImage: "dryCourtGuardian.jpg",
+    tracks:['ruth', 'carlos', 'milo'],
+    enemy: true,
   },
   'wildBoar': {
     name: "Wild Boar",
