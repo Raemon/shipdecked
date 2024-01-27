@@ -283,7 +283,9 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
 
   // Tracking
   useEffect(() => {
+    console.log("tracking effect")
     setTimeout(() => {
+      console.log("tracking timeout")
       if (!cardPosition) return
       if (!cardPosition.tracks?.length) return
       updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
@@ -311,7 +313,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
           y: newY,
         }
       });
-    }, 2200);
+    }, 3000);
   }, [trackedCardId, cardPosition.tracks, cardPosition.x, cardPosition.y])
 
   // const loot = cardPosition.loot && Object.values(cardPosition.loot).flatMap((item) => item)

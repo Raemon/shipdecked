@@ -24,7 +24,7 @@ export type CardSlug =
   'smallFire'|
   'raft'|'birdDroppings'|
   'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaRope'|
-  'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|'visionDryCourtOffering'|
+  'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|'visionDryCourtOffering'|'visionDryThroneJourney'|
   'sexualTensionCarlosRuth'|
   'shelter'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
@@ -241,8 +241,8 @@ export const allCards: Record<CardSlug, CardType> = {
         preserve: true,
       },
       {
-        duration: 500,
-        descriptor: "Fighting",
+        duration: 1500,
+        descriptor: "Fighting Unarmed",
         inputStack: ['wildBoar'],
         consumeInitiator: true,
         output: ['ruthCorpse'],
@@ -250,7 +250,7 @@ export const allCards: Record<CardSlug, CardType> = {
       },
       {
         duration: 1500,
-        descriptor: "Fighting",
+        descriptor: "Fighting with Hatchet",
         inputStack: ['wildBoar', 'hatchet'],
         output: ['boarCarcass', 'hatchet'],
         damage: 5
@@ -416,7 +416,8 @@ export const allCards: Record<CardSlug, CardType> = {
     backgroundImage: "denseJungle.jpg",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['craggyCliffs', 'jungleTree', 'jungleTree', 'wildBoar', 'ancientTree', 'distantFigure', 'jungleShrine'],
+    loot: ['craggyCliffs', 'jungleTree', 'jungleTree', 'wildBoar', 'distantFigure', 'jungleShrine'],
+    secondaryLoot: ['jungleTree', 'jungleTree', 'wildBoar', 'ancientTree'],
   },
   'ominousWaters': {
     name: "Ominous Waters",
@@ -690,6 +691,14 @@ export const allCards: Record<CardSlug, CardType> = {
   'protectionDryCourt': {
     name: "Protection of the Dry Court",
     imageUrl: "protectionDryCourt.png",
+  },
+  'visionDryThroneJourney': {
+    name: <div><div>Vision:</div>Journey to the Dry Throne</div>,
+    idea: true,
+    large: true,
+    cardText: <div>
+      Dry Throne, Corpse
+    </div>
   },
   'ideaHatchet': {
     name: 'Idea: Hatchet',
