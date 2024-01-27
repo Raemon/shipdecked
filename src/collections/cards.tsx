@@ -4,7 +4,7 @@ import { CardType, SpawnInfo } from "./types"
 export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath',
-  'crate', 
+  'crate',
 ]
 
 export type CardSlug = 
@@ -639,6 +639,7 @@ export const allCards: Record<CardSlug, CardType> = {
     name: "Small Shelter",
     imageUrl: 'shelter.png',
     rest: 600,
+    cardText: <div><em>Room for two, barely</em></div>,
     spawnInfo: [
       {
         duration: 6000,
