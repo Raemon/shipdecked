@@ -175,7 +175,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
     whileAttachedCallback(cardPositionInfo)
   }, [cardPositionInfo]);
 
-  function updateAttribute ({currentAttribute, interval=3000, adjust= -1, maxAttribute}:{currentAttribute: keyof CurrentCardAttriutes, interval?:number, adjust?: number, maxAttribute?: keyof MaxCardAttributes} ) {
+  function updateAttribute ({currentAttribute, interval=3000, adjust= -1, max, min=0}:{currentAttribute: keyof CurrentCardAttriutes, interval?:number, adjust?: number, max?: number, min?: number} ) {
     setTimeout(() => {
       if (!cardPosition) return
       if (cardPosition[currentAttribute] === 0) {
@@ -190,11 +190,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
       updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
         try {
           const current = cardPosition[currentAttribute]
-          const max = maxAttribute && cardPosition[maxAttribute]
           if (!paused && current) {
             if (adjust > 0 && max && current < max) {
               return { ...cardPosition, [currentAttribute]: current + adjust };
-            } else if (adjust < 0 && current > 0) {
+            } else if (adjust < 0 && current > min) {
               return { ...cardPosition, [currentAttribute]: current + adjust };
             }
           } else {
@@ -230,9 +229,9 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
 
   const updateTemperature = useCallback(() => {
     if (isNight(dayCount)) {
-      updateAttribute({currentAttribute: 'currentTemp', maxAttribute: 'maxTemp', adjust: -1})
+      updateAttribute({currentAttribute: 'currentTemp', adjust: -1, min: 50})
     } else {
-      updateAttribute({currentAttribute: 'currentTemp', maxAttribute: 'maxTemp', adjust: 2})
+      updateAttribute({currentAttribute: 'currentTemp', max: cardPosition.maxTemp, adjust: 2})
     }
   }, [cardPositionInfo, cardPosition])
 

@@ -21,7 +21,7 @@ const FuelStatus = ({max, current}:{max: number, current:number}) => {
     descriptor = "Embers"
     color = "red"
   }
-  if (current < 1){
+  if (current < 2){
     descriptor = "Ashes"
   }
   if (descriptor) return (

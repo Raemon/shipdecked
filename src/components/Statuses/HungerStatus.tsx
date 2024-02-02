@@ -2,18 +2,19 @@ import React from 'react';
 
 const HungerStatus = ({max, current}:{max: number, current:number}) => {
   let descriptor = ""
-  let color = "rgba(0,0,0,1)"
+  let color = "rgba(0,0,0,.65)"
   if (current > max - max/8) {
     descriptor = "Gorged"
     color = "darkorange"
   }
-  if (current < max/1.5) {
+  if (current < max * .6) {
     descriptor = "Slightly Hungry"
   }
-  if (current < max/2) {
+  if (current < max * .5) {
+    color = "black"
     descriptor = "Hungry"
   }
-  if (current < max/4) {
+  if (current < max * .25) {
     descriptor = "Very Hungry"
     color = "darkorange"
   }

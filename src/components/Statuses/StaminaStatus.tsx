@@ -3,18 +3,19 @@ import React from 'react';
 
 export const StaminaStatus = ({max, current}:{max: number, current:number}) => {
   let descriptor = ""
-  let color = "rgba(0,0,0,1)"
-  if (current < max/1.5) {
+  let color = "rgba(0,0,0,.65)"
+  if (current < max * .65) {
     descriptor = "Slightly Tired"
   }
-  if (current < max/2) {
+  if (current < max * .5) {
+    color = "black"
     descriptor = "Tired"
   }
-  if (current < max/4) {
+  if (current < max * .25) {
     descriptor = "Exhausted"
     color = "darkorange"
   }
-  if (current < max/8) {
+  if (current < max * .125) {
     descriptor = "Delirious"
     color = "red"
   }
@@ -23,7 +24,9 @@ export const StaminaStatus = ({max, current}:{max: number, current:number}) => {
   }
   if (descriptor) return (
     // <Tooltip tooltip={`${current}/${max} stamina`} display="inline">
-      <span className="status" style={{color}}>{descriptor}</span>
+      <span className="status" style={{color}}>
+        {descriptor}
+      </span>
     // </Tooltip>
   );
   return null
