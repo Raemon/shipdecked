@@ -481,51 +481,45 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
       }
      }) 
      if (!anySpawn) {
-      spawnInfo.forEach(({ inputStack}) => {
-        const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
-        if (inputEqualsAttached) {
-          console.log(inputStack)
-          if (attachedCard?.calories) {
-            restoreTimer({
-              duration: 1000, 
-              cardPositionInfo, 
-              resource: "calories", 
-              currentAttribute: "currentHunger",
-              maxAttribute: "maxHunger",
-              descriptor: "Eating..."
-            })
-          } else if (attachedCard.fuel) {
-            restoreTimer({
-              duration:1000, 
-              cardPositionInfo, 
-              resource: "fuel", 
-              currentAttribute: "currentFuel",
-              maxAttribute: "maxFuel",
-              descriptor: "Fueling..."
-            })
-          } else if (attachedCard.rest) {
-            restoreTimer({
-              duration:6000, 
-              cardPositionInfo, 
-              resource: "rest", 
-              currentAttribute: "currentStamina",
-              maxAttribute: "maxStamina",
-              preserve: true,
-              descriptor: "Resting..."
-            })
-          } else if (attachedCard.heat) {
-            restoreTimer({
-              duration:6000, 
-              cardPositionInfo, 
-              resource: "heat", 
-              currentAttribute: "currentTemp",
-              maxAttribute: "maxTemp",
-              preserve: true,
-              descriptor: "Warming..."
-            })
-          }
-        }
-      })
+      if (attachedCard?.calories) {
+        restoreTimer({
+          duration: 1000, 
+          cardPositionInfo, 
+          resource: "calories", 
+          currentAttribute: "currentHunger",
+          maxAttribute: "maxHunger",
+          descriptor: "Eating..."
+        })
+      } else if (attachedCard.fuel) {
+        restoreTimer({
+          duration:1000, 
+          cardPositionInfo, 
+          resource: "fuel", 
+          currentAttribute: "currentFuel",
+          maxAttribute: "maxFuel",
+          descriptor: "Fueling..."
+        })
+      } else if (attachedCard.rest) {
+        restoreTimer({
+          duration:6000, 
+          cardPositionInfo, 
+          resource: "rest", 
+          currentAttribute: "currentStamina",
+          maxAttribute: "maxStamina",
+          preserve: true,
+          descriptor: "Resting..."
+        })
+      } else if (attachedCard.heat) {
+        restoreTimer({
+          duration:6000, 
+          cardPositionInfo, 
+          resource: "heat", 
+          currentAttribute: "currentTemp",
+          maxAttribute: "maxTemp",
+          preserve: true,
+          descriptor: "Warming..."
+        })
+      }
     }
   }
 }
