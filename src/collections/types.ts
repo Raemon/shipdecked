@@ -1,5 +1,5 @@
 import { type } from "os";
-import React from "react";
+import React, { ReactElement } from "react";
 import { CardSlug } from "./cards";
 
 export interface MaxCardAttributes {
@@ -9,6 +9,7 @@ export interface MaxCardAttributes {
   maxStamina?: number;
   maxFading?: number;
   maxDecay?: number;
+  maxTemp?: number;
 }
 
 export interface CurrentCardAttriutes {
@@ -18,6 +19,7 @@ export interface CurrentCardAttriutes {
   currentStamina?: number;
   currentFading?: number;
   currentDecay?: number;
+  currentTemp?: number
 }
 
 export interface AttributeInfo extends MaxCardAttributes, CurrentCardAttriutes {}
@@ -32,12 +34,14 @@ export interface CardTypeBase {
   calories?: number;
   fuel?: number;
   rest?: number;
+  heat?: number;
   loot?: CardSlug[];
   secondaryLoot?: CardSlug[];
   spawnInfo?: SpawnInfo[];
   spawnDescriptor?: string,
   creatingDescriptor?: string,
   cardText?: string|React.ReactNode,
+  Widget?: any,
   damagePerSecond?: number,
   tracks?: CardSlug[],
   enemy?: boolean,

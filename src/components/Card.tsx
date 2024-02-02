@@ -1,18 +1,20 @@
 import React, { useCallback, useEffect } from 'react';
 import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
-import { AttributeInfo, CardPosition, CardPositionInfo } from '../collections/types';
+import { CardPosition, CardPositionInfo, CurrentCardAttriutes, MaxCardAttributes } from '../collections/types';
 import { allCards } from '../collections/cards';
 import { getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
 import CardTimer from './CardTimer';
-import { debugging, handleStart } from './Game';
+import { handleStart } from './Game';
 import HungerStatus from './Statuses/HungerStatus';
 import FuelStatus from './Statuses/FuelStatus';
-import { findNonoverlappingDirection, getNewCardPosition, getOverlappingNonattachedCards, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
+import { getNewCardPosition, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
 import { StaminaStatus } from './Statuses/StaminaStatus';
 import DecayStatus from './Statuses/DecayStatus';
 import ExploredStatus from './Statuses/ExploredStatus';
 import HealthStatus from './Statuses/HealthStatus';
+import TemperatureStatus from './Statuses/TemperatureStatus';
+import { isNight } from './SunDial';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 218
@@ -72,6 +74,7 @@ const useStyles = createUseStyles({
   root: {
     display: "inline-block",
     position: "absolute",
+    transition: 'filter 2s ease-in-out',
   },
   styling: {
     padding: 9,
@@ -143,10 +146,11 @@ type CardProps = {
   paused: boolean;
   isDragging: boolean;
   soundEnabled: boolean;
+  dayCount: number;
 };
 
 
-const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnabled}:CardProps) => {
+const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:CardProps) => {
   const classes = useStyles();
   const {cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id];
@@ -171,11 +175,11 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
     whileAttachedCallback(cardPositionInfo)
   }, [cardPositionInfo]);
 
-  function updateAttribute (attribute: keyof AttributeInfo, interval=3000) {
+  function updateAttribute ({currentAttribute, interval=3000, adjust= -1, maxAttribute}:{currentAttribute: keyof CurrentCardAttriutes, interval?:number, adjust?: number, maxAttribute?: keyof MaxCardAttributes} ) {
     setTimeout(() => {
       if (!cardPosition) return
-      if (cardPosition[attribute] === 0) {
-        setCardPositions((cardPositions: Record<string, CardPosition>,) => {
+      if (cardPosition[currentAttribute] === 0) {
+        setCardPositions((cardPositions: Record<string, CardPosition>) => {
           const newCardPositions = {...cardPositions}
           delete newCardPositions[id]
           return newCardPositions
@@ -183,9 +187,14 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
       }
       updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
         try {
-          const current = cardPosition[attribute]
-          if (!paused && current && current > 0) {
-            return { ...cardPosition, [attribute]: current - 1 };
+          const current = cardPosition[currentAttribute]
+          const max = maxAttribute && cardPosition[maxAttribute]
+          if (!paused && current) {
+            if (adjust > 0 && max && current < max) {
+              return { ...cardPosition, [currentAttribute]: current + adjust };
+            } else if (adjust < 0 && current > 0) {
+              return { ...cardPosition, [currentAttribute]: current + adjust };
+            }
           } else {
             return {
               ...cardPosition,
@@ -194,7 +203,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
           }
         } catch (err) {
           console.log(err)
-          console.log({cardPosition, attribute})
+          console.log({cardPosition, currentAttribute})
         }
         return cardPosition;
       });
@@ -202,23 +211,31 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
   }
 
   const updateHunger = useCallback(() => {
-    updateAttribute('currentHunger')
+    updateAttribute({currentAttribute: 'currentHunger'})
   }, [cardPositionInfo, cardPosition])
 
   const updateFuel = useCallback(() => {
-    updateAttribute('currentFuel')
+    updateAttribute({currentAttribute: 'currentFuel'})
   }, [cardPositionInfo, cardPosition])
 
   const updateStamina = useCallback(() => {
-    updateAttribute('currentStamina')
+    updateAttribute({currentAttribute: 'currentStamina'})
   }, [cardPositionInfo, cardPosition])
 
   const updateDecaying = useCallback(() => {
-    updateAttribute('currentDecay')
+    updateAttribute({currentAttribute: 'currentDecay'})
+  }, [cardPositionInfo, cardPosition])
+
+  const updateTemperature = useCallback(() => {
+    if (isNight(dayCount)) {
+      updateAttribute({currentAttribute: 'currentTemp', maxAttribute: 'maxTemp', adjust: -1})
+    } else {
+      updateAttribute({currentAttribute: 'currentTemp', maxAttribute: 'maxTemp', adjust: 1})
+    }
   }, [cardPositionInfo, cardPosition])
 
   const updateFading = useCallback(() => {
-    updateAttribute('currentFading', 10)
+    updateAttribute({currentAttribute: 'currentFading', interval:10})
   }, [cardPositionInfo, cardPosition])
 
   useEffect(() => {
@@ -240,6 +257,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
   useEffect(() => {
     updateDecaying()
   }, [cardPosition.currentDecay])
+
+  useEffect(() => {
+    updateTemperature()
+  }, [cardPosition.currentTemp, dayCount])
 
   // set new destination based on nonoverlap
   // useEffect(() => {
@@ -283,9 +304,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
 
   // Tracking
   useEffect(() => {
-    console.log("tracking effect")
     setTimeout(() => {
-      console.log("tracking timeout")
       if (!cardPosition) return
       if (!cardPosition.tracks?.length) return
       updateCardPosition(cardPositionInfo, (cardPosition: CardPosition): CardPosition => {
@@ -324,7 +343,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
 
   if (!cardPosition) return null
 
-  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,  maxHealth, currentHealth, currentDecay,currentHunger, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,  maxHealth, currentHealth, currentDecay,currentHunger, maxTemp, currentTemp, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack, Widget } = cardPosition;
   const card = allCards[slug]
   if (!card) throw Error
 
@@ -343,6 +362,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
         left: cardPosition.x, 
         top: cardPosition.y, 
         zIndex: cardPosition.zIndex,
+        filter: isNight(dayCount) ? 'brightness(80%)' : 'brightness(100%)',
       }}>
         <div className={classes.styling} style={{
           ...getCardDimensions(cardPosition),
@@ -401,10 +421,11 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, soundEnable
               max={maxDecay} 
               current={currentDecay}
               />}
+            {!!(maxTemp && currentTemp) && <TemperatureStatus max={maxTemp} current={currentTemp}/>}
             <ExploredStatus card={card} cardPosition={cardPosition}/>
           </div>
-
           {cardText && <div className={classes.cardText}>
+            {Widget && <Widget dayCount={dayCount}/>}
             {cardText}
           </div>}
           {renderTimer && <CardTimer 

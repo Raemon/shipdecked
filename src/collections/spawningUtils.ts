@@ -37,6 +37,7 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     currentFading: card.maxFading,
     currentDecay: card.maxDecay,
     currentHealth: card.maxHealth,
+    currentTemp: card.maxTemp,
     createdAt: new Date(),
     x,
     y,
@@ -267,6 +268,14 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
   })
 }
 
+function checkIfShouldSkip(cardPositions: Record<string, CardPosition>, skipIfExists?: CardSlug[]) {
+  if (!skipIfExists) return false
+  const allSlugs = Object.values(cardPositions).map(cardPosition => cardPosition.slug)
+  return some(skipIfExists, function(item) {
+    return includes(allSlugs, item);
+  });
+}
+
 export function spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists, damage}:{
   inputStack: CardSlug[], 
   output: CardSlug[], 
@@ -285,10 +294,7 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
 
   const completeStack = areArraysIdentical(attachedSlugs, inputStack)
 
-  const allSlugs = Object.values(cardPositions).map(cardPosition => cardPosition.slug)
-  const alreadySpawned = skipIfExists && some(skipIfExists, function(item) {
-    return includes(allSlugs, item);
-  });
+  const alreadySpawned = checkIfShouldSkip(cardPositions, skipIfExists)
 
   if (completeStack && !cardPosition.timerEnd && !alreadySpawned) {
     const timerId = setTimeout(() => spawnFromSet({inputStack, output, attachedOutput,cardPositionInfo, preserve, consumeInitiator, damage}), duration);
@@ -305,6 +311,7 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
       return newCardPositions;
     })
   }
+  return false
 }
 
 export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator, damage}:{
@@ -371,9 +378,9 @@ export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxA
   duration: number, 
   cardPositionInfo: 
   CardPositionInfo, 
-  currentAttribute: "currentHunger"|"currentFuel"|"currentStamina",
-  maxAttribute: "maxHunger"|"maxFuel"|"maxStamina",
-  resource: "calories"|"fuel"|"rest",
+  currentAttribute: "currentHunger"|"currentFuel"|"currentStamina"|"currentTemp",
+  maxAttribute: "maxHunger"|"maxFuel"|"maxStamina"|"maxTemp",
+  resource: "calories"|"fuel"|"rest"|"heat",
   preserve?: boolean,
   descriptor?: string
 }) {
@@ -409,8 +416,8 @@ export function restoreTimer({duration, cardPositionInfo, currentAttribute, maxA
 function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribute, attachedId, preserve}:{
   cardPositionInfo: CardPositionInfo, 
   resourceAmount: number, 
-  currentAttribute: "currentHunger"|"currentFuel"|"currentStamina",
-  maxAttribute: "maxHunger"|"maxFuel"|"maxStamina",
+  currentAttribute: "currentHunger"|"currentFuel"|"currentStamina"|"currentTemp",
+  maxAttribute: "maxHunger"|"maxFuel"|"maxStamina"|"maxTemp",
   attachedId: string,
   preserve?: boolean,
 }) {
@@ -458,45 +465,67 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
   const attachedCard = cardPositions[cardPosition.attached[0]]
 
   if (attachedCard) {
+    let anySpawn = false
     spawnInfo.forEach(({ duration, inputStack, preserve, output, attachedOutput,  descriptor, skipIfExists, consumeInitiator, damage }) => {
       const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
       if (inputEqualsAttached) {
         const attachedSlugs = cardPositions[id].attached.map(i => cardPositions[i].slug)
         const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
         if (inputEqualsAttached && output) {
-          spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator, damage})
+           anySpawn = !checkIfShouldSkip(cardPositions, skipIfExists)
+           spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator, damage})
         } else if (duration && attachedSlugs.length === 1) {  
+          anySpawn = !  checkIfShouldSkip(cardPositions, skipIfExists)
           spawnTimerFromLoot({attachedSlug: inputStack[0], duration, cardPositionInfo, preserve, descriptor})
         }
-      } else if (attachedCard?.calories) {
-        restoreTimer({
-          duration: 1000, 
-          cardPositionInfo, 
-          resource: "calories", 
-          currentAttribute: "currentHunger",
-          maxAttribute: "maxHunger",
-          descriptor: "Eating..."
-        })
-      } else if (attachedCard.fuel) {
-        restoreTimer({
-          duration:1000, 
-          cardPositionInfo, 
-          resource: "fuel", 
-          currentAttribute: "currentFuel",
-          maxAttribute: "maxFuel",
-          descriptor: "Fueling..."
-        })
-      } else if (attachedCard.rest) {
-        restoreTimer({
-          duration:6000, 
-          cardPositionInfo, 
-          resource: "rest", 
-          currentAttribute: "currentStamina",
-          maxAttribute: "maxStamina",
-          preserve: true,
-          descriptor: "Resting..."
-        })
       }
-    })
+     }) 
+     if (!anySpawn) {
+      spawnInfo.forEach(({ inputStack}) => {
+        const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
+        if (inputEqualsAttached) {
+          console.log(inputStack)
+          if (attachedCard?.calories) {
+            restoreTimer({
+              duration: 1000, 
+              cardPositionInfo, 
+              resource: "calories", 
+              currentAttribute: "currentHunger",
+              maxAttribute: "maxHunger",
+              descriptor: "Eating..."
+            })
+          } else if (attachedCard.fuel) {
+            restoreTimer({
+              duration:1000, 
+              cardPositionInfo, 
+              resource: "fuel", 
+              currentAttribute: "currentFuel",
+              maxAttribute: "maxFuel",
+              descriptor: "Fueling..."
+            })
+          } else if (attachedCard.rest) {
+            restoreTimer({
+              duration:6000, 
+              cardPositionInfo, 
+              resource: "rest", 
+              currentAttribute: "currentStamina",
+              maxAttribute: "maxStamina",
+              preserve: true,
+              descriptor: "Resting..."
+            })
+          } else if (attachedCard.heat) {
+            restoreTimer({
+              duration:6000, 
+              cardPositionInfo, 
+              resource: "heat", 
+              currentAttribute: "currentTemp",
+              maxAttribute: "maxTemp",
+              preserve: true,
+              descriptor: "Warming..."
+            })
+          }
+        }
+      })
+    }
   }
 }

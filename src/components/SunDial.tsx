@@ -12,12 +12,14 @@ const useStyles = createUseStyles({
   },
 });
 
+export const isNight = (dayCount: number) => dayCount % 2 === 1;
+
 function SunDial({dayCount, setDayCount}:{dayCount: number, setDayCount: React.Dispatch<React.SetStateAction<number>>}) {
   const [countdown, setCountdown] = useState(0);
   const [lastUpdated, setLastUpdated] = useState(moment())
   const classes = useStyles();
 
-  const dayLength = 60 * 5 * 1000 // 5 minutes
+  const dayLength = 60 * 5 * 50 // 5 minutes
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -58,7 +60,7 @@ function SunDial({dayCount, setDayCount}:{dayCount: number, setDayCount: React.D
       />
       <circle
         stroke="rgba(0,0,0,.1)"
-        fill="transparent"
+        fill={dayCountRemainder === 0 ? "#eeddcc" : "#ccddee"}
         strokeWidth="6"
         strokeDasharray={circumference + ' ' + circumference}
         r={radius}
@@ -70,8 +72,10 @@ function SunDial({dayCount, setDayCount}:{dayCount: number, setDayCount: React.D
         y="50%"
         dominantBaseline="middle"
         textAnchor="middle"
+        fontFamily="papyrus"
+        fontWeight="bold"
       >
-        {dayCountRemainder === 0 ? "Day" : "Night"} {dayCountWhole}
+        {dayCountRemainder === 0 ? "Day" : "Night"} {dayCountWhole + 1}
       </text>
     </svg>
   );

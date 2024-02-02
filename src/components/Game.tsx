@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Card from './Card';
 import { createUseStyles } from 'react-jss';
-import SunDial from './SunDial';
+import SunDial, { isNight } from './SunDial';
 import ScalingField from './ScalingField';
 import Draggable, { DraggableEvent } from 'react-draggable';
 import { startingCards } from '../collections/cards';
@@ -18,10 +18,10 @@ export function handleStart(event: DraggableEvent) {
 
 const useStyles = createUseStyles({
   root: {
-    backgroundSize: "cover",
-    background: "Url('map2.jpg')",
+    backgroundSize: "cover !important", // TODO: figure out why this needs 'important'
     height: '100vh',
     width: '100vw',
+    transition: 'background 3s ease-in-out',
   },
   map: {
     textAlign: 'center',
@@ -31,7 +31,7 @@ const useStyles = createUseStyles({
     justifyContent: 'center',
     fontSize: 'calc(10px + 2vmin)',
     height: '400%',
-    width: '400%'
+    width: '400%',
   },
   style: {
     border: 'solid 1px rgba(0,0,0,.2)',
@@ -43,7 +43,7 @@ const useStyles = createUseStyles({
     left: '2.5%',
     borderRadius: 6,
     overflow: "hidden",
-    background: "rgba(220,210,200,.7)",
+    transition: '3s ease-in-out',
   },
   pauseScreen: {
     position: "absolute",
@@ -126,7 +126,7 @@ function Game() {
   });
 
   return (
-    <div className={classes.root}>
+    <div className={classes.root} style={{background: isNight(dayCount) ? "Url('map2night.jpg')" : "Url('map2.jpg')"}}>
       {
         debugging &&
         <div style={{position: "absolute", top: 0, left: 0, zIndex: 9999}}>
@@ -136,7 +136,9 @@ function Game() {
       {paused && <div className={classes.pauseScreen} onClick={() => setPaused(false)}>
         Paused
       </div>}
-      <div className={classes.style}>
+      <div className={classes.style} style={{
+        background:isNight(dayCount) ? "rgba(200,210,220,.3)" : "rgba(220,210,200,.7)"
+      }}>
         <ScalingField>
           <Draggable onStart={handleStart}>
             <div className={classes.map}>
@@ -149,6 +151,7 @@ function Game() {
                   onStop={onStop}
                   paused={paused}
                   isDragging={isDragging}
+                  dayCount={dayCount}
                 />
               })}
             </div>

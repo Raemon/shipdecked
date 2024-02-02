@@ -3,7 +3,7 @@ import React from 'react';
 
 export const StaminaStatus = ({max, current}:{max: number, current:number}) => {
   let descriptor = ""
-  let color = "rgba(0,0,0,.65)"
+  let color = "rgba(0,0,0,1)"
   if (current < max/1.5) {
     descriptor = "Slightly Tired"
   }

@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://raemon.github.io/sro-game",
+  "homepage1": "https://raemon.github.io/sro-game",
   "dependencies": {
     "@mui/material": "^5.13.6",
     "@popperjs/core": "^2.11.8",

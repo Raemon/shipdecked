@@ -1,10 +1,12 @@
 import React from 'react';
 import { CardType, SpawnInfo } from "./types"
+import SeasonCountdown from '../components/Widgets/SeasonCountdown';
+import { carlosSpawnInfo, characterSpawnInfo, miloSpawnInfo, ruthSpawnInfo } from './characterSpawnInfo';
 
 export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath',
-  'crate',
+  'crate'
 ]
 
 export type CardSlug = 
@@ -21,220 +23,16 @@ export type CardSlug =
   'smallFire'|
   'raft'|
   'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaRope'|
-  'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|'visionDryCourtOffering'|'visionDryThroneJourney'|
+  'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|
   'sexualTensionCarlosRuth'|
   'shelter'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
   'distantFigure'|'feyHorror'|'dryCourtGuardian'|
-  'jungleShrine'|'visionDryCourtSacrifice'|'protectionDryCourt'|
+  'jungleShrine'|'visionDryCourtSacrifice'|'protectionDryCourt'|'visionDryCourtOffering'|'visionDryThroneJourney'|
+  'islandShrine'|
   'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'|
-  'wildBoar'|'boarCarcass'|'rawMeat'|'cookedMeat'
-
-const characterSpawnInfo: SpawnInfo[] = [
-  { inputStack: ['shoresidePath'], duration: 2500, descriptor: "Exploring...", preserve: true },
-  { inputStack: ['theShipwreck'], duration: 2500, descriptor: "Exploring...", preserve: true },
-  { inputStack: ['craggyCliffs'], duration: 2500, descriptor: "Exploring...", preserve: true },
-  { inputStack: ['denseJungle'], duration: 35000, descriptor: "Exploring...", preserve: true},
-  { inputStack: ['shelteredCove'], duration: 2500, descriptor: "Exploring...", preserve: true},
-  { inputStack: ['coastalWaters'], duration: 2500, descriptor: "Exploring...", preserve: true},
-  { inputStack: ['ominousWaters'], duration: 2500, descriptor: "Exploring...", preserve: true},
-  { inputStack: ['crate'], duration: 1000, descriptor: "Opening..." },
-  { inputStack: ['rocks'], duration: 3000, descriptor: "Chipping..." },
-  { 
-    duration: 6000, 
-    descriptor: "Building...", 
-    inputStack: ['flint', 'fallenLog', 'sticks'], 
-    output: ['smallFire'], 
-  },
-  {
-    duration: 12000,
-    descriptor: "Building...",
-    inputStack: ['rope', 'rope', 'fallenLog', 'fallenLog', 'fallenLog', 'fallenLog', 'fallenLog'],
-    output: ['raft'], 
-  },
-  { 
-    duration: 6000, 
-    descriptor: "Building...", 
-    inputStack: ['flint', 'driftWoodLog', 'sticks'], 
-    output: ['smallFire'],  
-  },
-  { 
-    duration: 6000, 
-    descriptor: "Building...", 
-    inputStack: ['flint', 'hewnLog', 'sticks'], 
-    output: ['smallFire'],  
-  },
-  {
-    duration: 1000, 
-    descriptor: "Building...", 
-    inputStack: ['flint', 'sticks'], 
-    output: ['hatchet'],
-  },
-  {
-    duration: 1000,
-    descriptor: "Building...",
-    inputStack: ['hewnLog', 'hewnLog', 'palmLeaves'],
-    output: ['shelter'],
-  },
-
-  {
-    duration: 1000,
-    descriptor: "Building...",
-    inputStack: ['fallenLog', 'fallenLog', 'palmLeaves'],
-    output: ['shelter'],
-  },
-  { 
-    duration: 6000, 
-    descriptor: "Chopping...", 
-    inputStack: ['hatchet', 'coconutTree'], 
-    output: ["coconut", "fallenLog", "palmLeaves"],
-    attachedOutput: ['hatchet']
-  },
-  {
-    duration: 6000,
-    descriptor: "Chopping...",
-    inputStack: ['hatchet', 'fallenLog'],
-    output: ['hewnLog', 'hewnLog', 'sticks'],
-    attachedOutput: ['hatchet']
-  },
-  {
-    duration: 6000,
-    descriptor: "Chopping...",
-    inputStack: ['hatchet', 'driftWoodLog'],
-    output: ['hewnLog', 'hewnLog', 'sticks'],
-    attachedOutput: ['hatchet']
-  },
-  {
-    duration: 6000,
-    descriptor: "Building...", 
-    inputStack: ['smallRoundStone', 'sticks'], 
-    output: ['hammer'],
-  },
-  {  
-    duration: 3000, 
-    descriptor: "Staring Frustratedly...", 
-    skipIfExists: ['hatchet', 'ideaHatchet'], 
-    preserve: true,
-    inputStack: ['coconutTree'],
-    output: ['ideaHatchet'], 
-  },
-  {
-    duration: 1500,
-    descriptor: "Cracking...",
-    inputStack: ['coconut', 'hatchet'],
-    output: ['openCoconut', 'hatchet']
-  },
-  {
-    duration: 6000, 
-    descriptor: "Chopping Tree...",  
-    inputStack: ['hatchet', 'bananaTree'],
-    output: ['bananas', 'bananas', 'bananas', 'fallenLog', 'palmLeaves', 'hatchet'], 
-  },
-  {
-    duration: 3000,
-    descriptor: "Chopping",
-    inputStack: ['jungleTree', 'hatchet'],
-    output: ['sticks', 'fallenLog', 'fallenLog', 'vine', 'hatchet']
-  },
-  {
-    duration: 3000,
-    descriptor: "Weaving",
-    inputStack: ['vine', 'vine', 'vine'],
-    output: ['rope']
-  },
-  {
-    duration: 3000,
-    descriptor: "Sitting quietly...",
-    inputStack: ['jungleShrine'],
-    output: ['jungleShrine', 'visionDryCourtOffering'],
-    skipIfExists: ['visionDryCourtOffering'], 
-  },
-  {
-    duration: 6000,
-    descriptor: "Praying...",
-    inputStack: ['jungleShrine', 'boarCarcass'],
-    output: ['jungleShrine', 'protectionDryCourt', 'visionDryCourtSacrifice'],
-    skipIfExists: ['visionDryCourtSacrifice'], 
-  },
-  {
-    duration: 6000,
-    descriptor: "Praying...",
-    inputStack: ['jungleShrine', 'shipwreckedCorpse'],
-    output: ['jungleShrine', 'visionDryThroneJourney'],
-    skipIfExists: ['visionDryThroneJourney'], 
-  },
-  // dry throne journeys
-  {
-    duration: 6000,
-    descriptor: "Praying...",
-    inputStack: ['jungleShrine', 'ruthCorpse'],
-    output: ['jungleShrine', 'visionDryThroneJourney'],
-    skipIfExists: ['visionDryThroneJourney'], 
-  },
-  {
-    duration: 6000,
-    descriptor: "Praying...",
-    inputStack: ['jungleShrine', 'carlosCorpse'],
-    output: ['jungleShrine', 'visionDryThroneJourney'],
-    skipIfExists: ['visionDryThroneJourney'], 
-  },
-  {
-    duration: 6000,
-    descriptor: "Praying...",
-    inputStack: ['jungleShrine', 'miloCorpse'],
-    output: ['jungleShrine', 'visionDryThroneJourney'],
-    skipIfExists: ['visionDryThroneJourney'], 
-  },
-  { 
-    skipIfExists: ['ideaRope'], 
-    inputStack: ['vine'],
-    duration: 3000, preserve: true, descriptor: "Thinking...", 
-    output: ['ideaRope'] 
-  },
-  {
-    duration: 6000,
-    descriptor: "Rowing...",
-    inputStack: ['raft', 'shelteredCove'],
-    preserve: true, 
-    skipIfExists: ['ominousWaters'], 
-    output: ['ominousWaters'],
-  },
-  {
-    duration: 12000,
-    descriptor: "Rowing...",
-    inputStack: ['raft', 'ominousWaters'],
-    preserve: true, 
-    skipIfExists: ['unnaturalStorm'], 
-    output: ['unnaturalStorm'],
-  },
-  {
-    duration: 3000,
-    descriptor: "Rowing...",
-    inputStack: ['raft', 'unnaturalStorm'], 
-    consumeInitiator: true,
-    output: ['ideaBiggerBoat'],
-  },
-  { 
-    duration: 6000, 
-    descriptor: "Stare in horror...", 
-    inputStack: ['shipwreckedCorpse'], 
-    skipIfExists: ['ideaEscape'], 
-    output: ["ideaEscape"],
-    preserve: true,
-  },
-  {
-    inputStack: ['boarCarcass', 'hatchet'],
-    duration: 3000,
-    descriptor: "Butchering...",
-    output: ['rawMeat', 'rawMeat', 'rawMeat', 'hatchet'],
-  },
-  { 
-    skipIfExists: ['ideaRaft'], 
-    inputStack: ['milo'],
-    duration: 3000, preserve: true, descriptor: "Talking...", 
-    output: ['ideaRaft'] 
-  },
-]
+  'wildBoar'|'boarCarcass'|'rawMeat'|'cookedMeat'|
+  'mysteriousRuin'|'ancientCalendar'
 
 export const allCards: Record<CardSlug, CardType> = {
   "ruth": {
@@ -243,59 +41,11 @@ export const allCards: Record<CardSlug, CardType> = {
     nightImageUrl: 'nightRuth.png',
     maxHunger: 2000,
     maxStamina: 2000,
+    maxTemp: 100,
     maxHealth: 6,
     spawnInfo: [
       ...characterSpawnInfo,
-      { inputStack: ['carlosFootprints'], duration: 5000, descriptor: "Following..." },
-      { 
-        skipIfExists: ['ideaFire'], 
-        inputStack: ['carlos'],
-        duration: 3000, preserve: true, descriptor: "Talking...", 
-        output: ['ideaFire'] 
-      },
-      {
-        duration: 30000,
-        descriptor: "Chopping...",
-        inputStack: ['hatchet', 'ancientTree'],
-        output: ['vine', 'vine', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'ruthUnsettlingFeeling']
-      },
-      { 
-        duration: 6000, 
-        descriptor: "Stare into flames...", 
-        inputStack: ['smallFire'], 
-        skipIfExists: ['ideaGatherSurvivors'], 
-        output: ["ideaGatherSurvivors"],
-        preserve: true,
-      },
-      {
-        duration: 1500,
-        descriptor: "Fighting Unarmed",
-        inputStack: ['wildBoar'],
-        consumeInitiator: true,
-        output: ['ruthCorpse'],
-        preserve: true,
-      },
-      {
-        duration: 1500,
-        descriptor: "Fighting with Hatchet",
-        inputStack: ['wildBoar', 'hatchet'],
-        output: ['boarCarcass', 'hatchet'],
-        damage: 5
-      },
-      {
-        duration: 3000,
-        descriptor: "Following...",
-        inputStack: ['distantFigure'], 
-        consumeInitiator: true,
-        output: ['feyHorror', 'ruthJungleFootprints'],
-      },
-      {
-        duration: 3000,
-        descriptor: "Following...",
-        inputStack: ['distantFigure', 'protectionDryCourt'], 
-        consumeInitiator: true,
-        output: ['dryCourtGuardian'],
-      },
+      ...ruthSpawnInfo,
     ]
   },
   "carlos": {
@@ -303,46 +53,11 @@ export const allCards: Record<CardSlug, CardType> = {
     imageUrl: 'carlos.png',
     maxHunger: 2800,
     maxStamina: 2000,
+    maxTemp: 100,
     maxHealth: 10,
     spawnInfo: [
       ...characterSpawnInfo,
-      { 
-        duration: 6000, 
-        descriptor: "Talking...", 
-        inputStack: ['smallFire', 'ruth'], 
-        output: ["ideaShelter"],
-        skipIfExists: ['ideaShelter'],
-        preserve: true,
-      },
-      {
-        duration: 30000,
-        descriptor: "Chopping...",
-        inputStack: ['hatchet', 'ancientTree'],
-        output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'carlosUnsettlingFeeling', 'palmLeaves']
-      },
-      {
-        duration: 500,
-        descriptor: "Fighting Unarmed",
-        inputStack: ['wildBoar'],
-        consumeInitiator: true,
-        output: ['carlosCorpse'],
-        damage: 5,
-        preserve: true,
-      },
-      {
-        duration: 1000,
-        descriptor: "Fighting with Hatchet",
-        inputStack: ['wildBoar', 'hatchet'],
-        output: ['boarCarcass', 'hatchet'],
-        damage: 3
-      },
-      {
-        duration: 3000,
-        descriptor: "Following...",
-        inputStack: ['distantFigure'], 
-        consumeInitiator: true,
-        output: ['feyHorror', 'carlosJungleFootprints'],
-      },
+      ...carlosSpawnInfo
     ]
   },
   'milo': {
@@ -350,30 +65,11 @@ export const allCards: Record<CardSlug, CardType> = {
     imageUrl: 'milo.png',
     maxHunger: 2000,
     maxStamina: 2000,
+    maxTemp: 100,
     maxHealth: 6,
     spawnInfo: [
       ...characterSpawnInfo,
-      {
-        duration: 30000,
-        descriptor: "Chopping...",
-        inputStack: ['hatchet', 'ancientTree'],
-        output: ['sticks', 'fallenLog', 'fallenLog', 'fallenLog', 'hatchet', 'miloUnsettlingFeeling']
-      },
-      {
-        duration: 3000,
-        descriptor: "Following...",
-        inputStack: ['distantFigure'], 
-        consumeInitiator: true,
-        output: ['feyHorror', 'miloJungleFootprints'],
-      },
-      {
-        duration: 500,
-        descriptor: "Fighting Unarmed",
-        inputStack: ['wildBoar'],
-        consumeInitiator: true,
-        damage: 5,
-        preserve: true,
-      },
+      ...miloSpawnInfo
     ]
   },
   'sticks': {
@@ -460,7 +156,7 @@ export const allCards: Record<CardSlug, CardType> = {
     backgroundImage: "denseJungle.jpg",
     large: true,
     spawnDescriptor: "Exploring...",
-    loot: ['craggyCliffs', 'jungleTree', 'jungleTree', 'wildBoar', 'distantFigure', 'jungleShrine'],
+    loot: ['craggyCliffs', 'jungleTree', 'jungleTree', 'wildBoar', 'distantFigure', 'jungleShrine', 'mysteriousRuin'],
     secondaryLoot: ['jungleTree', 'jungleTree', 'wildBoar', 'ancientTree'],
   },
   'ominousWaters': {
@@ -580,6 +276,7 @@ export const allCards: Record<CardSlug, CardType> = {
     creatingDescriptor: "Building...",
     spawnDescriptor: "Cooking...",
     maxFuel: 1000,
+    heat: 25,
     loot: ['ideaRaft'],
   },
   'raft': {
@@ -655,6 +352,12 @@ export const allCards: Record<CardSlug, CardType> = {
   'jungleShrine': {
     name: "Jungle Shrine",
     imageUrl: 'jungleShrine.png'
+  },
+
+  'islandShrine': {
+    name: "Island Shrine",
+    imageUrl: 'islandShrine.jpg',
+    cardText: <div><em>(Not in Demo)</em></div>
   },
 
   // Ideas/Dreams
@@ -841,5 +544,18 @@ export const allCards: Record<CardSlug, CardType> = {
     name: "Sexual Tension",
     imageUrl: "sexualTensionRuthCarlos.png",
     idea: true,
+  },
+  "mysteriousRuin": {
+    name: "Mysterious Ruin",
+    imageUrl: "mysteriousRuin.jpg",
+    cardText: <div><em>What is it?</em></div>
+  },
+  "ancientCalendar": {
+    name: "Ancient Calendar",
+    imageUrl: "mysteriousRuin.jpg",
+    Widget: SeasonCountdown,
+    cardText: <div>
+      <em>(Not in demo)</em>
+    </div>
   }
 }

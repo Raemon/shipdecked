@@ -2,7 +2,7 @@ import React from 'react';
 
 const HealthStatus = ({max, current}:{max: number, current:number}) => {
   let descriptor = ""
-  let color = "rgba(0,0,0,.65)"
+  let color = "rgba(0,0,0,1)"
   if (current < max) {
     descriptor = "Wounded"
     color = "red"

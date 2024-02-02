@@ -2,7 +2,7 @@ import React from 'react';
 
 const HungerStatus = ({max, current}:{max: number, current:number}) => {
   let descriptor = ""
-  let color = "rgba(0,0,0,.65)"
+  let color = "rgba(0,0,0,1)"
   if (current > max - max/8) {
     descriptor = "Gorged"
     color = "darkorange"
@@ -25,11 +25,10 @@ const HungerStatus = ({max, current}:{max: number, current:number}) => {
     descriptor = "Dead"
   }
   if (descriptor) return (
-    // <Tooltip tooltip={`${current}/${max} hunger`} display="inline">
       <span style={{color}}>
-        {descriptor}
+        {descriptor} 
+        {/* {current} */}
       </span>
-    // </Tooltip>
   );
   return null
 }
