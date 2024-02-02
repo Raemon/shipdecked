@@ -19,7 +19,7 @@ function SunDial({dayCount, setDayCount}:{dayCount: number, setDayCount: React.D
   const [lastUpdated, setLastUpdated] = useState(moment())
   const classes = useStyles();
 
-  const dayLength = 60 * 5 * 50 // 5 minutes
+  const dayLength = 60 * 5 * 1000 // 5 minutes
 
   useEffect(() => {
     const interval = setInterval(() => {
