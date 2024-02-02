@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/sro-game/static/css/main.e6c13ad2.css",
-    "main.js": "/sro-game/static/js/main.d068df53.js",
+    "main.js": "/sro-game/static/js/main.bb4f5a5a.js",
     "static/js/787.d4aba7ab.chunk.js": "/sro-game/static/js/787.d4aba7ab.chunk.js",
     "index.html": "/sro-game/index.html",
     "main.e6c13ad2.css.map": "/sro-game/static/css/main.e6c13ad2.css.map",
-    "main.d068df53.js.map": "/sro-game/static/js/main.d068df53.js.map",
+    "main.bb4f5a5a.js.map": "/sro-game/static/js/main.bb4f5a5a.js.map",
     "787.d4aba7ab.chunk.js.map": "/sro-game/static/js/787.d4aba7ab.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.d068df53.js"
+    "static/js/main.bb4f5a5a.js"
   ]
 }
