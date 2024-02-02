@@ -3,7 +3,7 @@ import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
 import { CardPosition, CardPositionInfo, CurrentCardAttriutes, MaxCardAttributes } from '../collections/types';
 import { allCards } from '../collections/cards';
-import { getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
+import { createCardPosition, getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
 import CardTimer from './CardTimer';
 import { handleStart } from './Game';
 import HungerStatus from './Statuses/HungerStatus';
@@ -182,6 +182,8 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
         setCardPositions((cardPositions: Record<string, CardPosition>) => {
           const newCardPositions = {...cardPositions}
           delete newCardPositions[id]
+          const corpseCard = cardPosition.corpse && createCardPosition(cardPositions, cardPosition.corpse, cardPosition.x, cardPosition.y, undefined, false)
+          if (corpseCard) newCardPositions[corpseCard.id] = corpseCard
           return newCardPositions
         })
       }
@@ -230,7 +232,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
     if (isNight(dayCount)) {
       updateAttribute({currentAttribute: 'currentTemp', maxAttribute: 'maxTemp', adjust: -1})
     } else {
-      updateAttribute({currentAttribute: 'currentTemp', maxAttribute: 'maxTemp', adjust: 1})
+      updateAttribute({currentAttribute: 'currentTemp', maxAttribute: 'maxTemp', adjust: 2})
     }
   }, [cardPositionInfo, cardPosition])
 

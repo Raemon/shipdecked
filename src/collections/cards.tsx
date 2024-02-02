@@ -43,6 +43,7 @@ export const allCards: Record<CardSlug, CardType> = {
     maxStamina: 2000,
     maxTemp: 100,
     maxHealth: 6,
+    corpse: 'ruthCorpse',
     spawnInfo: [
       ...characterSpawnInfo,
       ...ruthSpawnInfo,
@@ -55,6 +56,7 @@ export const allCards: Record<CardSlug, CardType> = {
     maxStamina: 2000,
     maxTemp: 100,
     maxHealth: 10,
+    corpse: 'carlosCorpse',
     spawnInfo: [
       ...characterSpawnInfo,
       ...carlosSpawnInfo
@@ -67,6 +69,7 @@ export const allCards: Record<CardSlug, CardType> = {
     maxStamina: 2000,
     maxTemp: 100,
     maxHealth: 6,
+    corpse: 'miloCorpse',
     spawnInfo: [
       ...characterSpawnInfo,
       ...miloSpawnInfo

@@ -187,6 +187,14 @@ export const characterSpawnInfo: SpawnInfo[] = [
     output: ['unnaturalStorm'],
   },
   {
+    duration: 6000,
+    descriptor: "Rowing...",
+    inputStack: ['ominousWaters'],
+    preserve: true, 
+    skipIfExists: ['ominousWaters'], 
+    output: ['ominousWaters'],
+  },
+  {
     duration: 12000,
     descriptor: "Rowing...",
     inputStack: ['raft', 'ominousWaters'],

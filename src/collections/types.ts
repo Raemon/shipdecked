@@ -42,6 +42,7 @@ export interface CardTypeBase {
   creatingDescriptor?: string,
   cardText?: string|React.ReactNode,
   Widget?: any,
+  corpse?: CardSlug,
   damagePerSecond?: number,
   tracks?: CardSlug[],
   enemy?: boolean,
