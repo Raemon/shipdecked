@@ -237,7 +237,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
   }, [cardPositionInfo, cardPosition])
 
   const updateFading = useCallback(() => {
-    updateAttribute({currentAttribute: 'currentFading', interval:10})
+    updateAttribute({currentAttribute: 'currentFading', interval:15})
   }, [cardPositionInfo, cardPosition])
 
   useEffect(() => {
@@ -365,6 +365,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
         top: cardPosition.y, 
         zIndex: cardPosition.zIndex,
         filter: isNight(dayCount) ? 'brightness(80%)' : 'brightness(100%)',
+        opacity: cardPosition.currentFading !== undefined ? cardPosition.currentFading / 100 : 1,
       }}>
         <div className={classes.styling} style={{
           ...getCardDimensions(cardPosition),
