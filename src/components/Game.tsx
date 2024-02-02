@@ -8,7 +8,6 @@ import { startingCards } from '../collections/cards';
 import { createCardPosition } from '../collections/spawningUtils';
 import { useCardPositions } from '../collections/useCardPositions';
 import { CardPosition } from '../collections/types';
-import { initial } from 'lodash';
 
 export const debugging = false
 

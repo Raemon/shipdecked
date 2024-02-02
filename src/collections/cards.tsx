@@ -1,5 +1,5 @@
 import React from 'react';
-import { CardType, SpawnInfo } from "./types"
+import { CardType } from "./types"
 import SeasonCountdown from '../components/Widgets/SeasonCountdown';
 import { carlosSpawnInfo, characterSpawnInfo, miloSpawnInfo, ruthSpawnInfo } from './characterSpawnInfo';
 

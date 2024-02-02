@@ -227,8 +227,8 @@ export const getOverlappingNonattachedCards = (cardPositions: Record<string, Car
 export function useCardPositions(initialPositions: Record<string, CardPosition>) {
   const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>(() => {
     // Try to load from local storage
-    const savedState = localStorage.getItem('cardPositions');
-    const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
+    // const savedState = localStorage.getItem('cardPositions');
+    // const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
     // const validState = jsonParsedState.map((cardPosition: CardPosition) => cardPosition) as Record<string, CardPosition>
 
     return initialPositions;
