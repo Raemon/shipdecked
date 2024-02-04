@@ -1,10 +1,11 @@
 import React from 'react';
+import { light, dark, warning, danger } from '../../collections/styles';
 
 const DecayStatus = ({max, current}:{max: number, current:number}) => {
   let descriptor = "Fresh"
-  let color = "rgba(0,0,0,.65)"
+  let color = light
   if (current < max * 0.9) {
-    color = "black"
+    color = dark
     descriptor = "Bloated"
   }
   if (current < max * .5) {

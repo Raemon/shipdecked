@@ -363,8 +363,8 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
         left: cardPosition.x, 
         top: cardPosition.y, 
         zIndex: cardPosition.zIndex,
-        filter: isNight(dayCount) ? 'brightness(80%)' : 'brightness(100%)',
-        opacity: cardPosition.currentFading !== undefined ? cardPosition.currentFading / 100 : 1,
+        filter: (isNight(dayCount) && !card.glowing) ? 'brightness(80%)' : 'brightness(100%)',
+        opacity: cardPosition.currentFading !== undefined ? cardPosition.currentFading / (cardPosition.maxFading ?? 100) : 1
       }}>
         <div className={classes.styling} style={{
           ...getCardDimensions(cardPosition),
@@ -372,6 +372,11 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
           background: getCardBackground(cardPosition),
           borderRadius: card.idea ? 20 : 4,
+          boxShadow: card.glowing ? `
+            0 0 200px rgba(255,150,0,.5),
+            0 0 10px rgba(255,255,250,.9),
+            0 0 50px rgba(255,150,0,.5)
+          ` : ""
           // transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
         }}>
           <h2>{name}</h2>

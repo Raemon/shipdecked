@@ -17,7 +17,7 @@ export type CardSlug =
   'shipwreckedCorpse'|'ruthCorpse'|'carlosCorpse'|'miloCorpse'|
   'palmLeaves'|'vine'|
   'shoresidePath'|'shelteredCove'|'denseJungle'|'junglePath'|'theShipwreck'|'craggyCliffs'|
-  'ominousWaters'|'coastalWaters'|'unnaturalStorm'|
+  'ominousWaters'|'unnaturalStorm'|
   'carlosFootprints'|'carlosJungleFootprints'|'ruthJungleFootprints'|'miloJungleFootprints'|
   'crate'|
   'smallFire'|
@@ -183,8 +183,8 @@ export const allCards: Record<CardSlug, CardType> = {
     name: "The Shipwreck",
     backgroundImage: "theShipwreck.jpg",
     large: true,
-    loot: ['shipwreckedCorpse', 'carlosFootprints'], 
-    secondaryLoot: ['rocks', 'crate', 'seaweed', 'crate', 'flint', 'denseJungle' ],
+    loot: ['shipwreckedCorpse'], 
+    secondaryLoot: ['crate', 'coconutTree', 'crate', 'flint', 'denseJungle', 'carlosFootprints' ],
     spawnDescriptor: "Exploring...",
   },
   'craggyCliffs': {
@@ -193,12 +193,6 @@ export const allCards: Record<CardSlug, CardType> = {
     large: true,
     loot: ['rocks', 'rocks', 'milo', 'sticks', 'sticks'],
     spawnDescriptor: "Exploring...",
-  },
-  'coastalWaters': {
-    name: "Coastal Waters",
-    backgroundImage: "shallowWaters.jpg",
-    large: true,
-    loot: ['seaweed', 'seaweed'],
   },
 
   'carlosFootprints': {
@@ -280,6 +274,7 @@ export const allCards: Record<CardSlug, CardType> = {
     spawnDescriptor: "Cooking...",
     maxFuel: 1000,
     heat: 25,
+    glowing: 50,
     loot: ['ideaRaft'],
   },
   'raft': {
@@ -472,6 +467,7 @@ export const allCards: Record<CardSlug, CardType> = {
   'distantFigure': {
     name: "Distant Figure",
     imageUrl: "distantFigure.png",
+    maxFading: 1000,
   },
   'feyHorror': {
     name: "Fey Horror",

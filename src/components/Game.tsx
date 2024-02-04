@@ -57,24 +57,30 @@ const useStyles = createUseStyles({
     justifyContent: "center",
     fontSize: 100,
     zIndex: 9999
+  },
+  reset: {
+    position: "absolute",
+    bottom: -1,
+    fontFamily: "Papyrus",
+    color: "white",
+    right: 35,
+    fontWeight: 600,
+    cursor: "pointer",
+    zIndex: 9999
   }
 });
 
 function Game() {
   const classes = useStyles();
-  const [hasSetInitialState, setHasSetInitialState] = useState(false);
 
   const initialCardPositions: Record<string, CardPosition> = {}
 
-  if (!hasSetInitialState) {
-    startingCards.forEach((slug, i) => {
-      const cardPosition = createCardPosition(initialCardPositions, slug, 
-        Math.round(i*25+260+Math.random()*100), 
-        Math.round(200+Math.random()*100))
-      initialCardPositions[cardPosition.id] = cardPosition
-    }); 
-    setHasSetInitialState(true)
-  }
+  startingCards.forEach((slug, i) => {
+    const cardPosition = createCardPosition(initialCardPositions, slug, 
+      Math.round(i*25+260+Math.random()*100), 
+      Math.round(200+Math.random()*100))
+    initialCardPositions[cardPosition.id] = cardPosition
+  }); 
 
   const { cardPositions, setCardPositions, onDrag, onStop, isDragging } = useCardPositions(initialCardPositions);
 
@@ -158,6 +164,7 @@ function Game() {
         </ScalingField>
       </div>
       <SunDial dayCount={dayCount} setDayCount={setDayCount} />
+      <div className={classes.reset} onClick={() => setCardPositions(initialCardPositions)}>New Game</div>
     </div>
   );
 }

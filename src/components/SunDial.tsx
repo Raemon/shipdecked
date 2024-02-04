@@ -51,7 +51,7 @@ function SunDial({dayCount, setDayCount}:{dayCount: number, setDayCount: React.D
       <circle
         stroke="rgba(0,0,0,.2)"
         fill="transparent"
-        strokeWidth="6"
+        strokeWidth="20"
         strokeDasharray={circumference + ' ' + circumference}
         style={{ strokeDashoffset: offset }}
         r={radius}
@@ -61,7 +61,7 @@ function SunDial({dayCount, setDayCount}:{dayCount: number, setDayCount: React.D
       <circle
         stroke="rgba(0,0,0,.1)"
         fill={dayCountRemainder === 0 ? "#eeddcc" : "#ccddee"}
-        strokeWidth="6"
+        strokeWidth="20"
         strokeDasharray={circumference + ' ' + circumference}
         r={radius}
         cx="50"

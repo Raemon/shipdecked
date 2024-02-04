@@ -1,6 +1,7 @@
 import { type } from "os";
 import React, { ReactElement } from "react";
 import { CardSlug } from "./cards";
+import { JssStyle } from "jss";
 
 export interface MaxCardAttributes {
   maxHunger?: number;
@@ -46,6 +47,7 @@ export interface CardTypeBase {
   damagePerSecond?: number,
   tracks?: CardSlug[],
   enemy?: boolean,
+  glowing?: number,
   whileAttached?: (
     cardPositionInfo: CardPositionInfo
   ) => void
@@ -72,6 +74,7 @@ export interface CardPositionBase extends CardType {
   zIndex: number,
   dragging?: boolean,
   createdAt: Date,
+  glowing?: number,
 }
 
 export interface CardPosition extends CardPositionBase, CurrentCardAttriutes, MaxCardAttributes {}

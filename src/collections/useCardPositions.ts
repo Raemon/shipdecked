@@ -53,7 +53,6 @@ export function handleNewCardPosition(cardPositions: Record<string, CardPosition
   newCardPosition.attached.forEach((id) => {
     newPositions[id].attached = addIfNotInArray(newPositions[id].attached, index)
   })
-  console.log()
   const cardsNoLongerAttachedToIndex = cardPositions[index].attached.filter((id) => {
     return newCardPosition.attached.indexOf(id) === -1;
   });
@@ -227,11 +226,16 @@ export const getOverlappingNonattachedCards = (cardPositions: Record<string, Car
 export function useCardPositions(initialPositions: Record<string, CardPosition>) {
   const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>(() => {
     // Try to load from local storage
-    // const savedState = localStorage.getItem('cardPositions');
-    // const jsonParsedState = savedState !== null ? JSON.parse(savedState) : initialPositions;
-    // const validState = jsonParsedState.map((cardPosition: CardPosition) => cardPosition) as Record<string, CardPosition>
-
-    return initialPositions;
+    const recoveredPositions: Record<string, CardPosition> = {};
+    const savedState = localStorage.getItem('cardPositions');
+    if (savedState) {
+      const cards = JSON.parse(savedState) as Record<string, CardPosition>;
+      for (const [id, position] of Object.entries(cards)) {
+        recoveredPositions[id] = position;
+      }
+    }
+    // return initialPositions
+    return savedState ? recoveredPositions : initialPositions;
   });
 
   const [isDragging, setIsDragging] = useState(false);
