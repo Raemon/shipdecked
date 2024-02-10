@@ -48,13 +48,6 @@ export const characterSpawnInfo: SpawnInfo[] = [
     inputStack: ['hewnLog', 'hewnLog', 'palmLeaves'],
     output: ['shelter'],
   },
-
-  {
-    duration: 1000,
-    descriptor: "Building...",
-    inputStack: ['fallenLog', 'fallenLog', 'palmLeaves'],
-    output: ['shelter'],
-  },
   { 
     duration: 6000, 
     descriptor: "Chopping...", 
@@ -169,6 +162,7 @@ export const characterSpawnInfo: SpawnInfo[] = [
     duration: 3000, preserve: true, descriptor: "Thinking...", 
     output: ['ideaShelter'],
   },
+  
   {
     duration: 6000,
     descriptor: "Rowing...",
@@ -288,7 +282,24 @@ export const ruthSpawnInfo: SpawnInfo[] = [
     inputStack: ['distantFigure', 'protectionDryCourt'], 
     consumeInitiator: true,
     output: ['dryCourtGuardian'],
-  }
+  },
+  {
+    duration: 6000,
+    descriptor: "Building together...",
+    inputStack: [
+      'hewnLog', 'hewnLog', 'hewnLog', 'hewnLog', 'hewnLog', 'hewnLog', 'hewnLog',
+      'palmLeaves', 'palmLeaves', 'palmLeaves', 
+      'carlos'
+    ],
+    output: ['cabin', 'cameraderieRuthCarlos', 'carlos'],
+  },
+  {
+    duration: 6000,
+    descriptor: "Making Love...",
+    inputStack: ['carlos', 'cabin', 'sexualTensionCarlosRuth', 'cameraderieRuthCarlos'],
+    conceiving: true,
+    output: ['carlos', 'cabin', 'loveCarlosRuth'],
+  },
 ]
 
 export const miloSpawnInfo: SpawnInfo[] = [
@@ -326,6 +337,22 @@ export const carlosSpawnInfo: SpawnInfo[] = [
   { 
     duration: 6000, 
     descriptor: "Talking...", 
+    inputStack: ['smallFire', 'ruth'], 
+    output: ["ideaCabin"],
+    skipIfExists: ['ideaCabin'],
+    preserve: true,
+  },
+  { 
+    duration: 6000, 
+    descriptor: "Talking around fire...", 
+    inputStack: ['smallFire', 'ruth'], 
+    output: ["ideaCabin"],
+    skipIfExists: ['ideaCabin'],
+    preserve: true,
+  },
+  { 
+    duration: 6000, 
+    descriptor: "Talking around fire...", 
     inputStack: ['smallFire', 'ruth'], 
     output: ["ideaShelter"],
     skipIfExists: ['ideaShelter'],

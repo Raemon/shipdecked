@@ -15,6 +15,7 @@ import ExploredStatus from './Statuses/ExploredStatus';
 import HealthStatus from './Statuses/HealthStatus';
 import TemperatureStatus from './Statuses/TemperatureStatus';
 import { isNight } from './SunDial';
+import PregnancyStatus from './Statuses/PregnancyStatus';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 218
@@ -42,12 +43,12 @@ export const getCardDimensions = (card: CardPosition) => {
   }
 }
 
-export const getCardBackground = (cardPosition: CardPosition) => {
+export const getCardBackground = (cardPosition: CardPosition, dayCount: number) => {
   if (cardPosition.backgroundImage) {
     return `url(${cardPosition.backgroundImage})`
-  } else if (cardPosition.maybeAttached.length) {
+  } else if (cardPosition.maybeAttached.length && !isNight(dayCount)) {
     return 'rgba(255,255,255,.8)'
-  } else if (cardPosition.attached.length) {
+  } else if (cardPosition.attached.length && !isNight(dayCount)) {
     return 'rgba(255,255,255,.8)'
   } else if (cardPosition.idea) {
     return 'rgba(255,255,255,.6)'
@@ -74,7 +75,7 @@ const useStyles = createUseStyles({
   root: {
     display: "inline-block",
     position: "absolute",
-    transition: 'filter 2s ease-in-out',
+    // transition: 'filter 1s ease-in-out',
   },
   styling: {
     padding: 9,
@@ -182,7 +183,9 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
         setCardPositions((cardPositions: Record<string, CardPosition>) => {
           const newCardPositions = {...cardPositions}
           delete newCardPositions[id]
-          const corpseCard = cardPosition.corpse && createCardPosition(cardPositions, cardPosition.corpse, cardPosition.x, cardPosition.y, undefined, false)
+          const corpseCard = cardPosition.corpse && createCardPosition(cardPositions, 
+            cardPosition.corpse, cardPosition.x, cardPosition.y, undefined, false
+          )
           if (corpseCard) newCardPositions[corpseCard.id] = corpseCard
           return newCardPositions
         })
@@ -239,6 +242,12 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
     updateAttribute({currentAttribute: 'currentFading', interval:15})
   }, [cardPositionInfo, cardPosition])
 
+  const updatePregnancy = useCallback(() => {
+    if (cardPosition.currentPregnancy && cardPosition.currentPregnancy > 1) {
+      updateAttribute({currentAttribute: 'currentPregnancy', interval: 1000, adjust: +1})
+    }
+  }, [cardPositionInfo, cardPosition])
+
   useEffect(() => {
     updateHunger()
   }, [cardPosition.currentHunger])
@@ -262,6 +271,10 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
   useEffect(() => {
     updateTemperature()
   }, [cardPosition.currentTemp, dayCount])
+
+  useEffect(() => {
+    updatePregnancy()
+  }, [cardPosition.currentPregnancy])
 
   // set new destination based on nonoverlap
   // useEffect(() => {
@@ -344,18 +357,19 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
 
   if (!cardPosition) return null
 
-  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,  maxHealth, currentHealth, currentDecay,currentHunger, maxTemp, currentTemp, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack, Widget } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,  maxHealth, currentHealth, currentDecay,currentHunger, maxTemp, currentTemp, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack, Widget, maxPregnancy, currentPregnancy } = cardPosition;
   const card = allCards[slug]
   if (!card) throw Error
 
   if (cardPosition.hide) return null
 
-  const renderTimer = 
-    timerStart && 
+  const renderTimer = timerStart && 
     timerEnd && 
-    timerEnd.getTime() > Date.now() && 
-    // TODO rewrite this to check slugs
-    spawningStack?.length === cardPosition.attached.length
+    timerEnd.getTime && timerEnd.getTime() > Date.now() && spawningStack?.length === cardPosition.attached.length    
+
+  function shouldBeBright(cardPosition: CardPosition) {
+    return cardPosition && (!isNight(dayCount) || (!!cardPosition.glowing || cardPosition.attached.some((id) => cardPositions[id].glowing)))
+  }
 
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
@@ -363,14 +377,14 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
         left: cardPosition.x, 
         top: cardPosition.y, 
         zIndex: cardPosition.zIndex,
-        filter: (isNight(dayCount) && !card.glowing) ? 'brightness(80%)' : 'brightness(100%)',
+        filter: (shouldBeBright(cardPosition)) ? 'brightness(100%)' : 'brightness(80%)',
         opacity: cardPosition.currentFading !== undefined ? cardPosition.currentFading / (cardPosition.maxFading ?? 100) : 1
       }}>
         <div className={classes.styling} style={{
           ...getCardDimensions(cardPosition),
           border: getCardBorder(cardPosition),
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
-          background: getCardBackground(cardPosition),
+          background: getCardBackground(cardPosition, dayCount),
           borderRadius: card.idea ? 20 : 4,
           boxShadow: card.glowing ? `
             0 0 200px rgba(255,150,0,.5),
@@ -389,7 +403,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
                 {/* <div className={classes.meta} style={{right: 5, top: 5}}>
                   {cardPosition.destinationX}, {cardPosition.destinationY}
                 </div> */}
-{/*                 
+                {/*                 
                 <div className={classes.meta} style={{left: 5, top: 5}}>
                   {id}
                 </div> */}
@@ -429,6 +443,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
               current={currentDecay}
               />}
             {!!(maxTemp && currentTemp) && <TemperatureStatus max={maxTemp} current={currentTemp}/>}
+            {<PregnancyStatus max={maxPregnancy} current={currentPregnancy}/>}
             <ExploredStatus card={card} cardPosition={cardPosition}/>
           </div>
           {cardText && <div className={classes.cardText}>

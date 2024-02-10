@@ -22,10 +22,10 @@ export type CardSlug =
   'crate'|
   'smallFire'|
   'raft'|
-  'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaRope'|
+  'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaCabin'|'ideaRope'|
   'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|
-  'sexualTensionCarlosRuth'|
-  'shelter'|
+  'sexualTensionCarlosRuth'|'cameraderieRuthCarlos'|'loveCarlosRuth'|
+  'shelter'|'cabin'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
   'distantFigure'|'feyHorror'|'dryCourtGuardian'|
   'jungleShrine'|'visionDryCourtSacrifice'|'protectionDryCourt'|'visionDryCourtOffering'|'visionDryThroneJourney'|
@@ -43,6 +43,7 @@ export const allCards: Record<CardSlug, CardType> = {
     maxStamina: 2000,
     maxTemp: 100,
     maxHealth: 6,
+    maxPregnancy: 90,
     corpse: 'ruthCorpse',
     spawnInfo: [
       ...characterSpawnInfo,
@@ -151,7 +152,7 @@ export const allCards: Record<CardSlug, CardType> = {
     backgroundImage: "shelteredCove.png",
     large: true,
     loot: ['carlos'],
-    secondaryLoot: ['rocks', 'coconutTree', 'seaweed', 'fallenLog', 'coconutTree', 'flint'],
+    secondaryLoot: ['rocks', 'coconutTree', 'seaweed', 'fallenLog', 'coconutTree', 'flint','fallenLog'],
     spawnDescriptor: "Exploring...",
   },
   'denseJungle': {
@@ -160,7 +161,7 @@ export const allCards: Record<CardSlug, CardType> = {
     large: true,
     spawnDescriptor: "Exploring...",
     loot: ['craggyCliffs', 'jungleTree', 'jungleTree', 'wildBoar', 'distantFigure', 'jungleShrine', 'mysteriousRuin'],
-    secondaryLoot: ['jungleTree', 'jungleTree', 'wildBoar', 'ancientTree'],
+    secondaryLoot: ['jungleTree', 'jungleTree', 'wildBoar', 'ancientTree', 'jungleTree', 'jungleTree'],
   },
   'ominousWaters': {
     name: "Ominous Waters",
@@ -346,6 +347,12 @@ export const allCards: Record<CardSlug, CardType> = {
       },
     ]
   },
+  'cabin': {
+    name: "Cabin",
+    backgroundImage: 'cabin.jpg',
+    rest: 1200,
+    cardText: <div><em>A cozy home for a family</em></div>,
+  },
 
   'jungleShrine': {
     name: "Jungle Shrine",
@@ -461,6 +468,14 @@ export const allCards: Record<CardSlug, CardType> = {
       <div>2 Hewn Logs, Palm Leaves</div>
     </div>
   },
+  'ideaCabin': {
+    name: 'Idea: Cabin',
+    imageUrl: "ideaCabin.png",
+    idea: true,
+    cardText: <div>
+      <div>7 Hewn Logs, 3 Palm Leaves, 2 Characters</div>
+    </div>
+  },
 
   // Encounters
 
@@ -542,6 +557,16 @@ export const allCards: Record<CardSlug, CardType> = {
   'sexualTensionCarlosRuth': {
     name: "Sexual Tension",
     imageUrl: "sexualTensionRuthCarlos.png",
+    idea: true,
+  },
+  'cameraderieRuthCarlos': {
+    name: "Cameraderie",
+    imageUrl: "cameraderieRuthCarlos.png",
+    idea: true,
+  },
+  'loveCarlosRuth': {
+    name: "Love",
+    imageUrl: "loveRuthCarlos.png",
     idea: true,
   },
   "mysteriousRuin": {

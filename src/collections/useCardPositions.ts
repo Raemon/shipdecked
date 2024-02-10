@@ -234,7 +234,7 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
         recoveredPositions[id] = position;
       }
     }
-    // return initialPositions
+    return initialPositions
     return savedState ? recoveredPositions : initialPositions;
   });
 

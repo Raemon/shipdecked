@@ -11,6 +11,7 @@ export interface MaxCardAttributes {
   maxFading?: number;
   maxDecay?: number;
   maxTemp?: number;
+  maxPregnancy?: number;
 }
 
 export interface CurrentCardAttriutes {
@@ -20,7 +21,8 @@ export interface CurrentCardAttriutes {
   currentStamina?: number;
   currentFading?: number;
   currentDecay?: number;
-  currentTemp?: number
+  currentTemp?: number;
+  currentPregnancy?: number;
 }
 
 export interface AttributeInfo extends MaxCardAttributes, CurrentCardAttriutes {}
@@ -48,6 +50,7 @@ export interface CardTypeBase {
   tracks?: CardSlug[],
   enemy?: boolean,
   glowing?: number,
+  conceiving?: boolean,
   whileAttached?: (
     cardPositionInfo: CardPositionInfo
   ) => void
@@ -96,4 +99,5 @@ export type SpawnInfo = {
   consumeInitiator?: boolean,
   descriptor: string,
   skipIfExists?: CardSlug[],
+  conceiving?: boolean,
 }
