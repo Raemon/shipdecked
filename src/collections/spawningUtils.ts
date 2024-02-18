@@ -277,7 +277,7 @@ function checkIfShouldSkip(cardPositions: Record<string, CardPosition>, skipIfEx
   });
 }
 
-export function spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists, damage, conceiving}:{
+export function spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists, damage, conceiving, consumeStack}:{
   inputStack: CardSlug[], 
   output: CardSlug[], 
   attachedOutput?: CardSlug[],
@@ -288,7 +288,8 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   preserve?: boolean,
   consumeInitiator?: boolean,
   damage?: number,
-  conceiving?: boolean
+  conceiving?: boolean,
+  consumeStack?: CardSlug[]
 }) {
   const { cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id] 
@@ -299,7 +300,7 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   const alreadySpawned = checkIfShouldSkip(cardPositions, skipIfExists)
 
   if (completeStack && !cardPosition.timerEnd && !alreadySpawned) {
-    const timerId = setTimeout(() => spawnFromSet({inputStack, output, attachedOutput,cardPositionInfo, preserve, consumeInitiator, damage, conceiving}), duration);
+    const timerId = setTimeout(() => spawnFromSet({inputStack, output, attachedOutput,cardPositionInfo, preserve, consumeInitiator, damage, conceiving, consumeStack}), duration);
     setCardPositions(prevCardPositions => {
       const newCardPositions = {...prevCardPositions}
       newCardPositions[id] = ({
@@ -316,13 +317,14 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   return false
 }
 
-export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator, damage, conceiving}:{
+export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator, damage, conceiving, consumeStack}:{
   inputStack: CardSlug[], 
   output: CardSlug[], 
   attachedOutput?: CardSlug[],
   cardPositionInfo: CardPositionInfo
   preserve?: boolean,
   consumeInitiator?: boolean,
+  consumeStack?: CardSlug[],
   damage?: number,
   conceiving?: boolean
 }) {
@@ -367,6 +369,14 @@ export function spawnFromSet({inputStack, output, attachedOutput, cardPositionIn
       }
       if (consumeInitiator) {
         delete newCardPositions[id]
+      }
+      if (consumeStack) {
+        consumeStack.forEach(consumed => {
+          const consumeFromStackId = attachedCardsInStack.find(attachedCardPosition => attachedCardPosition.slug === consumed)?.id
+          if (consumeFromStackId) {
+            delete newCardPositions[consumeFromStackId]
+          }
+        })
       }
       const health = cardPosition.currentHealth
       if (damage && health) {
@@ -472,14 +482,14 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
 
   if (attachedCard) {
     let anySpawn = false
-    spawnInfo.forEach(({ duration, inputStack, preserve, output, attachedOutput,  descriptor, skipIfExists, consumeInitiator, damage, conceiving }) => {
+    spawnInfo.forEach(({ duration, inputStack, preserve, output, attachedOutput,  descriptor, skipIfExists, consumeInitiator, damage, conceiving, consumeStack }) => {
       const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
       if (inputEqualsAttached) {
         const attachedSlugs = cardPositions[id].attached.map(i => cardPositions[i].slug)
         const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
         if (inputEqualsAttached && output) {
            anySpawn = !checkIfShouldSkip(cardPositions, skipIfExists)
-           spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator, damage, conceiving})
+           spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator, damage, conceiving, consumeStack})
         } else if (duration && attachedSlugs.length === 1) {  
           anySpawn = !  checkIfShouldSkip(cardPositions, skipIfExists)
           spawnTimerFromLoot({attachedSlug: inputStack[0], duration, cardPositionInfo, preserve, descriptor})

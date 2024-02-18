@@ -1,21 +1,15 @@
 import React, { useCallback, useEffect } from 'react';
 import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
-import { CardPosition, CardPositionInfo, CurrentCardAttriutes, MaxCardAttributes } from '../collections/types';
+import { CardPosition, CardPositionInfo, CurrentCardAttriutes } from '../collections/types';
 import { allCards } from '../collections/cards';
 import { createCardPosition, getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
 import CardTimer from './CardTimer';
 import { handleStart } from './Game';
-import HungerStatus from './Statuses/HungerStatus';
-import FuelStatus from './Statuses/FuelStatus';
 import { getNewCardPosition, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
-import { StaminaStatus } from './Statuses/StaminaStatus';
-import DecayStatus from './Statuses/DecayStatus';
-import ExploredStatus from './Statuses/ExploredStatus';
-import HealthStatus from './Statuses/HealthStatus';
-import TemperatureStatus from './Statuses/TemperatureStatus';
 import { isNight } from './SunDial';
-import PregnancyStatus from './Statuses/PregnancyStatus';
+import { Statuses } from './Statuses/Statuses';
+import { CardDebugging } from './CardDebugging';
 
 export const LARGE_CARD_WIDTH = 132
 export const LARGE_CARD_HEIGHT = 218
@@ -128,15 +122,6 @@ const useStyles = createUseStyles({
     color: 'rgba(0,0,0,.8)',
     fontFamily: "Palatino",
     lineHeight: "1.3em",
-  },
-  statuses: {
-    fontSize: 10,
-    color: "rgba(0,0,0,.75)",
-    fontStyle: "italic",
-    fontFamily: "Palatino",
-    '& span:not(:last-child):after': {
-      content: '", "',
-    }
   }
 });
 
@@ -357,11 +342,11 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
 
   if (!cardPosition) return null
 
-  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, maxHunger, maxDecay,  maxHealth, currentHealth, currentDecay,currentHunger, maxTemp, currentTemp, cardText, currentFuel, maxFuel, maxStamina, currentStamina, spawningStack, Widget, maxPregnancy, currentPregnancy } = cardPosition;
+  const { slug, timerEnd, timerStart, name, imageUrl, currentSpawnDescriptor, cardText, spawningStack, Widget } = cardPosition;
   const card = allCards[slug]
   if (!card) throw Error
 
-  if (cardPosition.hide) return null
+  if (cardPosition.deleted) return null
 
   const renderTimer = timerStart && 
     timerEnd && 
@@ -370,6 +355,8 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
   function shouldBeBright(cardPosition: CardPosition) {
     return cardPosition && (!isNight(dayCount) || (!!cardPosition.glowing || cardPosition.attached.some((id) => cardPositions[id].glowing)))
   }
+  console.log(cardText)
+  console.log(typeof cardText)
 
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
@@ -394,58 +381,9 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
           // transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
         }}>
           <h2>{name}</h2>
-          {
-            // debugging && 
-              <div>
-                {/* <div className={classes.meta} style={{left: 5, top: 5}}>
-                  {cardPosition.x}, {cardPosition.y}
-                </div> */}
-                {/* <div className={classes.meta} style={{right: 5, top: 5}}>
-                  {cardPosition.destinationX}, {cardPosition.destinationY}
-                </div> */}
-                {/*                 
-                <div className={classes.meta} style={{left: 5, top: 5}}>
-                  {id}
-                </div> */}
-                {/* <div className={classes.meta} style={{left: 5, bottom: 5}}>
-                  {cardPosition.attached.length > 0 && <span>
-                    {cardPosition.attached.map((index) => `${index}`).join(",")}
-                  </span>}
-                </div> */}
-                {/* <div className={classes.meta} style={{right: 5, top: 5}}>
-                  {cardPosition.zIndex}
-                </div> */}
-                {/* <div className={classes.meta} style={{right: 5, bottom: 5}}>
-                  {cardPosition.loot?.join(", ")}
-                </div> */}
-              </div>
-            }
+          <CardDebugging cardPosition={cardPosition} />
           {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
-          <div className={classes.statuses}>
-            {!!(maxHunger && currentHunger) && <HungerStatus
-              max={maxHunger} 
-              current={currentHunger}
-              />}
-            {!!(maxHealth && currentHealth) && <HealthStatus
-              max={maxHealth} 
-              current={currentHealth}
-              />}
-            {!!(maxFuel && currentFuel) && <FuelStatus
-              max={maxFuel} 
-              current={currentFuel}
-              />}
-            {!!(maxStamina && currentStamina) && <StaminaStatus
-              max={maxStamina} 
-              current={currentStamina}
-              />}
-            {!!(maxDecay && currentDecay) && <DecayStatus
-              max={maxDecay} 
-              current={currentDecay}
-              />}
-            {!!(maxTemp && currentTemp) && <TemperatureStatus max={maxTemp} current={currentTemp}/>}
-            {<PregnancyStatus max={maxPregnancy} current={currentPregnancy}/>}
-            <ExploredStatus card={card} cardPosition={cardPosition}/>
-          </div>
+          <Statuses cardPosition={cardPosition} />
           {cardText && <div className={classes.cardText}>
             {Widget && <Widget dayCount={dayCount}/>}
             {cardText}

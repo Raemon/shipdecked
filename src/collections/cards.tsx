@@ -6,7 +6,8 @@ import { carlosSpawnInfo, characterSpawnInfo, miloSpawnInfo, ruthSpawnInfo } fro
 export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath',
-  'crate'
+  'crate',
+  'mysteriousRuin'
 ]
 
 export type CardSlug = 
@@ -24,7 +25,7 @@ export type CardSlug =
   'raft'|
   'ideaFire'|'ideaRaft'|'ideaHatchet'|'ideaShelter'|'ideaCabin'|'ideaRope'|
   'ideaGatherSurvivors'|'ideaEscape'|'ideaBiggerBoat'|
-  'sexualTensionCarlosRuth'|'cameraderieRuthCarlos'|'loveCarlosRuth'|
+  'sexualTensionCarlosRuth'|'sexualTensionCarlosRuth2'|'cameraderieRuthCarlos'|'loveCarlosRuth'|
   'shelter'|'cabin'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
   'distantFigure'|'feyHorror'|'dryCourtGuardian'|
@@ -342,7 +343,16 @@ export const allCards: Record<CardSlug, CardType> = {
         descriptor: "Awkwardly resting...",
         inputStack: ['carlos', 'ruth'],
         output: ['sexualTensionCarlosRuth'],
-        skipIfExists: ['sexualTensionCarlosRuth'],
+        skipIfExists: ['sexualTensionCarlosRuth', 'sexualTensionCarlosRuth2', 'loveCarlosRuth'],
+        preserve: true,
+      },
+      {
+        duration: 6000,
+        descriptor: "Awkwardly resting...",
+        inputStack: ['carlos', 'ruth', 'sexualTensionCarlosRuth'],
+        output: ['sexualTensionCarlosRuth2'],
+        skipIfExists: ['sexualTensionCarlosRuth2', 'loveCarlosRuth'],
+        consumeStack: ['sexualTensionCarlosRuth'],
         preserve: true,
       },
     ]
@@ -558,6 +568,12 @@ export const allCards: Record<CardSlug, CardType> = {
     name: "Sexual Tension",
     imageUrl: "sexualTensionRuthCarlos.png",
     idea: true,
+  },
+  'sexualTensionCarlosRuth2': {
+    name: "Heightened Sexual Tension",
+    imageUrl: "sexualTensionRuthCarlos.png",
+    idea: true,
+    cardText: <div><em>The shelter is very uncomfortable</em></div>
   },
   'cameraderieRuthCarlos': {
     name: "Cameraderie",

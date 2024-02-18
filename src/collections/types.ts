@@ -34,6 +34,7 @@ export interface CardTypeBase {
   name: string|React.ReactNode,
   large?: boolean,
   idea?: true,
+  character?: boolean,
   calories?: number;
   fuel?: number;
   rest?: number;
@@ -73,7 +74,7 @@ export interface CardPositionBase extends CardType {
   timerId?: NodeJS.Timeout,
   spawningStack?: CardSlug[],
   currentSpawnDescriptor?: string,
-  hide?: boolean,
+  deleted?: boolean,
   zIndex: number,
   dragging?: boolean,
   createdAt: Date,
@@ -97,7 +98,8 @@ export type SpawnInfo = {
   attachedOutput?: CardSlug[],
   preserve?:boolean, 
   consumeInitiator?: boolean,
+  consumeStack?: CardSlug[],
   descriptor: string,
   skipIfExists?: CardSlug[],
-  conceiving?: boolean,
+  conceiving?: boolean
 }
