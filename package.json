@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "homepage2": "https://raemon.github.io/sro-game",
+  "homepage": "https://shipdecked.com/",
   "COMMENT_ON_HOMEPAGE": "remove '2' from 'homepage2' to deploy to github pages",
   "dependencies": {
     "@mui/material": "^5.13.6",
