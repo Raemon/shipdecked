@@ -7,7 +7,7 @@ export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath',
   'crate',
-  'mysteriousRuin'
+  // 'mysteriousRuin'
 ]
 
 export type CardSlug = 
