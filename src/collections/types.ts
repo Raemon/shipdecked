@@ -1,7 +1,5 @@
-import { type } from "os";
-import React, { ReactElement } from "react";
+import React from "react";
 import { CardSlug } from "./cards";
-import { JssStyle } from "jss";
 
 export interface MaxCardAttributes {
   maxHunger?: number;
