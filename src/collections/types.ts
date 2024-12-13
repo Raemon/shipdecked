@@ -101,5 +101,7 @@ export type SpawnInfo = {
   consumeStack?: CardSlug[],
   descriptor: string,
   skipIfExists?: CardSlug[],
-  conceiving?: boolean
+  stamina?: number,
+  conceiving?: boolean,
+  heat?: number,
 }

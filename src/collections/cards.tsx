@@ -7,6 +7,7 @@ export const startingCards: CardSlug[] = [
   'ruth', 
   'shoresidePath',
   'crate',
+  // 'smallFire'
   // 'mysteriousRuin'
 ]
 
@@ -276,6 +277,7 @@ export const allCards: Record<CardSlug, CardType> = {
     spawnDescriptor: "Cooking...",
     maxFuel: 1000,
     heat: 25,
+    rest: 300,
     glowing: 50,
     loot: ['ideaRaft'],
   },

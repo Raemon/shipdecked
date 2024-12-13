@@ -248,10 +248,12 @@ export const ruthSpawnInfo: SpawnInfo[] = [
   },
   { 
     duration: 6000, 
-    descriptor: "Stare into flames...", 
+    descriptor: "Staring into flames...", 
     inputStack: ['smallFire'], 
     skipIfExists: ['ideaGatherSurvivors'], 
     output: ["ideaGatherSurvivors"],
+    stamina: 2000,
+    heat: 20,
     preserve: true,
   },
   {

@@ -3,7 +3,7 @@ import { DraggableCore, DraggableData, DraggableEvent } from 'react-draggable';
 import { createUseStyles } from 'react-jss';
 import { CardPosition, CardPositionInfo, CurrentCardAttriutes } from '../collections/types';
 import { allCards } from '../collections/cards';
-import { createCardPosition, getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
+import { createCardPosition, deleteCard, getAttachedCardsWithHigherZIndex, updateCardPosition, whileAttached } from '../collections/spawningUtils';
 import CardTimer from './CardTimer';
 import { handleStart } from './Game';
 import { getNewCardPosition, isOverlapping, moveTowardsDestination, STACK_OFFSET_X, STACK_OFFSET_Y } from '../collections/useCardPositions';
@@ -167,8 +167,8 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
       if (cardPosition[currentAttribute] === 0) {
         setCardPositions((cardPositions: Record<string, CardPosition>) => {
           const newCardPositions = {...cardPositions}
-          delete newCardPositions[id]
-          const corpseCard = cardPosition.corpse && createCardPosition(cardPositions, 
+          deleteCard(newCardPositions, id)
+          const corpseCard = cardPosition.corpse && createCardPosition(newCardPositions, 
             cardPosition.corpse, cardPosition.x, cardPosition.y, undefined, false
           )
           if (corpseCard) newCardPositions[corpseCard.id] = corpseCard
@@ -355,8 +355,6 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
   function shouldBeBright(cardPosition: CardPosition) {
     return cardPosition && (!isNight(dayCount) || (!!cardPosition.glowing || cardPosition.attached.some((id) => cardPositions[id].glowing)))
   }
-  console.log(cardText)
-  console.log(typeof cardText)
 
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>

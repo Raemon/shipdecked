@@ -33,7 +33,7 @@ export function createCardPosition(cardPositions: Record<string, CardPosition>, 
     zIndex: zIndex ?? 1,
     currentHunger: card.maxHunger ? card.maxHunger/2 - 1: undefined,
     currentFuel: card.maxFuel ? card.maxFuel/2 - 1: undefined,
-    currentStamina: card.maxStamina ? card.maxStamina/1.5 - 1: undefined,
+    currentStamina: card.maxStamina ? card.maxStamina/2 - 1: undefined,
     currentFading: card.maxFading,
     currentDecay: card.maxDecay,
     currentHealth: card.maxHealth,
@@ -260,7 +260,7 @@ export function spawnFromLoot({attachedSlug, cardPositionInfo, preserve}:{attach
       // If there are no more items to spawn even , remove the attached card
       
       if (newSpawnItems.length === 0 && !preserve) {
-        delete newCardPositions[attachedId]
+        deleteCard(newCardPositions, attachedId)
       }
       return newCardPositions;
     } else {
@@ -277,7 +277,7 @@ function checkIfShouldSkip(cardPositions: Record<string, CardPosition>, skipIfEx
   });
 }
 
-export function spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, preserve, consumeInitiator, skipIfExists, damage, conceiving, consumeStack}:{
+type SpawnProps = {
   inputStack: CardSlug[], 
   output: CardSlug[], 
   attachedOutput?: CardSlug[],
@@ -287,10 +287,17 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   skipIfExists?: CardSlug[]
   preserve?: boolean,
   consumeInitiator?: boolean,
-  damage?: number,
-  conceiving?: boolean,
-  consumeStack?: CardSlug[]
-}) {
+  damage?: number, 
+  conceiving?: boolean, 
+  consumeStack?: CardSlug[],
+  stamina?: number,
+  fuel?: number,
+  calories?: number,
+  rest?: number,
+  heat?: number,
+}
+
+export function spawnTimerFromSet({inputStack, duration, descriptor, skipIfExists, cardPositionInfo, ...props}:SpawnProps) {
   const { cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id] 
   const attachedSlugs = cardPosition.attached.map(i => cardPositions[i].slug)
@@ -300,7 +307,7 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   const alreadySpawned = checkIfShouldSkip(cardPositions, skipIfExists)
 
   if (completeStack && !cardPosition.timerEnd && !alreadySpawned) {
-    const timerId = setTimeout(() => spawnFromSet({inputStack, output, attachedOutput,cardPositionInfo, preserve, consumeInitiator, damage, conceiving, consumeStack}), duration);
+    const timerId = setTimeout(() => spawnFromSet({inputStack, duration, descriptor, skipIfExists, cardPositionInfo, ...props}), duration);
     setCardPositions(prevCardPositions => {
       const newCardPositions = {...prevCardPositions}
       newCardPositions[id] = ({
@@ -317,17 +324,25 @@ export function spawnTimerFromSet({inputStack, output, attachedOutput, duration,
   return false
 }
 
-export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator, damage, conceiving, consumeStack}:{
-  inputStack: CardSlug[], 
-  output: CardSlug[], 
-  attachedOutput?: CardSlug[],
-  cardPositionInfo: CardPositionInfo
-  preserve?: boolean,
-  consumeInitiator?: boolean,
-  consumeStack?: CardSlug[],
-  damage?: number,
-  conceiving?: boolean
-}) {
+export function deleteCard(cardPositions: Record<string, CardPosition>, id: string) {
+  const cardPosition = cardPositions[id]
+  if (!cardPosition) return cardPositions
+
+  const newCardPositions = { ...cardPositions }
+
+  Object.values(newCardPositions).forEach(card => {
+    if (card.attached) {
+      card.attached = card.attached.filter(attachedId => attachedId !== id)
+    }
+    if (card.maybeAttached) {
+      card.maybeAttached = card.maybeAttached.filter(attachedId => attachedId !== id)
+    }
+  })
+
+  delete newCardPositions[id]
+}
+
+export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator, damage, conceiving, consumeStack, stamina, heat}:SpawnProps) {
   const { cardPositions, id, setCardPositions } = cardPositionInfo
   if (!cardPositions[id]) return
 
@@ -340,6 +355,9 @@ export function spawnFromSet({inputStack, output, attachedOutput, cardPositionIn
       newCardPositions[id] = popOffCard(newCardPositionInfo)
 
       // create the output card
+
+      console.log({cardPositionInfo, stamina, heat})
+      
 
       const soFarOutput: CardPosition[] = []
       output.forEach((outputSlug) => {
@@ -364,17 +382,17 @@ export function spawnFromSet({inputStack, output, attachedOutput, cardPositionIn
       // destroy the attached cards
       if (!preserve) {
         attachedCardsInStack.forEach(attachedCardPosition => {
-          delete newCardPositions[attachedCardPosition.id]
+          deleteCard(newCardPositions, attachedCardPosition.id)
         })
       }
       if (consumeInitiator) {
-        delete newCardPositions[id]
+        deleteCard(newCardPositions, id)
       }
       if (consumeStack) {
         consumeStack.forEach(consumed => {
           const consumeFromStackId = attachedCardsInStack.find(attachedCardPosition => attachedCardPosition.slug === consumed)?.id
           if (consumeFromStackId) {
-            delete newCardPositions[consumeFromStackId]
+            deleteCard(newCardPositions, consumeFromStackId)
           }
         })
       }
@@ -383,7 +401,15 @@ export function spawnFromSet({inputStack, output, attachedOutput, cardPositionIn
         newCardPositions[id].currentHealth = Math.max(health - damage, 0)
       }
       if (conceiving && typeof cardPosition.currentPregnancy === "number") {
-        newCardPositions[id].currentPregnancy = 2
+        newCardPositions[id].currentPregnancy = 2;
+      }
+      if (typeof newCardPositions[id]?.currentStamina === "number" && typeof stamina === "number") {
+        const staminaValue = newCardPositions[id].currentStamina as number // the typing is confused here and I don't know why
+        newCardPositions[id].currentStamina = staminaValue + stamina
+      }
+      if (typeof newCardPositions[id]?.currentTemp === "number" && typeof heat === "number") {
+        const temp = newCardPositions[id].currentTemp as number
+        newCardPositions[id].currentTemp = temp + heat
       }
     }
     return newCardPositions
@@ -458,7 +484,7 @@ function restore({cardPositionInfo, resourceAmount, currentAttribute, maxAttribu
       };
 
       if (!preserve) {
-        delete newCardPositions[attachedId]
+        deleteCard(newCardPositions, attachedId)
       }
     }
 
@@ -482,17 +508,17 @@ export function whileAttached (cardPositionInfo: CardPositionInfo) {
 
   if (attachedCard) {
     let anySpawn = false
-    spawnInfo.forEach(({ duration, inputStack, preserve, output, attachedOutput,  descriptor, skipIfExists, consumeInitiator, damage, conceiving, consumeStack }) => {
+    spawnInfo.forEach(({inputStack, duration, output, skipIfExists, ...props}) => {
       const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
       if (inputEqualsAttached) {
         const attachedSlugs = cardPositions[id].attached.map(i => cardPositions[i].slug)
         const inputEqualsAttached = inputStack && areArraysIdentical(inputStack, attachedSlugs)
         if (inputEqualsAttached && output) {
            anySpawn = !checkIfShouldSkip(cardPositions, skipIfExists)
-           spawnTimerFromSet({inputStack, output, attachedOutput, duration, cardPositionInfo, descriptor, skipIfExists, preserve, consumeInitiator, damage, conceiving, consumeStack})
+           spawnTimerFromSet({inputStack, duration, output, skipIfExists, cardPositionInfo, ...props})
         } else if (duration && attachedSlugs.length === 1) {  
           anySpawn = !  checkIfShouldSkip(cardPositions, skipIfExists)
-          spawnTimerFromLoot({attachedSlug: inputStack[0], duration, cardPositionInfo, preserve, descriptor})
+          spawnTimerFromLoot({attachedSlug: inputStack[0], duration, cardPositionInfo, ...props})
         }
       }
      }) 
