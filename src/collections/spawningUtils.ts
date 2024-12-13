@@ -325,21 +325,26 @@ export function spawnTimerFromSet({inputStack, duration, descriptor, skipIfExist
 }
 
 export function deleteCard(cardPositions: Record<string, CardPosition>, id: string) {
-  const cardPosition = cardPositions[id]
-  if (!cardPosition) return cardPositions
+  const cardPosition = cardPositions[id];
+  if (!cardPosition) return;
 
-  const newCardPositions = { ...cardPositions }
+  // Clear any timers associated with the card
+  if (cardPosition.timerId) {
+    clearTimeout(cardPosition.timerId);
+  }
 
-  Object.values(newCardPositions).forEach(card => {
+  // Remove references from other cards
+  Object.values(cardPositions).forEach(card => {
     if (card.attached) {
-      card.attached = card.attached.filter(attachedId => attachedId !== id)
+      card.attached = card.attached.filter(attachedId => attachedId !== id);
     }
     if (card.maybeAttached) {
-      card.maybeAttached = card.maybeAttached.filter(attachedId => attachedId !== id)
+      card.maybeAttached = card.maybeAttached.filter(attachedId => attachedId !== id);
     }
-  })
+  });
 
-  delete newCardPositions[id]
+  // Delete the card position
+  delete cardPositions[id];
 }
 
 export function spawnFromSet({inputStack, output, attachedOutput, cardPositionInfo, preserve, consumeInitiator, damage, conceiving, consumeStack, stamina, heat}:SpawnProps) {
