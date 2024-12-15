@@ -355,6 +355,7 @@ export function spawnFromSet({inputStack, output, attachedOutput, cardPositionIn
     const newCardPositions = {...prevCardPositions}
     const cardPosition = newCardPositions[cardPositionInfo.id]
     const newCardPositionInfo = { ...cardPositionInfo, cardPositions: newCardPositions }
+    if (!cardPosition) return newCardPositions // TODO: unclear if this is the solution or just a hack
     const attachedSlugs = cardPosition.attached.map(i => newCardPositions[i].slug)
     if (areArraysIdentical(attachedSlugs, inputStack)) {
       newCardPositions[id] = popOffCard(newCardPositionInfo)

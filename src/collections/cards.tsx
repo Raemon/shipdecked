@@ -4,9 +4,9 @@ import SeasonCountdown from '../components/Widgets/SeasonCountdown';
 import { carlosSpawnInfo, characterSpawnInfo, miloSpawnInfo, ruthSpawnInfo } from './characterSpawnInfo';
 
 export const startingCards: CardSlug[] = [
-  'ruth', 
   'shoresidePath',
   'crate',
+  'ruth',
   // 'smallFire'
   // 'mysteriousRuin'
 ]
@@ -345,18 +345,18 @@ export const allCards: Record<CardSlug, CardType> = {
         descriptor: "Awkwardly resting...",
         inputStack: ['carlos', 'ruth'],
         output: ['sexualTensionCarlosRuth'],
-        skipIfExists: ['sexualTensionCarlosRuth', 'sexualTensionCarlosRuth2', 'loveCarlosRuth'],
+        skipIfExists: ['sexualTensionCarlosRuth', 'loveCarlosRuth'],
         preserve: true,
-      },
-      {
-        duration: 6000,
-        descriptor: "Awkwardly resting...",
-        inputStack: ['carlos', 'ruth', 'sexualTensionCarlosRuth'],
-        output: ['sexualTensionCarlosRuth2'],
-        skipIfExists: ['sexualTensionCarlosRuth2', 'loveCarlosRuth'],
-        consumeStack: ['sexualTensionCarlosRuth'],
-        preserve: true,
-      },
+      }
+      // {
+      //   duration: 6000,
+      //   descriptor: "Awkwardly resting...",
+      //   inputStack: ['carlos', 'ruth', 'sexualTensionCarlosRuth'],
+      //   output: ['sexualTensionCarlosRuth2'],
+      //   skipIfExists: ['sexualTensionCarlosRuth2', 'loveCarlosRuth'],
+      //   consumeStack: ['sexualTensionCarlosRuth'],
+      //   preserve: true,
+      // },
     ]
   },
   'cabin': {
@@ -383,7 +383,7 @@ export const allCards: Record<CardSlug, CardType> = {
     name: 'Idea: Fire',
     imageUrl: 'ideaFire.png',
     idea: true,
-    cardText: <div>Sticks, Log and Flint</div>
+    cardText: <div>A Character, Sticks, Log and Flint</div>
   },
   'ideaRope':{
     name: "Idea: Rope",
@@ -469,7 +469,7 @@ export const allCards: Record<CardSlug, CardType> = {
     imageUrl: "ideaHatchet.png",
     idea: true,
     cardText: <div>
-      <div>Attach Ruth to <br/> <b><em>Sticks</em></b> and <b><em>Flint</em></b><br/> to make a hatchet</div>
+      <div>Attach Character to <br/> <b><em>Sticks</em></b> and <b><em>Flint</em></b><br/> to make a hatchet</div>
     </div>
   },
   'ideaShelter': {

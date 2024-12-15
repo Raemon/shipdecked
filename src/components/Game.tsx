@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from './Card';
 import { createUseStyles } from 'react-jss';
 import SunDial, { isNight } from './SunDial';
@@ -81,23 +81,7 @@ function Game() {
       Math.round(200+Math.random()*100))
     initialCardPositions[cardPosition.id] = cardPosition
   }); 
-
-  // const [audio] = useState(new Audio('sounds/haunting1.mp3'));
-
-  // useEffect(() => {
-  //   const handleClick = () => {
-  //     console.log("playing")
-  //     if (!audio) return
-  //     audio.play().catch(error => console.error("Audio play failed:", error));
-  //   };
-
-  //   document.addEventListener('click', handleClick);
-
-  //   return () => {
-  //     document.removeEventListener('click', handleClick);
-  //   };
-  // }, [audio]);
-
+  
   const { cardPositions, setCardPositions, onDrag, onStop, isDragging } = useCardPositions(initialCardPositions);
 
   function removeUndefinedValues(obj: Record<string, CardPosition>): Record<string, CardPosition> {

@@ -12,7 +12,7 @@ const ScalingField = ({children}:{children: React.ReactNode}) => {
     const scaleChange = event.deltaY > 0 ? -0.01 : 0.01;
 
     // Update the scale state
-    setScale(prevScale => Math.min(Math.max(0.4, prevScale + scaleChange), 2));
+    setScale(prevScale => Math.min(Math.max(0.8, prevScale + scaleChange), 2));
   };
 
   useEffect(() => {

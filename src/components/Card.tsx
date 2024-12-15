@@ -10,9 +10,10 @@ import { getNewCardPosition, isOverlapping, moveTowardsDestination, STACK_OFFSET
 import { isNight } from './SunDial';
 import { Statuses } from './Statuses/Statuses';
 import { CardDebugging } from './CardDebugging';
+import classNames from 'classnames';
 
-export const LARGE_CARD_WIDTH = 132
-export const LARGE_CARD_HEIGHT = 218
+export const LARGE_CARD_WIDTH = 138
+export const LARGE_CARD_HEIGHT = 224
 export const CARD_HEIGHT = 180;
 export const CARD_WIDTH = 110;
 export const IDEA_CARD_WIDTH = 120;
@@ -62,14 +63,9 @@ export const getCardBorder = (cardPosition: CardPosition) => {
 }
 
 const useStyles = createUseStyles({
-  '@keyframes fadeOutOutline': {
-    from: { outline: '4px solid rgba(0, 0, 0, .5)' }, // Full opacity
-    to: { outline: '4px solid rgba(0, 0, 0, 0)' } // Zero opacity
-  },
   root: {
     display: "inline-block",
     position: "absolute",
-    // transition: 'filter 1s ease-in-out',
   },
   styling: {
     padding: 9,
@@ -122,7 +118,11 @@ const useStyles = createUseStyles({
     color: 'rgba(0,0,0,.8)',
     fontFamily: "Palatino",
     lineHeight: "1.3em",
-  }
+  },
+  character: {
+    border: 'solid 5px #e9d2bc',
+    borderRadius: '7px !important',
+  },
 });
 
 type CardProps = {
@@ -365,7 +365,7 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
         filter: (shouldBeBright(cardPosition)) ? 'brightness(100%)' : 'brightness(80%)',
         opacity: cardPosition.currentFading !== undefined ? cardPosition.currentFading / (cardPosition.maxFading ?? 100) : 1
       }}>
-        <div className={classes.styling} style={{
+        <div className={classNames(classes.styling, {[classes.character]: card.maxHunger})} style={{
           ...getCardDimensions(cardPosition),
           border: getCardBorder(cardPosition),
           outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
