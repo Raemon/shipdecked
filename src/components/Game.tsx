@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Card from './Card';
+import Card, { CARD_HEIGHT, CARD_WIDTH, getCardDimensions } from './Card';
 import { createUseStyles } from 'react-jss';
 import SunDial, { isNight } from './SunDial';
 import ScalingField from './ScalingField';
@@ -21,6 +21,23 @@ const useStyles = createUseStyles({
     height: '100vh',
     width: '100vw',
     transition: 'background 3s ease-in-out',
+    position: "relative",
+    scrollbarWidth: "none",
+    msOverflowStyle: "none",
+    '&::-webkit-scrollbar': {
+      display: 'none'
+    },
+    '& *::-webkit-scrollbar': {
+      display: 'none'
+    },
+    overflow: 'hidden',
+    '& *': {
+      scrollbarWidth: "none",
+      msOverflowStyle: "none",
+      '&::-webkit-scrollbar': {
+        display: 'none'
+      }
+    }
   },
   map: {
     textAlign: 'center',
@@ -31,18 +48,27 @@ const useStyles = createUseStyles({
     fontSize: 'calc(10px + 2vmin)',
     height: '400%',
     width: '400%',
+    scrollbarWidth: "none",
+    msOverflowStyle: "none",
+    '&::-webkit-scrollbar': {
+      display: 'none'
+    },
+    '& *::-webkit-scrollbar': {
+      display: 'none'
+    },
+    overflow: 'hidden'
   },
   style: {
     border: 'solid 1px rgba(0,0,0,.2)',
     boxShadow: '0 40px 40px 0 rgba(0,0,0,0)',
-    width: '95%',
-    height: '95vh',
+    width: `calc(100vw - ${CARD_WIDTH*2.5+80}px)`,
+    height: `calc(100vh - 32px)`,
     position: "relative",
-    top: '2.5vh',
-    left: '2.5%',
-    borderRadius: 6,
+    top: '16px',
+    left: '16px',
+    borderRadius: 8,
     overflow: "hidden",
-    transition: '3s ease-in-out',
+    transition: 'background 3s ease-in-out',
   },
   pauseScreen: {
     position: "absolute",
@@ -67,6 +93,11 @@ const useStyles = createUseStyles({
     fontWeight: 600,
     cursor: "pointer",
     zIndex: 9999
+  },
+  latestCard: {
+    position: "absolute",
+    zIndex: 9999,
+    pointerEvents: "none",
   }
 });
 
@@ -82,7 +113,7 @@ function Game() {
     initialCardPositions[cardPosition.id] = cardPosition
   }); 
   
-  const { cardPositions, setCardPositions, onDrag, onStop, isDragging } = useCardPositions(initialCardPositions);
+  const { cardPositions, setCardPositions, onDrag, onStop, isDragging, latestCardPosition } = useCardPositions(initialCardPositions);
 
   function removeUndefinedValues(obj: Record<string, CardPosition>): Record<string, CardPosition> {
     return Object.entries(obj).reduce((a, [k, v]) => (v === undefined ? a : {...a, [k]: v}), {});
@@ -165,6 +196,23 @@ function Game() {
       </div>
       <SunDial dayCount={dayCount} setDayCount={setDayCount} />
       <div className={classes.reset} onClick={() => setCardPositions(initialCardPositions)}>New Game</div>
+      {latestCardPosition && <div className={classes.latestCard} 
+        style={{
+          right: CARD_WIDTH*2.5 + 56, 
+          bottom: CARD_HEIGHT*2.5 + 60,
+          transform: `scale(${(CARD_WIDTH * 2.5) / getCardDimensions(latestCardPosition).width})`
+        }}>
+        <Card 
+          cardPositionInfo={{cardPositions, id: latestCardPosition.id, setCardPositions}} 
+          notDraggable={true} 
+          paused={paused} 
+          onDrag={onDrag} 
+          onStop={onStop} 
+          soundEnabled={soundEnabled} 
+          isDragging={isDragging} 
+          dayCount={dayCount} 
+        />
+      </div>}
     </div>
   );
 }

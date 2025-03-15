@@ -4,9 +4,10 @@ import SeasonCountdown from '../components/Widgets/SeasonCountdown';
 import { carlosSpawnInfo, characterSpawnInfo, miloSpawnInfo, ruthSpawnInfo } from './characterSpawnInfo';
 
 export const startingCards: CardSlug[] = [
-  'shoresidePath',
-  'crate',
   'ruth',
+  'shoresidePath',
+  'islandShrine',
+  'crate',
   // 'smallFire'
   // 'mysteriousRuin'
 ]
@@ -30,11 +31,12 @@ export type CardSlug =
   'shelter'|'cabin'|
   'hatchet'|'spear'|'hammer'|'workBench'|'rope'|
   'distantFigure'|'feyHorror'|'dryCourtGuardian'|
-  'jungleShrine'|'visionDryCourtSacrifice'|'protectionDryCourt'|'visionDryCourtOffering'|'visionDryThroneJourney'|
-  'islandShrine'|
+  'jungleShrine'|'visionDryCourtSacrifice'|'aceOfSuns'|'visionDryCourtOffering'|'visionDryThroneJourney'|
   'miloUnsettlingFeeling'|'carlosUnsettlingFeeling'|'ruthUnsettlingFeeling'|
   'wildBoar'|'boarCarcass'|'rawMeat'|'cookedMeat'|
-  'mysteriousRuin'|'ancientCalendar'
+  'mysteriousRuin'|'ancientCalendar'|
+  'islandShrine'|'visionMonsoonCourtOffering'|
+  "safeHarbor"
 
 export const allCards: Record<CardSlug, CardType> = {
   "ruth": {
@@ -168,6 +170,7 @@ export const allCards: Record<CardSlug, CardType> = {
   'ominousWaters': {
     name: "Ominous Waters",
     backgroundImage: "ominousWaters.jpg",
+    loot: ['islandShrine', 'unnaturalStorm'],
     large: true,
   },
   'unnaturalStorm': {
@@ -447,9 +450,11 @@ export const allCards: Record<CardSlug, CardType> = {
       Jungle Shrine, Corpse
     </div>
   },
-  'protectionDryCourt': {
-    name: "Protection of the Dry Court",
-    imageUrl: "protectionDryCourt.png",
+  'aceOfSuns': {
+    name: "Ace of Suns",
+    titleStyle: {color: "white", fontWeight: 700, marginTop: 5},
+    textStyle: {color: "white", marginBottom: 5},
+    backgroundImage: "aceOfSunsDark.jpg",
     cardText: <div>
       <em>(Not in demo)</em>
     </div>
@@ -598,6 +603,21 @@ export const allCards: Record<CardSlug, CardType> = {
     Widget: SeasonCountdown,
     cardText: <div>
       <em>(Not in demo)</em>
+    </div>
+  },
+  "visionMonsoonCourtOffering": {
+    name: "Vision: Monsoon Court Offering",
+    imageUrl: "visionMonsoonCourtOffering.jpg",
+    cardText: <div>
+      <em>(Not in demo)</em>
+    </div>
+  },
+  "safeHarbor": {
+    name: "Safe Harbor",
+    imageUrl: "safeHarbor.jpg",
+    cardText: <div>
+      <em>Victory</em>
+      <em>You made it to the safe harbor</em>
     </div>
   }
 }

@@ -239,9 +239,11 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
   });
 
   const [isDragging, setIsDragging] = useState(false);
+  const [latestCardPosition, setLatestCardPosition] = useState<CardPosition>(cardPositions[Object.keys(cardPositions)[0]]);
 
   const onDrag = useCallback((event: DraggableEvent, data: DraggableData, i: string) => {
     setIsDragging(true);
+    setLatestCardPosition(cardPositions[i]);
     const newPositions = {...cardPositions};
     const cardPosition = cardPositions[i];
     if (cardPosition.enemy) return
@@ -258,8 +260,9 @@ export function useCardPositions(initialPositions: Record<string, CardPosition>)
 
   const onStop = useCallback((index: string) => {
     setIsDragging(false);
+    setLatestCardPosition(cardPositions[index]);
     handleNewCardPosition(cardPositions, index, setCardPositions)
   }, [cardPositions, getAttachedIndexes]);
 
-  return { cardPositions, setCardPositions, onDrag, onStop, isDragging };
+  return { latestCardPosition, cardPositions, setCardPositions, onDrag, onStop, isDragging };
 }

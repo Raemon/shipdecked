@@ -13,27 +13,38 @@ import { CardDebugging } from './CardDebugging';
 import classNames from 'classnames';
 
 export const LARGE_CARD_WIDTH = 138
-export const LARGE_CARD_HEIGHT = 224
+export const LARGE_CARD_HEIGHT = 230
 export const CARD_HEIGHT = 180;
 export const CARD_WIDTH = 110;
 export const IDEA_CARD_WIDTH = 120;
 export const IDEA_CARD_HEIGHT = 190;
 
+const CHAR_BORDER_WIDTH = 5
+
 export const getCardDimensions = (card: CardPosition) => {
   if (card.large) {
     return {
       width: LARGE_CARD_WIDTH,
-      height: LARGE_CARD_HEIGHT
+      height: LARGE_CARD_HEIGHT,
+      ratio: LARGE_CARD_WIDTH / CARD_WIDTH
     }
   } else if (card.idea) {
     return {
       width: IDEA_CARD_WIDTH,
-      height: IDEA_CARD_HEIGHT
+      height: IDEA_CARD_HEIGHT,
+      ratio: IDEA_CARD_WIDTH / CARD_WIDTH
+    }
+  } else if (card.character) {
+    return {
+      width: CARD_WIDTH,
+      height: CARD_WIDTH,
+      ratio: (CARD_WIDTH + CHAR_BORDER_WIDTH*2) / CARD_WIDTH
     }
   } else {
     return {
       width: CARD_WIDTH,
-      height: CARD_HEIGHT
+      height: CARD_HEIGHT,
+      ratio: 1
     }
   }
 }
@@ -58,6 +69,8 @@ export const getCardBorder = (cardPosition: CardPosition) => {
     return "dashed 2px rgba(0,0,0,.2)"
   } else if (cardPosition.enemy) {
     return "solid 3px rgba(200,0,0,1)"
+  } else if (cardPosition.maxStamina) {
+    return `solid ${CHAR_BORDER_WIDTH}px #e8cdb8`
   }
   return ""
 }
@@ -78,7 +91,7 @@ const useStyles = createUseStyles({
     borderRadius: 4,
     boxShadow: '0 4px 0 0 rgba(0,0,0,0)',
     backgroundSize: "cover !important",
-    transition: 'all .1s ease-in-out',
+    // transition: 'all .1s ease-in-out',
     animation: '$fadeOutOutline 2s forwards', // Apply the animation
     cursor: "grab", 
     '&:hover': {
@@ -120,8 +133,8 @@ const useStyles = createUseStyles({
     lineHeight: "1.3em",
   },
   character: {
-    border: 'solid 5px #e9d2bc',
     borderRadius: '7px !important',
+    boxShadow: '0 0 4px rgba(0,0,0,.5)',
   },
 });
 
@@ -129,6 +142,7 @@ type CardProps = {
   cardPositionInfo: CardPositionInfo,
   onDrag: (event: DraggableEvent, data: DraggableData, id: string) => void;
   onStop: (id: string) => void;
+  notDraggable?: boolean;
   paused: boolean;
   isDragging: boolean;
   soundEnabled: boolean;
@@ -136,7 +150,7 @@ type CardProps = {
 };
 
 
-const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:CardProps) => {
+const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount, notDraggable}:CardProps) => {
   const classes = useStyles();
   const {cardPositions, id, setCardPositions } = cardPositionInfo
   const cardPosition = cardPositions[id];
@@ -356,45 +370,55 @@ const Card = ({onDrag, onStop, cardPositionInfo, paused, isDragging, dayCount}:C
     return cardPosition && (!isNight(dayCount) || (!!cardPosition.glowing || cardPosition.attached.some((id) => cardPositions[id].glowing)))
   }
 
+  const renderedCard =  <div className={classes.root} style={{
+    left: !notDraggable ? cardPosition.x : undefined, 
+    top: !notDraggable ? cardPosition.y : undefined, 
+    zIndex: cardPosition.zIndex,
+    filter: (shouldBeBright(cardPosition)) ? 'brightness(100%)' : 'brightness(80%)',
+    opacity: cardPosition.currentFading !== undefined ? cardPosition.currentFading / (cardPosition.maxFading ?? 100) : 1
+  }}>
+    <div className={classNames(classes.styling, {[classes.character]: card.maxHunger && !notDraggable})} style={{
+      ...getCardDimensions(cardPosition),
+      border: notDraggable ? 'none' : getCardBorder(cardPosition),
+      outlineWidth: (cardPosition.maybeAttached.length && !notDraggable) ? 3 : 0,
+      backgroundColor: 'white',
+      background: getCardBackground(cardPosition, dayCount),
+      backgroundPosition: 'center',
+      borderRadius: card.idea ? 20 : 4,
+      boxShadow: card.glowing ? `
+        0 0 200px rgba(255,150,0,.5),
+        0 0 10px rgba(255,255,250,.9),
+        0 0 50px rgba(255,150,0,.5)
+      ` : ""
+      // transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
+    }}>
+      <h2 
+        style={card.titleStyle}
+      >
+        {name}
+      </h2>
+      <CardDebugging cardPosition={cardPosition} />
+      {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
+      <Statuses cardPosition={cardPosition} />
+      {cardText && <div className={classes.cardText} style={card.textStyle}>
+        {Widget && <Widget dayCount={dayCount}/>}
+        {cardText}
+      </div>}
+      {renderTimer && <CardTimer 
+        offsetX={progressBarOffsetX}
+        offsetY={progressBarOffsetY}
+        descriptor={currentSpawnDescriptor}
+        timerStart={timerStart} 
+        timerEnd={timerEnd}
+      />}
+    </div>
+  </div>
+
+  if (notDraggable) return renderedCard
+
   return (
     <DraggableCore onStart={handleStart} onDrag={handleDrag} onStop={handleStop}>
-      <div className={classes.root} style={{
-        left: cardPosition.x, 
-        top: cardPosition.y, 
-        zIndex: cardPosition.zIndex,
-        filter: (shouldBeBright(cardPosition)) ? 'brightness(100%)' : 'brightness(80%)',
-        opacity: cardPosition.currentFading !== undefined ? cardPosition.currentFading / (cardPosition.maxFading ?? 100) : 1
-      }}>
-        <div className={classNames(classes.styling, {[classes.character]: card.maxHunger})} style={{
-          ...getCardDimensions(cardPosition),
-          border: getCardBorder(cardPosition),
-          outlineWidth: cardPosition.maybeAttached.length ? 3 : 0,
-          background: getCardBackground(cardPosition, dayCount),
-          borderRadius: card.idea ? 20 : 4,
-          boxShadow: card.glowing ? `
-            0 0 200px rgba(255,150,0,.5),
-            0 0 10px rgba(255,255,250,.9),
-            0 0 50px rgba(255,150,0,.5)
-          ` : ""
-          // transition: cardPosition.transition ? 'all .1s ease-in-out' : 'none',
-        }}>
-          <h2>{name}</h2>
-          <CardDebugging cardPosition={cardPosition} />
-          {imageUrl && <div className={classes.image} style={{background:`url(${imageUrl})`}}/>}
-          <Statuses cardPosition={cardPosition} />
-          {cardText && <div className={classes.cardText}>
-            {Widget && <Widget dayCount={dayCount}/>}
-            {cardText}
-          </div>}
-          {renderTimer && <CardTimer 
-            offsetX={progressBarOffsetX}
-            offsetY={progressBarOffsetY}
-            descriptor={currentSpawnDescriptor}
-            timerStart={timerStart} 
-            timerEnd={timerEnd}
-          />}
-        </div>
-      </div>
+     {renderedCard}
     </DraggableCore>
   );
 }

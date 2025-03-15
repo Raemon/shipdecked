@@ -5,8 +5,8 @@ import { createUseStyles } from "react-jss";
 const useStyles = createUseStyles({
   root: {
     position: "absolute",
-    top: 0,
-    left: 0,
+    top: 10,
+    right: 10,
     height: 100,
     width: 100,
   },

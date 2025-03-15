@@ -1,6 +1,8 @@
 import React from "react";
 import { CardSlug } from "./cards";
 
+export type AnyBacauseHard = any
+
 export interface MaxCardAttributes {
   maxHunger?: number;
   maxHealth?: number;
@@ -37,6 +39,8 @@ export interface CardTypeBase {
   fuel?: number;
   rest?: number;
   heat?: number;
+  titleStyle?: React.CSSProperties;
+  textStyle?: React.CSSProperties;
   loot?: CardSlug[];
   secondaryLoot?: CardSlug[];
   spawnInfo?: SpawnInfo[];

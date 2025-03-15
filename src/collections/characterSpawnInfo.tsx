@@ -118,7 +118,7 @@ export const characterSpawnInfo: SpawnInfo[] = [
     duration: 6000,
     descriptor: "Praying...",
     inputStack: ['jungleShrine', 'boarCarcass'],
-    output: ['jungleShrine', 'protectionDryCourt', 'visionDryCourtSacrifice'],
+    output: ['jungleShrine', 'aceOfSuns', 'visionDryCourtSacrifice'],
     skipIfExists: ['visionDryCourtSacrifice'], 
   },
   {
@@ -149,6 +149,13 @@ export const characterSpawnInfo: SpawnInfo[] = [
     inputStack: ['jungleShrine', 'miloCorpse'],
     output: ['jungleShrine', 'visionDryThroneJourney'],
     skipIfExists: ['visionDryThroneJourney'], 
+  },
+  {
+    duration: 3000,
+    descriptor: "Singing...",
+    inputStack: ['islandShrine'],
+    output: ['islandShrine', 'visionMonsoonCourtOffering'],
+    skipIfExists: ['visionMonsoonCourtOffering'], 
   },
   { 
     skipIfExists: ['rope', 'ideaRope'], 
@@ -281,7 +288,7 @@ export const ruthSpawnInfo: SpawnInfo[] = [
   {
     duration: 3000,
     descriptor: "Following...",
-    inputStack: ['distantFigure', 'protectionDryCourt'], 
+    inputStack: ['distantFigure', 'aceOfSuns'], 
     consumeInitiator: true,
     output: ['dryCourtGuardian'],
   },

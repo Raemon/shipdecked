@@ -1,15 +1,14 @@
 import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Game from './components/Game';
-import { allCards } from './collections/cards';
-
+import TechTree from './components/TechTree';
 
 function App() {
-  Object.values(allCards).forEach(unit => {
-    const img = new Image();
-    img.src = unit.imageUrl || ""
-  })
   return (
-    <Game/>
+    <Routes>
+      <Route path="/" element={<Game />} />
+      <Route path="/tech-tree" element={<TechTree />} />
+    </Routes>
   );
 }
 
