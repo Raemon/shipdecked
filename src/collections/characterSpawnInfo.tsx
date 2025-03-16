@@ -236,7 +236,16 @@ export const characterSpawnInfo: SpawnInfo[] = [
     duration: 120000,
     descriptor: "Stare at confusedly",
     output: ['ancientCalendar']
-  }
+  },
+  {
+    duration: 6000,
+    descriptor: "Building...",
+    inputStack: ['hewnLog', 'hewnLog', 'hewnLog', 'hewnLog', 'hatchet'],
+    output: ["thinkingChair"],
+    skipIfExists: ['thinkingChair'],
+    preserve: true,
+  },
+  
 ]
 
 export const ruthSpawnInfo: SpawnInfo[] = [
@@ -319,6 +328,14 @@ export const miloSpawnInfo: SpawnInfo[] = [
     output: [...ancientTreeLoot, 'miloUnsettlingFeeling']
   },
   {
+    duration: 6000,
+    descriptor: "Thinking...",
+    inputStack: ['thinkingChair'],
+    output: ["ideaThinking"],
+    skipIfExists: ['ideaThinking'],
+    preserve: true,
+  },
+  {
     duration: 3000,
     descriptor: "Following...",
     inputStack: ['distantFigure'], 
@@ -339,7 +356,15 @@ export const miloSpawnInfo: SpawnInfo[] = [
     duration: 5000,
     descriptor: "Deciphering",
     output: ['ancientCalendar']
-  }
+  },  
+  { 
+    duration: 6000, 
+    descriptor: "Pondering...", 
+    inputStack: ['smallFire'], 
+    output: ["ideaThinkingChair"],
+    skipIfExists: ['ideaThinkingChair'],
+    preserve: true,
+  },
 ]
 
 export const carlosSpawnInfo: SpawnInfo[] = [
